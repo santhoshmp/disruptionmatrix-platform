@@ -101,6 +101,8 @@ Each airline calculates its own exposure score per threat (e.g., `namma`, `eva`,
 
 ```
 DisruptionMatrix/
+├── README.md                   # This file
+├── .gitignore                  # Root gitignore
 ├── app/                        # React application
 │   ├── public/
 │   │   └── hero.png            # Login page hero image
@@ -127,7 +129,11 @@ DisruptionMatrix/
 │   │   ├── App.jsx             # Routing, layouts, auth gating
 │   │   └── main.jsx            # Entry point
 │   ├── .env.example            # Environment variable template
-│   └── package.json
+│   ├── .gitignore              # App-specific gitignore
+│   ├── index.html              # Vite entry HTML
+│   ├── vite.config.js          # Vite configuration
+│   └── package.json            # Dependencies & scripts
+├── data/                       # Legacy JS data files (pre-JSON)
 ├── docs/                       # Design docs & airline profiles
 └── design/                     # Original HTML mockups
 ```
