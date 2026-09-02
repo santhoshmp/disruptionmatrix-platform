@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<title>Namma Air — Network Threat Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+<script src="./namma-data.js"></script>
+<style>
+  :root[data-theme="dark"] {
+    --bg: #0B1220; --panel: #101A2C; --panel2: #0D1626; --sunken: #0B1220;
+    --line: #1E293B; --line2: #263449; --edge: #2C3A52;
+    --ink: #E7EDF7; --ink2: #C7D2E3; --ink3: #9FB0C8; --mute: #7C8CA6; --mute2: #5B6B85;
+    --hover: #15213A; --tilefilter: invert(1) hue-rotate(185deg) brightness(.9) contrast(.88) saturate(.5);
+    --pinstroke: #05080B; --cyan: #22D3EE;
+  }
+  :root[data-theme="light"] {
+    --bg: #F1F5FA; --panel: #FFFFFF; --panel2: #F6F9FC; --sunken: #FFFFFF;
+    --line: #DCE4EE; --line2: #CDD8E5; --edge: #C0CCDB;
+    --ink: #101826; --ink2: #23324A; --ink3: #3C4E68; --mute: #5B6B85; --mute2: #6C7A89;
+    --hover: #EAF0F7; --tilefilter: saturate(.75) contrast(.95) brightness(1.02);
+    --pinstroke: #FFFFFF; --cyan: #0E8FA6;
+  }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: var(--cyan); text-decoration: none; }
+  a:hover { opacity: .82; }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+  #app { display: flex; flex-direction: column; height: 100vh; }
+  .topbar { flex: 0 0 auto; display: flex; align-items: center; gap: 20px; padding: 12px 22px;
+    background: var(--panel); border-bottom: 1px solid var(--line); }
+  .mark { width: 26px; height: 26px; border: 2px solid var(--cyan); border-radius: 50%; display: grid; place-items: center;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 700; color: var(--cyan); }
+  .btn { font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; padding: 6px 11px; cursor: pointer;
+    border: 1px solid var(--edge); background: var(--panel2); color: var(--mute); }
+  .btn:hover { color: var(--ink2); }
+  .btn.on { border-color: var(--cyan); background: rgba(34,211,238,.12); color: var(--ink); }
+  .stage { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 380px; }
+  .mapcol { min-width: 0; display: flex; flex-direction: column; }
+  .maptools { flex: 0 0 auto; padding: 10px 16px; background: var(--panel); border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .mapwrap { position: relative; flex: 1; min-height: 0; min-width: 0; background: var(--sunken); }
+  #map { position: absolute; inset: 0; background: var(--sunken); }
+  .leaflet-tile-pane { filter: var(--tilefilter); }
+  .leaflet-container { background: var(--sunken); font-family: 'IBM Plex Sans', system-ui, sans-serif; }
+  .leaflet-control-attribution { background: var(--panel) !important; color: var(--mute) !important;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; }
+  .leaflet-control-attribution a { color: var(--mute) !important; }
+  .kicker { font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: .12em; color: var(--mute2); }
+  .side { border-left: 1px solid var(--line); background: var(--sunken); display: flex; flex-direction: column; min-height: 0; overflow: auto; }
+  .card { padding: 14px 18px; border-bottom: 1px solid var(--line); }
+  .cta { display: block; width: 100%; box-sizing: border-box; text-align: center; padding: 12px 16px;
+    font-size: 13.5px; font-weight: 600; border: 1px solid var(--cyan); background: rgba(34,211,238,.12); color: var(--ink); cursor: pointer; }
+  .cta:hover { filter: brightness(1.08); }
+  .legend { position: absolute; z-index: 500; top: 12px; right: 12px; display: flex; gap: 10px; align-items: center;
+    padding: 8px 11px; border: 1px solid var(--line2); background: var(--panel); font-size: 11px; }
+  .legend i { width: 10px; height: 10px; display: inline-block; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--edge); border-radius: 6px; }
+  .pinlabel { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; white-space: nowrap; color: var(--ink2);
+    text-shadow: 0 0 4px var(--bg); margin-top: 2px; text-align: center; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <a href="Home.dc.html" style="display:flex;align-items:center;gap:9px">
+      <div class="mark">N7</div>
+      <div>
+        <div style="font-size:15px;font-weight:700">Namma Air</div>
+        <div class="mono" style="font-size:9px;color:var(--mute);letter-spacing:.1em">NETWORK THREAT MAP</div>
+      </div>
+    </a>
+    <div style="min-width:0">
+      <div style="font-size:14px;font-weight:600">Route exposure by external threat</div>
+      <div style="font-size:11.5px;color:var(--mute)">Select a threat to highlight the routes and stations it exposes</div>
+    </div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:14px">
+      <button class="btn" id="themeToggleBtn" title="Switch theme" style="display:grid;place-items:center;width:32px;height:32px;padding:0">
+        <svg id="iconSun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg id="iconMoon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path></svg>
+      </button>
+      <a class="btn" href="Namma Air Threat Radar.dc.html">Ops dashboard</a>
+      <a class="btn" href="Namma Air Data Explorer.dc.html">Data explorer</a>
+      <a class="btn" href="Threat Map.html">Global map</a>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="mapcol">
+      <div class="maptools">
+        <span class="kicker">HUB</span>
+        <button class="btn on" data-hub="All">All</button>
+        <button class="btn" data-hub="BLR">BLR</button>
+        <button class="btn" data-hub="DEL">DEL</button>
+        <span style="width:1px;height:20px;background:var(--line2);margin:0 2px"></span>
+        <span class="kicker">VIEW</span>
+        <button class="btn on" data-extent="domestic">Domestic network</button>
+        <button class="btn" data-extent="full">Full network</button>
+      </div>
+      <div class="maptools" style="border-bottom:none;padding-top:0" id="threatChips">
+        <span class="kicker">THREAT</span>
+      </div>
+      <div class="mapwrap">
+        <div id="map"></div>
+        <div class="legend mono">
+          <span class="kicker" style="margin-right:2px">SEVERITY</span>
+          <i style="background:#F0495A"></i><span>High</span>
+          <i style="background:#F5A623"></i><span>Elevated</span>
+          <i style="background:#5B92C9"></i><span>Watch</span>
+        </div>
+      </div>
+    </div>
+    <div class="side" id="side"></div>
+  </div>
+</div>
+
+<script>
+const CRIT='#F0495A', HIGH='#F5A623', MOD='#E8C34A', LOW='#5B92C9', OK='#34D399';
+function sevColor(v){ return v>=80?CRIT : v>=55?HIGH : v>=35?MOD : LOW; }
+
+const STATIONS = {
+  BLR: { lat: 13.1986, lon: 77.7066, name: 'Bengaluru (BLR)', role: 'Primary hub' },
+  DEL: { lat: 28.5562, lon: 77.1000, name: 'Delhi (DEL)', role: 'Secondary node · crew sub-base' },
+  CCU: { lat: 22.6547, lon: 88.4467, name: 'Kolkata' }, MAA: { lat: 12.9941, lon: 80.1709, name: 'Chennai' },
+  PNQ: { lat: 18.5793, lon: 73.9089, name: 'Pune' }, VTZ: { lat: 17.7211, lon: 83.2245, name: 'Visakhapatnam' },
+  HYD: { lat: 17.2403, lon: 78.4294, name: 'Hyderabad' }, BOM: { lat: 19.0887, lon: 72.8679, name: 'Mumbai' },
+  GOI: { lat: 15.3808, lon: 73.8314, name: 'Goa' }, COK: { lat: 10.1520, lon: 76.4019, name: 'Kochi' },
+  LHR: { lat: 51.4700, lon: -0.4543, name: 'London Heathrow' }, SIN: { lat: 1.3644, lon: 103.9915, name: 'Singapore' },
+  DXB: { lat: 25.2532, lon: 55.3657, name: 'Dubai' }, JFK: { lat: 40.6413, lon: -73.7781, name: 'New York JFK' }
+};
+// route -> destination code, derived from each flight's route string
+function destOf(route) { const m = route.match(/–([A-Z]{3})/g); return m ? m[m.length - 1].slice(1) : null; }
+
+let THREATS = [], FLIGHTS = [], selected = null, hub = 'All', map, layer;
+
+function ready() {
+  if (!window.NAMMA_DATA) return setTimeout(ready, 100);
+  THREATS = window.NAMMA_DATA.THREATS.slice().sort((a, b) => b.namma - a.namma);
+  FLIGHTS = window.NAMMA_DATA.FLIGHTS;
+  selected = THREATS[0].id;
+  buildMap();
+  wire();
+  renderChips();
+  renderCard();
+}
+
+function renderChips() {
+  const box = document.getElementById('threatChips');
+  box.innerHTML = '<span class="kicker">THREAT</span>' + THREATS.map((t) => {
+    const c = sevColor(t.namma);
+    const on = t.id === selected;
+    return '<button class="btn' + (on ? ' on' : '') + '" data-threat="' + t.id + '" style="' +
+      (on ? 'border-color:' + c + ';background:' + c + '1F;color:var(--ink);' : '') + '">' + t.code + ' · ' + t.namma + '</button>';
+  }).join('');
+  box.querySelectorAll('[data-threat]').forEach((b) => b.addEventListener('click', () => {
+    selected = b.dataset.threat;
+    renderChips(); draw(); renderCard();
+  }));
+}
+
+function buildMap() {
+  map = L.map('map', { zoomControl: true, worldCopyJump: false, minZoom: 2, fadeAnimation: false });
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors', maxZoom: 18 }).addTo(map);
+  layer = L.layerGroup().addTo(map);
+  map.setView([20, 78], 3);
+  map.whenReady(() => {
+    let tries = 0;
+    const settle = () => {
+      map.invalidateSize({ animate: false });
+      const s = map.getSize();
+      if ((s.x < 80 || s.y < 80) && tries++ < 30) return requestAnimationFrame(settle);
+      fitTo('domestic');
+    };
+    requestAnimationFrame(settle);
+  });
+  map.on('zoomend moveend', scheduleDraw);
+  let lastSize = map.getSize(), resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      const el = document.getElementById('map');
+      if (el.clientWidth === lastSize.x && el.clientHeight === lastSize.y) return;
+      map.invalidateSize({ animate: false });
+      lastSize = map.getSize();
+      draw();
+    }, 120);
+  });
+}
+
+let drawQueued = false;
+function scheduleDraw() { if (drawQueued) return; drawQueued = true; requestAnimationFrame(() => { drawQueued = false; draw(); }); }
+
+function fitTo(mode) {
+  const pts = mode === 'full'
+    ? Object.keys(STATIONS).map((k) => [STATIONS[k].lat, STATIONS[k].lon])
+    : [[STATIONS.BLR.lat, STATIONS.BLR.lon], [STATIONS.DEL.lat, STATIONS.DEL.lon],
+       [STATIONS.CCU.lat, STATIONS.CCU.lon], [STATIONS.BOM.lat, STATIONS.BOM.lon], [STATIONS.GOI.lat, STATIONS.GOI.lon]];
+  map.fitBounds(L.latLngBounds(pts), { padding: [50, 50], animate: false });
+}
+
+function activeFlights() {
+  return FLIGHTS.filter((f) => f.threat === selected && (hub === 'All' ||
+    (hub === 'BLR' && f.bank !== 'DEL node') || (hub === 'DEL' && f.bank === 'DEL node')));
+}
+
+function draw() {
+  if (!map || !map._loaded) return;
+  layer.clearLayers();
+  const t = THREATS.filter((x) => x.id === selected)[0];
+  const c = sevColor(t.namma);
+  const flights = activeFlights();
+  const destSet = {};
+  flights.forEach((f) => { const d = destOf(f.route); if (d && STATIONS[d]) destSet[d] = true; });
+
+  // hub markers, always shown
+  ['BLR', 'DEL'].forEach((code) => {
+    const s = STATIONS[code];
+    const big = code === 'BLR';
+    const icon = L.divIcon({ className: '', iconSize: [big ? 30 : 22, 44], iconAnchor: [big ? 15 : 11, big ? 15 : 11],
+      html: '<div style="display:flex;flex-direction:column;align-items:center">' +
+        '<div style="width:' + (big ? 26 : 18) + 'px;height:' + (big ? 26 : 18) + 'px;border-radius:50%;background:' + (big ? '#22D3EE' : '#7C8CA6') +
+        ';border:2px solid #05080B;box-shadow:0 2px 6px rgba(0,0,0,.4)"></div><div class="pinlabel">' + code + '</div></div>' });
+    L.marker([s.lat, s.lon], { icon: icon, zIndexOffset: 900 }).addTo(layer);
+  });
+
+  // route lines + destination markers for the selected threat
+  Object.keys(destSet).forEach((code) => {
+    const d = STATIONS[code];
+    const origin = FLIGHTS.filter((f) => f.threat === selected && destOf(f.route) === code)[0];
+    const fromCode = (origin && origin.bank === 'DEL node') ? 'DEL' : 'BLR';
+    const from = STATIONS[fromCode];
+    L.polyline([[from.lat, from.lon], [d.lat, d.lon]], { color: c, weight: 2, opacity: .75, dashArray: fromCode === 'DEL' ? '2 5' : null }).addTo(layer);
+    const icon = L.divIcon({ className: '', iconSize: [16, 34], iconAnchor: [8, 8],
+      html: '<div style="display:flex;flex-direction:column;align-items:center">' +
+        '<div style="width:12px;height:12px;border-radius:50%;background:' + c + ';border:2px solid #05080B"></div>' +
+        '<div class="pinlabel">' + code + '</div></div>' });
+    L.marker([d.lat, d.lon], { icon: icon, zIndexOffset: 500 }).addTo(layer);
+  });
+}
+
+function renderCard() {
+  const D = window.NAMMA_DATA;
+  const t = THREATS.filter((x) => x.id === selected)[0];
+  const ex = D.EXPOSURE[t.id];
+  const c = sevColor(t.namma);
+  const flights = activeFlights();
+
+  document.getElementById('side').innerHTML = `
+    <div class="card" style="border-top:3px solid ${c}">
+      <div class="mono" style="font-size:11px;color:var(--cyan);letter-spacing:.06em;margin-bottom:5px">${t.region} · External score ${t.edps} (EDPS)</div>
+      <div style="font-size:16px;font-weight:700;line-height:1.3;margin-bottom:10px;text-wrap:pretty">${t.name}</div>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center">
+        <div class="mono" style="text-align:center;padding:10px 14px;color:${c};border:1px solid ${c};background:${c}1A">
+          <div style="font-size:26px;font-weight:700;line-height:1">${t.namma}</div>
+          <div style="font-size:8px;letter-spacing:.12em;color:var(--mute);margin-top:3px">NAMMA THREAT SCORE</div>
+        </div>
+        <div style="font-size:12px;color:var(--ink3);line-height:1.5;text-wrap:pretty">${t.summary}</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="kicker" style="margin-bottom:9px">EXPOSURE SUMMARY</div>
+      <div style="display:flex;flex-direction:column;gap:7px;font-size:12px;color:var(--ink3)">
+        <div style="display:flex;justify-content:space-between"><span>Scheduled departures in window</span><span class="mono" style="color:var(--ink)">${ex.tier0.routeCount}</span></div>
+        <div style="display:flex;justify-content:space-between"><span>Tails / rotations at risk</span><span class="mono" style="color:var(--ink)">${ex.tier1.count}</span></div>
+        <div style="display:flex;justify-content:space-between"><span>Crew pairings near duty limit</span><span class="mono" style="color:var(--ink)">${ex.tier2.count}</span></div>
+        <div style="display:flex;justify-content:space-between"><span>Connecting pax at risk</span><span class="mono" style="color:var(--ink)">${ex.tier3.pax.toLocaleString()}</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="kicker" style="margin-bottom:9px">ROUTES HIGHLIGHTED ON MAP</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${flights.length ? flights.map(f => `
+          <div style="display:flex;justify-content:space-between;gap:10px;font-size:12px">
+            <span class="mono" style="color:var(--ink2)">${f.flt}</span><span style="color:var(--ink3)">${f.route}</span><span class="mono" style="color:var(--mute)">${f.tail}</span>
+          </div>`).join('') : '<div style="font-size:12px;color:var(--mute2)">No rotations currently flagged.</div>'}
+      </div>
+    </div>
+    <div style="flex:1;min-height:0"></div>
+    <div class="card" style="border-top:1px solid var(--line);border-bottom:none">
+      <a class="cta" href="Namma Air Threat Radar.dc.html">Open full exposure board →</a>
+    </div>`;
+}
+
+function wire() {
+  document.querySelectorAll('[data-hub]').forEach(b => b.addEventListener('click', () => {
+    hub = b.dataset.hub;
+    document.querySelectorAll('[data-hub]').forEach(x => x.classList.toggle('on', x === b));
+    draw(); renderCard();
+  }));
+  document.querySelectorAll('[data-extent]').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('[data-extent]').forEach(x => x.classList.toggle('on', x === b));
+    fitTo(b.dataset.extent);
+  }));
+  function syncThemeIcon() {
+    const light = document.documentElement.getAttribute('data-theme') === 'light';
+    document.getElementById('iconSun').style.display = light ? 'none' : 'block';
+    document.getElementById('iconMoon').style.display = light ? 'block' : 'none';
+  }
+  document.getElementById('themeToggleBtn').addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('dm-app-theme', next);
+    syncThemeIcon();
+  });
+  const saved = localStorage.getItem('dm-app-theme');
+  if (saved) document.documentElement.setAttribute('data-theme', saved);
+  syncThemeIcon();
+  // side card is wired to threat picks via the left rail — build it now
+  window.selectThreat = (id) => { selected = id; draw(); renderCard(); };
+}
+
+ready();
+</script>
+</body>
+</html>

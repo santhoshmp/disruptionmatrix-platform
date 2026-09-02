@@ -1,0 +1,519 @@
+{
+  "STATIONS": {
+    "BLR": {
+      "lat": 13.1986,
+      "lon": 77.7066,
+      "name": "Bengaluru (BLR)",
+      "role": "Primary hub"
+    },
+    "DEL": {
+      "lat": 28.5562,
+      "lon": 77.1,
+      "name": "Delhi (DEL)",
+      "role": "Secondary node · crew sub-base"
+    },
+    "CCU": {
+      "lat": 22.6547,
+      "lon": 88.4467,
+      "name": "Kolkata"
+    },
+    "MAA": {
+      "lat": 12.9941,
+      "lon": 80.1709,
+      "name": "Chennai"
+    },
+    "PNQ": {
+      "lat": 18.5793,
+      "lon": 73.9089,
+      "name": "Pune"
+    },
+    "VTZ": {
+      "lat": 17.7211,
+      "lon": 83.2245,
+      "name": "Visakhapatnam"
+    },
+    "HYD": {
+      "lat": 17.2403,
+      "lon": 78.4294,
+      "name": "Hyderabad"
+    },
+    "BOM": {
+      "lat": 19.0887,
+      "lon": 72.8679,
+      "name": "Mumbai"
+    },
+    "GOI": {
+      "lat": 15.3808,
+      "lon": 73.8314,
+      "name": "Goa"
+    },
+    "COK": {
+      "lat": 10.152,
+      "lon": 76.4019,
+      "name": "Kochi"
+    },
+    "LHR": {
+      "lat": 51.47,
+      "lon": -0.4543,
+      "name": "London Heathrow"
+    },
+    "SIN": {
+      "lat": 1.3644,
+      "lon": 103.9915,
+      "name": "Singapore"
+    },
+    "DXB": {
+      "lat": 25.2532,
+      "lon": 55.3657,
+      "name": "Dubai"
+    },
+    "JFK": {
+      "lat": 40.6413,
+      "lon": -73.7781,
+      "name": "New York JFK"
+    },
+    "VIE": {
+      "lat": 48.1103,
+      "lon": 16.5697,
+      "name": "Vienna",
+      "role": "EuroVista hub"
+    },
+    "MUC": {
+      "lat": 48.3538,
+      "lon": 11.7861,
+      "name": "Munich",
+      "role": "EuroVista secondary"
+    },
+    "PRG": {
+      "lat": 50.1008,
+      "lon": 14.26,
+      "name": "Prague",
+      "role": "EuroVista secondary"
+    },
+    "GVA": {
+      "lat": 46.2381,
+      "lon": 6.109,
+      "name": "Geneva"
+    },
+    "FRA": {
+      "lat": 50.0379,
+      "lon": 8.5622,
+      "name": "Frankfurt"
+    },
+    "CDG": {
+      "lat": 49.0097,
+      "lon": 2.5479,
+      "name": "Paris CDG"
+    },
+    "BRU": {
+      "lat": 50.9014,
+      "lon": 4.4844,
+      "name": "Brussels"
+    },
+    "WAW": {
+      "lat": 52.1657,
+      "lon": 20.9671,
+      "name": "Warsaw"
+    },
+    "BUD": {
+      "lat": 47.4369,
+      "lon": 19.2556,
+      "name": "Budapest"
+    },
+    "FCO": {
+      "lat": 41.8003,
+      "lon": 12.2389,
+      "name": "Rome Fiumicino"
+    },
+    "MAD": {
+      "lat": 40.4983,
+      "lon": -3.5676,
+      "name": "Madrid"
+    },
+    "IST": {
+      "lat": 41.2753,
+      "lon": 28.7519,
+      "name": "Istanbul"
+    },
+    "CPH": {
+      "lat": 55.618,
+      "lon": 12.656,
+      "name": "Copenhagen"
+    },
+    "AMS": {
+      "lat": 52.3105,
+      "lon": 4.7683,
+      "name": "Amsterdam"
+    },
+    "JAI": {
+      "lat": 26.8242,
+      "lon": 75.8122,
+      "name": "Jaipur"
+    },
+    "LKO": {
+      "lat": 26.7606,
+      "lon": 80.8893,
+      "name": "Lucknow"
+    },
+    "AMD": {
+      "lat": 23.0772,
+      "lon": 72.6347,
+      "name": "Ahmedabad"
+    },
+    "BKK": {
+      "lat": 13.69,
+      "lon": 100.7501,
+      "name": "Bangkok"
+    }
+  },
+  "EVENT_GEO": {
+    "monsoon": {
+      "lat": 12,
+      "lon": 80,
+      "radiusKm": 400,
+      "airports": [
+        "BLR",
+        "MAA"
+      ]
+    },
+    "fuel": {
+      "lat": 13.2,
+      "lon": 77.7,
+      "radiusKm": 50,
+      "airports": [
+        "BLR"
+      ]
+    },
+    "delfog": {
+      "lat": 28.6,
+      "lon": 77.1,
+      "radiusKm": 100,
+      "airports": [
+        "DEL"
+      ]
+    },
+    "chnAtc": {
+      "lat": 13,
+      "lon": 80.2,
+      "radiusKm": 300,
+      "airports": [
+        "MAA",
+        "BLR"
+      ]
+    },
+    "gulf": {
+      "lat": 27,
+      "lon": 52,
+      "radiusKm": 500,
+      "airports": [
+        "DXB",
+        "LHR"
+      ]
+    },
+    "cabincrew": {
+      "lat": 28.6,
+      "lon": 77.1,
+      "radiusKm": 80,
+      "airports": [
+        "DEL"
+      ]
+    },
+    "convwx": {
+      "lat": 49,
+      "lon": 10,
+      "radiusKm": 350,
+      "airports": [
+        "FRA",
+        "MUC",
+        "VIE"
+      ]
+    },
+    "fraatfm": {
+      "lat": 50,
+      "lon": 8.5,
+      "radiusKm": 200,
+      "airports": [
+        "FRA"
+      ]
+    },
+    "viesnow": {
+      "lat": 48.1,
+      "lon": 16.6,
+      "radiusKm": 120,
+      "airports": [
+        "VIE"
+      ]
+    },
+    "zrhfog": {
+      "lat": 47.5,
+      "lon": 8.5,
+      "radiusKm": 80,
+      "airports": [
+        "ZRH"
+      ]
+    },
+    "viestrike": {
+      "lat": 48.1,
+      "lon": 16.6,
+      "radiusKm": 100,
+      "airports": [
+        "VIE"
+      ]
+    },
+    "amslot": {
+      "lat": 52.3,
+      "lon": 4.8,
+      "radiusKm": 90,
+      "airports": [
+        "AMS"
+      ]
+    },
+    "bommonsoon": {
+      "lat": 19.1,
+      "lon": 72.9,
+      "radiusKm": 250,
+      "airports": [
+        "BOM"
+      ]
+    },
+    "blrstorms": {
+      "lat": 13.2,
+      "lon": 77.7,
+      "radiusKm": 150,
+      "airports": [
+        "BLR"
+      ]
+    },
+    "dxbacongest": {
+      "lat": 25.3,
+      "lon": 55.4,
+      "radiusKm": 120,
+      "airports": [
+        "DXB"
+      ]
+    },
+    "delatc": {
+      "lat": 28.6,
+      "lon": 77.1,
+      "radiusKm": 300,
+      "airports": [
+        "DEL",
+        "BOM"
+      ]
+    },
+    "cokmonsoon": {
+      "lat": 10.2,
+      "lon": 76.4,
+      "radiusKm": 100,
+      "airports": [
+        "COK"
+      ]
+    }
+  },
+  "AIRPORTS": {
+    "AMS": {
+      "lat": 52.3105,
+      "lon": 4.7683
+    },
+    "CPH": {
+      "lat": 55.618,
+      "lon": 12.656
+    },
+    "OSL": {
+      "lat": 60.1976,
+      "lon": 11.1004
+    },
+    "EDI": {
+      "lat": 55.951,
+      "lon": -3.3725
+    },
+    "ABZ": {
+      "lat": 57.2019,
+      "lon": -2.1978
+    },
+    "RTM": {
+      "lat": 51.9569,
+      "lon": 4.4372
+    },
+    "CDG": {
+      "lat": 49.0097,
+      "lon": 2.5479
+    },
+    "ORY": {
+      "lat": 48.7262,
+      "lon": 2.3652
+    },
+    "LYS": {
+      "lat": 45.7256,
+      "lon": 5.0811
+    },
+    "MRS": {
+      "lat": 43.4393,
+      "lon": 5.2214
+    },
+    "TLS": {
+      "lat": 43.629,
+      "lon": 1.3638
+    },
+    "BOD": {
+      "lat": 44.8283,
+      "lon": -0.7156
+    },
+    "LCA": {
+      "lat": 34.8751,
+      "lon": 33.6249
+    },
+    "TLV": {
+      "lat": 32.0114,
+      "lon": 34.8867
+    },
+    "BEY": {
+      "lat": 33.8209,
+      "lon": 35.4884
+    },
+    "PFO": {
+      "lat": 34.718,
+      "lon": 32.4857
+    },
+    "ZRH": {
+      "lat": 47.4647,
+      "lon": 8.5492
+    },
+    "LIS": {
+      "lat": 38.7742,
+      "lon": -9.1342
+    },
+    "OPO": {
+      "lat": 41.2481,
+      "lon": -8.6814
+    },
+    "FAO": {
+      "lat": 37.0144,
+      "lon": -7.9659
+    },
+    "LHR": {
+      "lat": 51.47,
+      "lon": -0.4543
+    },
+    "LGW": {
+      "lat": 51.1537,
+      "lon": -0.1821
+    },
+    "STN": {
+      "lat": 51.885,
+      "lon": 0.235
+    },
+    "VIE": {
+      "lat": 48.1103,
+      "lon": 16.5697
+    },
+    "MUC": {
+      "lat": 48.3538,
+      "lon": 11.7861
+    },
+    "PRG": {
+      "lat": 50.1008,
+      "lon": 14.26
+    },
+    "GVA": {
+      "lat": 46.2381,
+      "lon": 6.109
+    },
+    "FRA": {
+      "lat": 50.0379,
+      "lon": 8.5622
+    },
+    "BRU": {
+      "lat": 50.9014,
+      "lon": 4.4844
+    },
+    "WAW": {
+      "lat": 52.1657,
+      "lon": 20.9671
+    },
+    "BUD": {
+      "lat": 47.4369,
+      "lon": 19.2556
+    },
+    "FCO": {
+      "lat": 41.8003,
+      "lon": 12.2389
+    },
+    "MAD": {
+      "lat": 40.4983,
+      "lon": -3.5676
+    },
+    "IST": {
+      "lat": 41.2753,
+      "lon": 28.7519
+    },
+    "JAI": {
+      "lat": 26.8242,
+      "lon": 75.8122
+    },
+    "LKO": {
+      "lat": 26.7606,
+      "lon": 80.8893
+    },
+    "AMD": {
+      "lat": 23.0772,
+      "lon": 72.6347
+    },
+    "BKK": {
+      "lat": 13.69,
+      "lon": 100.7501
+    },
+    "BLR": {
+      "lat": 13.1986,
+      "lon": 77.7066
+    },
+    "DEL": {
+      "lat": 28.5562,
+      "lon": 77.1
+    },
+    "MAA": {
+      "lat": 12.9941,
+      "lon": 80.1709
+    },
+    "BOM": {
+      "lat": 19.0887,
+      "lon": 72.8679
+    },
+    "COK": {
+      "lat": 10.152,
+      "lon": 76.4019
+    },
+    "DXB": {
+      "lat": 25.2532,
+      "lon": 55.3657
+    },
+    "SIN": {
+      "lat": 1.3644,
+      "lon": 103.9915
+    },
+    "JFK": {
+      "lat": 40.6413,
+      "lon": -73.7781
+    },
+    "HYD": {
+      "lat": 17.2403,
+      "lon": 78.4294
+    },
+    "CCU": {
+      "lat": 22.6547,
+      "lon": 88.4467
+    },
+    "GOI": {
+      "lat": 15.3808,
+      "lon": 73.8314
+    },
+    "PNQ": {
+      "lat": 18.5793,
+      "lon": 73.9089
+    },
+    "VTZ": {
+      "lat": 17.7211,
+      "lon": 83.2245
+    }
+  }
+}

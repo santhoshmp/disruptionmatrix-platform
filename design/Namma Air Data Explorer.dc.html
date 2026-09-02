@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<script src="./namma-data.js"></script>
+<style>
+  html, body { margin: 0; height: 100%; background: #0B1220; font-family: 'IBM Plex Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: #22D3EE; text-decoration: none; }
+  a:hover { color: #67E3F5; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: #0B1220; }
+  ::-webkit-scrollbar-thumb { background: #263449; border-radius: 6px; }
+</style>
+</helmet>
+
+<div style="display: flex; flex-direction: column; height: 100vh; width: 100%; background: {{ T.bg }}; color: {{ T.ink }}; font-size: 14px; overflow: hidden">
+
+  <div style="flex: 0 0 auto; display: flex; align-items: center; gap: 18px; padding: 12px 22px; background: {{ T.panel }}; border-bottom: 1px solid {{ T.line }}">
+    <div style="display: flex; align-items: center; gap: 10px">
+      <div style="width: 26px; height: 26px; border: 2px solid {{ T.cyan }}; border-radius: 50%; display: grid; place-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 700; color: {{ T.cyan }}">N7</div>
+      <div>
+        <div style="font-size: 16px; font-weight: 700; letter-spacing: -0.2px">Namma Air — Data Explorer</div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: {{ T.mute }}; letter-spacing: 0.1em">UNDERLYING OPERATIONAL DATA</div>
+      </div>
+    </div>
+    <div style="margin-left: auto; display: flex; align-items: center; gap: 12px">
+      <a href="Home.dc.html" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 6px 11px; border: 1px solid {{ T.edge }}; background: {{ T.panel2 }}; color: {{ T.mute }}">Home</a>
+      <a href="Namma Air Threat Radar.dc.html" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 6px 11px; border: 1px solid {{ T.edge }}; background: {{ T.panel2 }}; color: {{ T.mute }}">Ops dashboard</a>
+      <a href="Namma Air Threat Map.html" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 6px 11px; border: 1px solid {{ T.edge }}; background: {{ T.panel2 }}; color: {{ T.mute }}">Network map</a>
+      <div onClick="{{ toggleTheme }}" title="Switch theme" style="{{ themeBtnStyle }}">
+        <sc-if value="{{ isDark }}" hint-placeholder-val="{{ true }}">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        </sc-if>
+        <sc-if value="{{ isLight }}" hint-placeholder-val="{{ false }}">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path></svg>
+        </sc-if>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex: 1; min-height: 0; display: flex">
+
+    <div style="width: 210px; flex: 0 0 210px; border-right: 1px solid {{ T.line }}; background: {{ T.panel2 }}; padding: 12px; display: flex; flex-direction: column; gap: 4px">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="6">
+        <div onClick="{{ t.go }}" style="{{ t.style }}">
+          <span>{{ t.label }}</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; opacity: .7">{{ t.count }}</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+      <sc-if value="{{ isGantt }}" hint-placeholder-val="{{ false }}">
+        <div style="flex: 0 0 auto; padding: 14px 20px; border-bottom: 1px solid {{ T.line }}; display: flex; align-items: center; gap: 14px; flex-wrap: wrap">
+          <div>
+            <div style="font-size: 15px; font-weight: 700">Schedule Gantt</div>
+            <div style="font-size: 11.5px; color: {{ T.mute }}; margin-top: 2px">Aircraft utilisation across the day · affected rotations highlighted</div>
+          </div>
+          <sc-if value="{{ hasThreatFilter }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ clearThreatFilter }}" style="display: flex; align-items: center; gap: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 6px 10px; border: 1px solid #22D3EE; background: rgba(34,211,238,0.1); color: {{ T.ink }}; cursor: pointer">
+              <span>Filtered by: {{ threatFilterName }}</span><span style="color: {{ T.mute }}">✕</span>
+            </div>
+          </sc-if>
+          <div style="margin-left: auto; display: flex; align-items: center; gap: 10px">
+            <div style="display: flex; align-items: center; gap: 6px" class="mono">
+              <span style="width: 10px; height: 10px; background: {{ T.mute2 }}; display: inline-block"></span><span style="font-size: 11px; color: {{ T.mute }}">Unaffected</span>
+              <span style="width: 10px; height: 10px; background: #F0495A; display: inline-block; margin-left: 8px"></span><span style="font-size: 11px; color: {{ T.mute }}">High</span>
+              <span style="width: 10px; height: 10px; background: #F5A623; display: inline-block; margin-left: 8px"></span><span style="font-size: 11px; color: {{ T.mute }}">Elevated</span>
+              <span style="width: 10px; height: 10px; background: #5B92C9; display: inline-block; margin-left: 8px"></span><span style="font-size: 11px; color: {{ T.mute }}">Watch</span>
+            </div>
+            <sc-if value="{{ solverApplied }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ resetSolver }}" style="{{ resetBtnStyle }}">Reset</div>
+            </sc-if>
+            <sc-if value="{{ solverNotApplied }}" hint-placeholder-val="{{ true }}">
+              <div onClick="{{ runSolver }}" style="{{ runBtnStyle }}">Run solver → fix {{ affectedCount }} flights</div>
+            </sc-if>
+          </div>
+        </div>
+
+        <div style="flex: 1; min-height: 0; overflow: auto; padding: 16px 20px">
+          <div style="font-size: 12px; font-weight: 600; color: {{ T.ink3 }}; margin-bottom: 8px">CURRENT SCHEDULE</div>
+          <div style="border: 1px solid {{ T.line }}; margin-bottom: 20px">
+            <div style="{{ ganttHeadStyle }}">
+              <div style="width: 92px; flex: 0 0 92px"></div>
+              <div style="flex: 1; position: relative; height: 18px">
+                <sc-for list="{{ ticks }}" as="tk" hint-placeholder-count="8">
+                  <span style="{{ tk.style }}">{{ tk.label }}</span>
+                </sc-for>
+              </div>
+            </div>
+            <sc-for list="{{ ganttBefore }}" as="row" hint-placeholder-count="14">
+              <div style="{{ row.rowStyle }}">
+                <div style="width: 92px; flex: 0 0 92px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{ T.ink2 }}; padding: 0 10px; display: flex; align-items: center; border-right: 1px solid {{ T.line }}">{{ row.tail }}</div>
+                <div style="flex: 1; position: relative; height: 32px">
+                  <sc-for list="{{ row.bars }}" as="bar" hint-placeholder-count="1">
+                    <div title="{{ bar.title }}" style="{{ bar.style }}">{{ bar.label }}</div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ solverApplied }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size: 12px; font-weight: 600; color: {{ T.ink3 }}; margin-bottom: 8px">PROPOSED SCHEDULE — POST-SOLVER</div>
+            <div style="border: 1px solid #22D3EE; margin-bottom: 20px">
+              <div style="{{ ganttHeadStyle }}">
+                <div style="width: 92px; flex: 0 0 92px"></div>
+                <div style="flex: 1; position: relative; height: 18px">
+                  <sc-for list="{{ ticks }}" as="tk" hint-placeholder-count="8">
+                    <span style="{{ tk.style }}">{{ tk.label }}</span>
+                  </sc-for>
+                </div>
+              </div>
+              <sc-for list="{{ ganttAfter }}" as="row" hint-placeholder-count="14">
+                <div style="{{ row.rowStyle }}">
+                  <div style="width: 92px; flex: 0 0 92px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{ T.ink2 }}; padding: 0 10px; display: flex; align-items: center; border-right: 1px solid {{ T.line }}">{{ row.tail }}</div>
+                  <div style="flex: 1; position: relative; height: 32px">
+                    <sc-for list="{{ row.bars }}" as="bar" hint-placeholder-count="1">
+                      <div title="{{ bar.title }}" style="{{ bar.style }}">{{ bar.label }}</div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="font-size: 12px; font-weight: 600; color: {{ T.ink3 }}; margin-bottom: 8px">CHANGES — {{ changes.length }} FLIGHTS ADJUSTED · PROPOSED, NOT YET APPROVED</div>
+            <table style="width: 100%; border-collapse: collapse; font-size: 12.5px; border: 1px solid {{ T.line }}">
+              <thead>
+                <tr>
+                  <th style="{{ chCol }}">FLIGHT</th><th style="{{ chCol }}">TAIL</th><th style="{{ chCol }}">DEPARTURE</th><th style="{{ chCol }}">ACTION</th><th style="{{ chCol }}">THREAT</th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ changes }}" as="ch" hint-placeholder-count="6">
+                  <tr>
+                    <td style="{{ chCell }}"><span style="font-family: 'IBM Plex Mono', monospace; color: {{ T.ink2 }}">{{ ch.flt }}</span></td>
+                    <td style="{{ chCell }}">{{ ch.tailBefore }} <span style="color: {{ T.mute2 }}">→</span> <span style="{{ ch.tailChangedStyle }}">{{ ch.tailAfter }}</span></td>
+                    <td style="{{ chCell }}">{{ ch.depBefore }} <span style="color: {{ T.mute2 }}">→</span> <span style="color: #22D3EE">{{ ch.depAfter }}</span></td>
+                    <td style="{{ chCell }}; color: {{ T.ink3 }}">{{ ch.action }}</td>
+                    <td style="{{ chCell }}"><span style="{{ ch.threatTag }}">{{ ch.threatCode }}</span></td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isTable }}" hint-placeholder-val="{{ true }}">
+      <div style="flex: 0 0 auto; padding: 14px 20px; border-bottom: 1px solid {{ T.line }}; display: flex; align-items: center; gap: 14px">
+        <div>
+          <div style="font-size: 15px; font-weight: 700">{{ active.title }}</div>
+          <div style="font-size: 11.5px; color: {{ T.mute }}; margin-top: 2px">{{ active.sub }}</div>
+        </div>
+        <input type="text" placeholder="Filter…" value="{{ query }}" onInput="{{ setQuery }}" style="margin-left: auto; width: 220px; padding: 8px 12px; font-size: 13px; border: 1px solid {{ T.edge }}; background: {{ T.panel2 }}; color: {{ T.ink }};" />
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{ T.mute }}">{{ shownCount }} of {{ active.count }} rows</span>
+      </div>
+
+      <div style="flex: 1; min-height: 0; overflow: auto">
+        <table style="width: 100%; border-collapse: collapse; font-size: 12.5px">
+          <thead>
+            <tr>
+              <sc-for list="{{ active.cols }}" as="c" hint-placeholder-count="6">
+                <th style="{{ c.style }}">{{ c.label }}</th>
+              </sc-for>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{ active.rows }}" as="r" hint-placeholder-count="14">
+              <tr style="{{ r.rowStyle }}">
+                <sc-for list="{{ r.cells }}" as="cell" hint-placeholder-count="6">
+                  <td style="{{ cell.style }}">{{ cell.tagStyle }}<span style="{{ cell.textStyle }}">{{ cell.v }}</span></td>
+                </sc-for>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+        <sc-if value="{{ noRows }}" hint-placeholder-val="{{ false }}">
+          <div style="padding: 30px; text-align: center; color: {{ T.mute2 }}; font-size: 13px">No rows match “{{ query }}”.</div>
+        </sc-if>
+      </div>
+
+      <div style="flex: 0 0 auto; padding: 9px 20px; border-top: 1px solid {{ T.line }}; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: {{ T.mute2 }}">{{ active.note }}</div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1560, &quot;height&quot;: 900}}">
+const CRIT = '#F0495A', HIGH = '#F5A623', OK = '#34D399', CYAN = '#22D3EE';
+const THEME_DARK = { bg: '#0B1220', panel: '#101A2C', panel2: '#0D1626', line: '#1E293B', edge: '#2C3A52',
+  hover: '#141F32', ink: '#E7EDF7', ink2: '#C7D2E3', ink3: '#9FB0C8', mute: '#7C8CA6', mute2: '#5B6B85', cyan: '#22D3EE' };
+const THEME_LIGHT = { bg: '#F1F5FA', panel: '#FFFFFF', panel2: '#F6F9FC', line: '#DCE4EE', edge: '#C0CCDB',
+  hover: '#EAF0F7', ink: '#101826', ink2: '#23324A', ink3: '#3C4E68', mute: '#5B6B85', mute2: '#6C7A89', cyan: '#0E8FA6' };
+const MONO = "font-family: 'IBM Plex Mono', monospace; ";
+
+const TABS = [
+  { id: 'flights', label: 'Flight schedule', sub: 'Rotations flagged against active external threats' },
+  { id: 'gantt', label: 'Schedule Gantt', sub: 'Aircraft utilisation with a recovery solver' },
+  { id: 'fleet', label: 'Fleet', sub: '30 aircraft — tail, type, base, CAT IIIB certification, status' },
+  { id: 'crew', label: 'Crew roster', sub: 'Individual crew, rank, base and duty status' },
+  { id: 'pairings', label: 'Crew pairings', sub: 'Duty pairings and margin to FDP limits' },
+  { id: 'banks', label: 'Bank structure', sub: 'BLR four-bank hub plus the DEL node' },
+  { id: 'threats', label: 'Threat feed', sub: 'DisruptionMatrix events feeding the exposure model' }
+];
+
+function sevColor2(v) { return v >= 80 ? CRIT : v >= 55 ? HIGH : '#5B92C9'; }
+function statusColor(s) {
+  if (s === 'AOG' || s === 'Red') return CRIT;
+  if (s === 'Scheduled maintenance' || s === 'Standby' || s === 'Amber') return HIGH;
+  return OK;
+}
+function cell(v, opts) { return Object.assign({ v: v, tagStyle: '' }, opts || {}); }
+
+function hhmm(dec) {
+  const h = Math.floor(dec % 24), m = Math.round((dec - Math.floor(dec)) * 60);
+  return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+}
+
+// deterministic recovery action per threat type — a proposal, not an auto-applied change
+const SOLVER_RULES = {
+  monsoon: { swapTails: ['N7-341', 'N7-372'], swapTo: { 'N7-341': 'VT-N04', 'N7-372': 'VT-N11' }, delayMin: 75, action: 'Delay past squall window' },
+  fuel: { swapTails: ['N7-505'], swapTo: { 'N7-505': 'VT-N24' }, delayMin: 25, action: 'Reduced-uplift delay' },
+  delfog: { swapTails: ['N7-611'], swapTo: { 'N7-611': 'VT-N26' }, delayMin: 40, action: 'Hold for visibility / CAT IIIB tail swap' },
+  chnAtc: { swapTails: [], swapTo: {}, delayMin: 20, action: 'ATFM delay' },
+  gulf: { swapTails: [], swapTo: {}, delayMin: 25, action: 'Reroute — extended block time' },
+  cabincrew: { swapTails: [], swapTo: {}, delayMin: 10, action: 'Monitor buffer' }
+};
+
+class Component extends DCLogic {
+  state = { tab: 'flights', query: '', theme: localStorage.getItem('dm-app-theme') || 'dark', solverApplied: false, ganttThreatFilter: null };
+
+  componentDidMount() {
+    const q = new URLSearchParams(window.location.search);
+    const tab = q.get('tab'), threat = q.get('threat');
+    if (tab || threat) this.setState((s) => ({ tab: tab || s.tab, ganttThreatFilter: threat || s.ganttThreatFilter }));
+    if (!window.NAMMA_DATA) {
+      this.poll = setInterval(() => { if (window.NAMMA_DATA) { clearInterval(this.poll); this.forceUpdate(); } }, 120);
+    }
+  }
+  componentWillUnmount() { clearInterval(this.poll); }
+
+  theme() { return this.state.theme === 'light' ? THEME_LIGHT : THEME_DARK; }
+  setTheme(t) { localStorage.setItem('dm-app-theme', t); this.setState({ theme: t }); }
+
+  colStyle(T) { return MONO + 'text-align: left; font-size: 10px; letter-spacing: 0.1em; color: ' + T.mute + '; padding: 9px 16px; border-bottom: 1px solid ' + T.line + '; position: sticky; top: 0; background: ' + T.panel + ';'; }
+  tdStyle(T) { return 'padding: 8px 16px; border-bottom: 1px solid ' + T.hover + '; vertical-align: top;'; }
+  rowStyle() { return ''; }
+
+  runSolver() { this.setState({ solverApplied: true }); }
+  resetSolver() { this.setState({ solverApplied: false }); }
+
+  // builds the recovery plan: per-flight tail/time changes, keyed by flight number
+  computePlan(D) {
+    const plan = {};
+    D.FLIGHTS.forEach((f) => {
+      const rule = SOLVER_RULES[f.threat];
+      if (!rule) return;
+      const sched = D.SCHEDULE[f.flt];
+      if (!sched) return;
+      const newTail = rule.swapTo[f.flt] || f.tail;
+      const newDep = sched.dep + rule.delayMin / 60;
+      plan[f.flt] = { tail: newTail, dep: newDep, dur: sched.dur, action: rule.action, delayMin: rule.delayMin, tailChanged: newTail !== f.tail };
+    });
+    return plan;
+  }
+
+  ganttFor(D, T, plan, threatFilter) {
+    const barsByTail = {};
+    const relevantTails = threatFilter ? new Set(D.FLIGHTS.filter((f) => f.threat === threatFilter).map((f) => f.tail)) : null;
+    D.FLIGHTS.forEach((f) => {
+      const sched = D.SCHEDULE[f.flt];
+      if (!sched) return;
+      if (relevantTails && !relevantTails.has(f.tail)) return;
+      const p = plan && plan[f.flt];
+      const tail = p ? p.tail : f.tail;
+      const dep = p ? p.dep : sched.dep;
+      const dur = p ? p.dur : sched.dur;
+      const threat = D.THREATS.filter((t) => t.id === f.threat)[0];
+      const color = threat ? sevColor2(threat.namma) : T.mute2;
+      const leftPct = Math.max(0, (dep / 24) * 100);
+      const widthPct = Math.max(1.6, Math.min(24 - dep, dur / 60) / 24 * 100);
+      (barsByTail[tail] = barsByTail[tail] || []).push({
+        title: f.flt + ' ' + f.route + (p ? ' · ' + p.action : ''),
+        label: f.flt,
+        style: 'position: absolute; top: 5px; height: 22px; left: ' + leftPct.toFixed(2) + '%; width: ' + widthPct.toFixed(2) +
+          '%; background: ' + color + '22; border: 1px solid ' + color + '; color: ' + T.ink2 + '; font-family: \'IBM Plex Mono\', monospace; font-size: 9.5px; ' +
+          'display: flex; align-items: center; padding: 0 5px; overflow: hidden; white-space: nowrap; border-radius: 2px;'
+      });
+    });
+    return Object.keys(barsByTail).sort().map((tail, i) => ({
+      tail: tail, bars: barsByTail[tail],
+      rowStyle: 'display: flex; border-bottom: 1px solid ' + T.hover + '; background: ' + (i % 2 ? T.panel2 : 'transparent') + ';'
+    }));
+  }
+
+  dataset(id, T) {
+    const D = window.NAMMA_DATA;
+    if (id === 'flights') return { cols: ['Flight', 'Route', 'Tail', 'Type', 'Bank', 'Linked threat'],
+      rows: D.FLIGHTS.map((f) => [f.flt, f.route, f.tail, f.type, f.bank, f.threat]) };
+    if (id === 'fleet') return { cols: ['Tail', 'Type', 'Base', 'CAT IIIB', 'Status'],
+      rows: D.FLEET.map((a) => [a.tail, a.type, a.base, a.catIIIB ? 'Yes' : 'No', a.status]),
+      tagCols: [4] };
+    if (id === 'crew') return { cols: ['Crew ID', 'Name', 'Rank', 'Base', 'Status', 'Duty remaining', 'Pairing'],
+      rows: D.CREW.map((c) => [c.id, c.name, c.rank, c.base, c.status, Math.round(c.dutyRemaining * 100) + '%', c.pairing]),
+      tagCols: [4] };
+    if (id === 'pairings') return { cols: ['Pairing', 'Base', 'Route', 'Margin (min)', 'Status', 'Linked threat'],
+      rows: D.PAIRINGS.map((p) => [p.id, p.base, p.route, p.margin, p.status, p.threat]),
+      tagCols: [4] };
+    if (id === 'banks') return { cols: ['Bank', 'Sub-label', 'Window', 'Kind', 'Severity (1–4)'],
+      rows: D.BANKS.map((b) => [b.label, b.sub, b.window, b.kind, b.severity]) };
+    if (id === 'threats') return { cols: ['Code', 'Name', 'Category', 'Region', 'EDPS', 'Namma score', 'Trajectory', 'Time to impact'],
+      rows: D.THREATS.map((t) => [t.code, t.name, t.cat, t.region, t.edps, t.namma, t.traj, t.tti]) };
+    return { cols: [], rows: [] };
+  }
+
+  renderVals() {
+    const st = this.state;
+    this._T = this.theme();
+    const T = this._T;
+    const isLight2 = st.theme === 'light';
+    const base = {
+      T: T, isDark: !isLight2, isLight: isLight2,
+      toggleTheme: () => this.setTheme(isLight2 ? 'dark' : 'light'),
+      themeBtnStyle: 'display: grid; place-items: center; width: 32px; height: 32px; cursor: pointer; border: 1px solid ' + T.edge + '; background: ' + T.panel2 + '; color: ' + T.mute + ';',
+      query: st.query, setQuery: (e) => this.setState({ query: e.target.value })
+    };
+    if (!window.NAMMA_DATA) return Object.assign(base, { tabs: [], active: { cols: [], rows: [], title: '', sub: '', note: '', count: 0 }, shownCount: 0, noRows: false, isGantt: false, isTable: true });
+
+    const D0 = window.NAMMA_DATA;
+    const tabsList = TABS.map((t) => {
+      const cnt = t.id === 'gantt' ? D0.FLIGHTS.filter((f) => SOLVER_RULES[f.threat]).length : this.dataset(t.id, T).rows.length;
+      return { label: t.label, count: cnt, go: () => this.setState({ tab: t.id, query: '' }),
+        style: 'display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; cursor: pointer; font-size: 13px; border-left: 2px solid ' +
+          (st.tab === t.id ? CYAN : 'transparent') + '; background: ' + (st.tab === t.id ? T.hover : 'transparent') + '; color: ' + (st.tab === t.id ? T.ink : T.mute) + ';' };
+    });
+    base.tabs = tabsList;
+
+    const isGantt = st.tab === 'gantt';
+    if (isGantt) {
+      const D = window.NAMMA_DATA;
+      const plan = st.solverApplied ? this.computePlan(D) : null;
+      const affectedCount = D.FLIGHTS.filter((f) => SOLVER_RULES[f.threat]).length;
+      const ticks = [0, 3, 6, 9, 12, 15, 18, 21, 24].map((h) => ({
+        label: String(h).padStart(2, '0') + ':00',
+        style: 'position: absolute; left: ' + (h / 24 * 100) + '%; top: 0; font-family: \'IBM Plex Mono\', monospace; font-size: 9.5px; color: ' + T.mute2 + '; border-left: 1px solid ' + T.line + '; padding-left: 4px;'
+      }));
+      const changes = plan ? Object.keys(plan).map((flt) => {
+        const f = D.FLIGHTS.filter((x) => x.flt === flt)[0];
+        const sched = D.SCHEDULE[flt];
+        const p = plan[flt];
+        const threat = D.THREATS.filter((t) => t.id === f.threat)[0];
+        return {
+          flt: flt, tailBefore: f.tail, tailAfter: p.tail, tailChangedStyle: p.tailChanged ? 'color: #22D3EE; font-weight: 600;' : 'color: ' + T.ink2 + ';',
+          depBefore: hhmm(sched.dep), depAfter: hhmm(p.dep), action: p.action + ' (+' + p.delayMin + 'm)',
+          threatCode: threat.code, threatTag: MONO + 'font-size: 10px; padding: 3px 7px; border: 1px solid ' + sevColor2(threat.namma) + '; color: ' + sevColor2(threat.namma) + ';'
+        };
+      }) : [];
+      Object.assign(base, {
+        isGantt: true, isTable: false, solverApplied: st.solverApplied, solverNotApplied: !st.solverApplied,
+        affectedCount: affectedCount, runSolver: () => this.runSolver(), resetSolver: () => this.resetSolver(),
+        runBtnStyle: MONO + 'font-size: 12px; padding: 8px 14px; cursor: pointer; border: 1px solid #22D3EE; background: rgba(34,211,238,0.12); color: ' + T.ink + ';',
+        resetBtnStyle: MONO + 'font-size: 12px; padding: 8px 14px; cursor: pointer; border: 1px solid ' + T.edge + '; background: ' + T.panel2 + '; color: ' + T.mute + ';',
+        ganttHeadStyle: 'display: flex; border-bottom: 1px solid ' + T.line + '; background: ' + T.panel + '; padding-top: 2px;',
+        chCol: this.colStyle(T), chCell: this.tdStyle(T),
+        ticks: ticks, ganttBefore: this.ganttFor(D, T, null, st.ganttThreatFilter), ganttAfter: plan ? this.ganttFor(D, T, plan, st.ganttThreatFilter) : [], changes: changes,
+        threatFilterName: st.ganttThreatFilter ? (D.THREATS.filter((t) => t.id === st.ganttThreatFilter)[0] || {}).name : '',
+        hasThreatFilter: !!st.ganttThreatFilter,
+        clearThreatFilter: () => this.setState({ ganttThreatFilter: null })
+      });
+      return base;
+    }
+
+    const rowStyleStr = 'border-bottom: 1px solid ' + T.hover + ';';
+    const cur = TABS.filter((t) => t.id === st.tab)[0];
+    const ds = this.dataset(st.tab, T);
+    const q = st.query.trim().toLowerCase();
+    const filteredRows = ds.rows.filter((row) => !q || row.some((v) => String(v).toLowerCase().includes(q)));
+
+    const active = {
+      title: cur.label, sub: cur.sub, count: ds.rows.length,
+      note: st.tab === 'threats' ? 'This is the raw feed — see the Ops dashboard for the exposure breakdown per event.' :
+        st.tab === 'fleet' ? '9 of 24 A320neo and 2 of 6 A350 are CAT IIIB certified — the split behind the fog/low-visibility vulnerability.' :
+        'Synthetic PoC data.',
+      cols: ds.cols.map((c) => ({ label: c, style: this.colStyle(T) })),
+      rows: filteredRows.map((row) => ({
+        rowStyle: rowStyleStr,
+        cells: row.map((v, i) => {
+          const isTag = (ds.tagCols || []).includes(i);
+          return { v: v, tagStyle: '', style: this.tdStyle(T),
+            textStyle: isTag ? MONO + 'font-size: 11px; padding: 3px 8px; border: 1px solid ' + statusColor(v) + '; color: ' + statusColor(v) + ';' :
+              (typeof v === 'number' ? MONO + 'color: ' + T.ink2 + ';' : 'color: ' + T.ink3 + ';') };
+        })
+      }))
+    };
+
+    return Object.assign(base, { active: active, shownCount: filteredRows.length, noRows: filteredRows.length === 0, isGantt: false, isTable: true });
+  }
+}
+</script>
+</body>
+</html>

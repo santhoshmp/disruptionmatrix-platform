@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<script src="./namma-data.js"></script>
+<style>
+  html, body { margin: 0; height: 100%; background: #0B1220; font-family: 'IBM Plex Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: #22D3EE; text-decoration: none; }
+  a:hover { color: #67E3F5; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: #0B1220; }
+  ::-webkit-scrollbar-thumb { background: #263449; border-radius: 6px; }
+  @keyframes naPulse { 0%,100% { opacity: 1 } 50% { opacity: .3 } }
+</style>
+</helmet>
+
+<div style="display: flex; flex-direction: column; height: 100vh; width: 100%; background: {{ T.bg }}; color: {{ T.ink }}; font-size: 14px; overflow: hidden">
+
+  <div style="flex: 0 0 auto; display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; padding: 12px 22px; background: {{ T.panel }}; border-bottom: 1px solid {{ T.line }}">
+    <div style="display: flex; align-items: center; gap: 10px">
+      <div style="width: 26px; height: 26px; border: 2px solid {{ T.cyan }}; border-radius: 50%; display: grid; place-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 700; color: {{ T.cyan }}">N7</div>
+      <div>
+        <div style="font-size: 16px; font-weight: 700; letter-spacing: -0.2px">Namma Air</div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: {{ T.mute }}; letter-spacing: 0.1em">OPERATIONS CONTROL CENTRE — BLR</div>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 6px">
+      <sc-for list="{{ hubFilters }}" as="h" hint-placeholder-count="2">
+        <div onClick="{{ h.go }}" style="{{ h.style }}">{{ h.label }}</div>
+      </sc-for>
+    </div>
+
+    <div style="{{ networkStatusStyle }}">
+      <div style="width: 8px; height: 8px; border-radius: 50%; background: {{ networkDotColor }}; animation: naPulse 1.8s ease-in-out infinite"></div>
+      <span>NETWORK STATUS — {{ networkLabel }}</span>
+    </div>
+
+    <div style="margin-left: auto; display: flex; align-items: center; flex-wrap: wrap; gap: 10px 14px">
+      <a href="Home.dc.html" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 6px 11px; border: 1px solid {{ T.edge }}; background: {{ T.panel2 }}; color: {{ T.mute }}">Home</a>
+      <a href="Namma Air Threat Map.html" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 6px 11px; border: 1px solid {{ T.edge }}; background: {{ T.panel2 }}; color: {{ T.mute }}">Network map</a>
+      <a href="Namma Air Data Explorer.dc.html" style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; padding: 6px 11px; border: 1px solid {{ T.edge }}; background: {{ T.panel2 }}; color: {{ T.mute }}">Data explorer</a>
+      <div onClick="{{ toggleTheme }}" title="Switch theme" style="{{ themeBtnStyle }}">
+        <sc-if value="{{ isDark }}" hint-placeholder-val="{{ true }}">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        </sc-if>
+        <sc-if value="{{ isLight }}" hint-placeholder-val="{{ false }}">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path></svg>
+        </sc-if>
+      </div>
+      <div style="text-align: right; font-family: 'IBM Plex Mono', monospace">
+        <div style="font-size: 16px; font-weight: 600">{{ clock }}</div>
+        <div style="font-size: 9.5px; color: {{ T.mute }}; letter-spacing: 0.1em">IST · BENGALURU</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex: 1; min-height: 0; display: grid; grid-template-columns: 320px minmax(0, 1fr) 300px; overflow: hidden">
+
+    <div style="border-right: 1px solid {{ T.line }}; background: {{ T.panel2 }}; display: flex; flex-direction: column; min-height: 0">
+      <div style="padding: 12px 16px 10px; border-bottom: 1px solid {{ T.line }}">
+        <div style="font-size: 13px; font-weight: 600">DisruptionMatrix feed</div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{ T.mute }}; margin-top: 2px">External events · ranked by score</div>
+      </div>
+      <div style="flex: 1; min-height: 0; overflow: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px">
+        <sc-for list="{{ threatList }}" as="t" hint-placeholder-count="6">
+          <div onClick="{{ t.go }}" style="{{ t.style }}">
+            <div style="display: flex; align-items: flex-start; gap: 10px">
+              <div style="{{ t.chipStyle }}">{{ t.edps }}</div>
+              <div style="min-width: 0; flex: 1">
+                <div style="display: flex; align-items: center; gap: 7px; margin-bottom: 3px">
+                  <span style="{{ t.codeStyle }}">{{ t.code }}</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: {{ T.mute2 }}">{{ t.tti }}</span>
+                </div>
+                <div style="font-size: 13px; font-weight: 600; line-height: 1.3; text-wrap: pretty">{{ t.name }}</div>
+                <div style="font-size: 11px; color: {{ T.mute }}; margin-top: 3px">{{ t.region }}</div>
+              </div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="min-width: 0; display: flex; flex-direction: column; overflow: auto">
+      <div style="padding: 14px 20px 20px">
+
+        <div style="display: flex; align-items: flex-start; gap: 16px; padding-bottom: 14px; border-bottom: 1px solid {{ T.line }}; margin-bottom: 14px">
+          <div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{ T.cyan }}; letter-spacing: 0.08em; margin-bottom: 4px">{{ sel.region }} · EXTERNAL SCORE {{ sel.edps }} (EDPS)</div>
+            <div style="font-size: 19px; font-weight: 700; letter-spacing: -0.3px; margin-bottom: 6px">{{ sel.name }}</div>
+            <div style="font-size: 12.5px; color: {{ T.ink3 }}; line-height: 1.55; max-width: 640px; text-wrap: pretty">{{ sel.summary }}</div>
+          </div>
+          <div style="margin-left: auto; text-align: center; padding: 12px 18px; border: 1px solid {{ sel.nammaColor }}; background: {{ sel.nammaBg }}">
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 30px; font-weight: 700; line-height: 1; color: {{ sel.nammaColor }}">{{ sel.namma }}</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.12em; color: {{ T.mute }}; margin-top: 4px">NAMMA THREAT SCORE</div>
+          </div>
+        </div>
+
+        <div style="font-size: 12px; font-weight: 600; color: {{ T.ink3 }}; letter-spacing: 0.04em; margin-bottom: 10px">NAMMA AIR EXPOSURE BOARD</div>
+        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; background: {{ T.line }}; border: 1px solid {{ T.line }}; margin-bottom: 18px">
+          <sc-for list="{{ sel.tiers }}" as="tier" hint-placeholder-count="5">
+            <div style="background: {{ T.panel }}; padding: 13px 14px">
+              <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px">
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: {{ T.mute2 }}; letter-spacing: 0.1em">{{ tier.num }}</span>
+              </div>
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 700; color: {{ tier.color }}; margin-bottom: 4px">{{ tier.big }}</div>
+              <div style="font-size: 11.5px; font-weight: 600; margin-bottom: 6px; line-height: 1.3">{{ tier.label }}</div>
+              <div style="font-size: 10.5px; color: {{ T.mute }}; line-height: 1.4; text-wrap: pretty">{{ tier.note }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px">
+          <div style="border: 1px solid {{ T.line }}; background: {{ T.panel2 }}">
+            <div style="padding: 10px 14px; border-bottom: 1px solid {{ T.line }}; display: flex; align-items: center; justify-content: space-between; gap: 10px">
+              <span style="font-size: 12px; font-weight: 600">Affected rotations</span>
+              <a href="{{ sel.fixScheduleHref }}" style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; padding: 4px 9px; border: 1px solid {{ T.cyan }}; background: rgba(34,211,238,0.12); color: {{ T.ink }};">Fix schedule →</a>
+            </div>
+            <div style="max-height: 220px; overflow: auto">
+              <sc-for list="{{ sel.flights }}" as="f" hint-placeholder-count="5">
+                <div style="display: grid; grid-template-columns: 68px 1fr 76px 62px; gap: 8px; padding: 8px 14px; border-bottom: 1px solid {{ T.hover }}; align-items: center">
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: {{ T.ink2 }}">{{ f.flt }}</span>
+                  <span style="font-size: 11.5px; color: {{ T.ink3 }}">{{ f.route }}</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: {{ T.mute2 }}">{{ f.tail }}</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{ T.mute }}">{{ f.bank }}</span>
+                </div>
+              </sc-for>
+              <sc-if value="{{ sel.noFlights }}" hint-placeholder-val="{{ false }}">
+                <div style="padding: 14px; font-size: 11.5px; color: {{ T.mute2 }}">No rotations currently flagged.</div>
+              </sc-if>
+            </div>
+          </div>
+          <div style="border: 1px solid {{ T.line }}; background: {{ T.panel2 }}">
+            <div style="padding: 10px 14px; border-bottom: 1px solid {{ T.line }}; font-size: 12px; font-weight: 600">Crew pairings near duty limits</div>
+            <div style="max-height: 220px; overflow: auto">
+              <sc-for list="{{ sel.pairings }}" as="p" hint-placeholder-count="3">
+                <div style="display: grid; grid-template-columns: 76px 1fr 60px; gap: 8px; padding: 8px 14px; border-bottom: 1px solid {{ T.hover }}; align-items: center">
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: {{ T.ink2 }}">{{ p.id }}</span>
+                  <span style="font-size: 11px; color: {{ T.ink3 }}">{{ p.route }}</span>
+                  <span style="{{ p.marginStyle }}">{{ p.margin }}m</span>
+                </div>
+              </sc-for>
+              <sc-if value="{{ sel.noPairings }}" hint-placeholder-val="{{ false }}">
+                <div style="padding: 14px; font-size: 11.5px; color: {{ T.mute2 }}">No pairings currently at risk.</div>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+
+        <div style="font-size: 12px; font-weight: 600; color: {{ T.ink3 }}; letter-spacing: 0.04em; margin-bottom: 10px">KNOWN STRUCTURAL VULNERABILITIES</div>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px">
+          <sc-for list="{{ vulnerabilities }}" as="v" hint-placeholder-count="4">
+            <div style="border: 1px solid {{ T.line }}; background: {{ T.panel2 }}; padding: 12px 14px; border-left: 3px solid #F5A623">
+              <div style="font-size: 12.5px; font-weight: 600; margin-bottom: 5px">{{ v.title }}</div>
+              <div style="font-size: 11px; color: {{ T.mute }}; line-height: 1.5; text-wrap: pretty">{{ v.detail }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div style="border-left: 1px solid {{ T.line }}; background: {{ T.panel2 }}; display: flex; flex-direction: column; min-height: 0; overflow: auto">
+      <div style="padding: 12px 16px 10px; border-bottom: 1px solid {{ T.line }}">
+        <div style="font-size: 13px; font-weight: 600">Live Ops Snapshot</div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{ T.mute }}; margin-top: 2px">24h trend · network-wide</div>
+      </div>
+      <div style="padding: 10px; display: flex; flex-direction: column; gap: 8px">
+        <sc-for list="{{ snapshot }}" as="s" hint-placeholder-count="7">
+          <div style="border: 1px solid {{ T.line }}; background: {{ T.panel }}; padding: 10px 12px">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px">
+              <span style="font-size: 11.5px; color: {{ T.ink3 }}">{{ s.label }}</span>
+              <span style="{{ s.valueStyle }}">{{ s.value }}{{ s.unit }}</span>
+            </div>
+            <sc-if value="{{ s.hasSpark }}" hint-placeholder-val="{{ true }}">
+              <svg viewBox="0 0 100 24" style="width: 100%; height: 24px; display: block" preserveAspectRatio="none">
+                <polyline points="{{ s.points }}" fill="none" stroke="{{ s.sparkColor }}" stroke-width="1.6" />
+              </svg>
+            </sc-if>
+            <sc-if value="{{ s.hasNote }}" hint-placeholder-val="{{ false }}">
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{ T.mute2 }}">{{ s.note }}</div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex: 0 0 auto; border-top: 1px solid {{ T.line }}; background: {{ T.panel }}; padding: 12px 22px">
+    <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px">
+      <span style="font-size: 12px; font-weight: 600; color: {{ T.ink3 }}; letter-spacing: 0.04em">BLR HUB BANK STRUCTURE</span>
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{ T.mute2 }}">color = highest threat severity mapped to this bank</span>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px">
+      <sc-for list="{{ banks }}" as="b" hint-placeholder-count="5">
+        <div style="{{ b.style }}">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px">
+            <span style="font-size: 13.5px; font-weight: 700">{{ b.label }}</span>
+            <span style="{{ b.sevStyle }}">{{ b.sevLabel }}</span>
+          </div>
+          <div style="font-size: 11px; color: {{ T.ink2 }}; margin-bottom: 2px">{{ b.sub }}</div>
+          <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{ T.mute }}">{{ b.window }} · {{ b.kind }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1680, &quot;height&quot;: 1000}}">
+const CRIT = '#F0495A', HIGH = '#F5A623', MOD = '#E8C34A', LOW = '#5B92C9', OK = '#34D399', CYAN = '#22D3EE';
+const THEME_DARK = { bg: '#0B1220', panel: '#101A2C', panel2: '#0D1626', line: '#1E293B', edge: '#2C3A52',
+  hover: '#141F32', ink: '#E7EDF7', ink2: '#C7D2E3', ink3: '#9FB0C8', mute: '#7C8CA6', mute2: '#5B6B85', cyan: '#22D3EE' };
+const THEME_LIGHT = { bg: '#F1F5FA', panel: '#FFFFFF', panel2: '#F6F9FC', line: '#DCE4EE', edge: '#C0CCDB',
+  hover: '#EAF0F7', ink: '#101826', ink2: '#23324A', ink3: '#3C4E68', mute: '#5B6B85', mute2: '#6C7A89', cyan: '#0E8FA6' };
+const MONO = "font-family: 'IBM Plex Mono', monospace; ";
+
+function sevColor(v) { return v >= 80 ? CRIT : v >= 55 ? HIGH : v >= 35 ? MOD : OK; }
+function toneColor(t, T) { return t === 'red' ? CRIT : t === 'amber' ? HIGH : t === 'green' ? OK : T.ink3; }
+function pointsFor(arr) {
+  const min = Math.min.apply(null, arr), max = Math.max.apply(null, arr), span = (max - min) || 1;
+  return arr.map((v, i) => (i / (arr.length - 1) * 100).toFixed(1) + ',' + (22 - ((v - min) / span) * 20).toFixed(1)).join(' ');
+}
+
+class Component extends DCLogic {
+  state = { sel: 'monsoon', hub: 'All', clock: '21:14:08', theme: localStorage.getItem('dm-app-theme') || 'dark' };
+
+  theme() { return this.state.theme === 'light' ? THEME_LIGHT : THEME_DARK; }
+  setTheme(t) { localStorage.setItem('dm-app-theme', t); this.setState({ theme: t }); }
+
+  componentDidMount() {
+    this.t0 = Date.now();
+    this.timer = setInterval(() => this.tick(), 1000);
+    if (!window.NAMMA_DATA) {
+      this.poll = setInterval(() => { if (window.NAMMA_DATA) { clearInterval(this.poll); this.forceUpdate(); } }, 120);
+    }
+  }
+  componentWillUnmount() { clearInterval(this.timer); clearInterval(this.poll); }
+  tick() {
+    const d = new Date(Date.parse('2026-07-14T21:14:08+05:30') + (Date.now() - this.t0));
+    const p = (n) => String(n).padStart(2, '0');
+    this.setState({ clock: p(d.getHours()) + ':' + p(d.getMinutes()) + ':' + p(d.getSeconds()) });
+  }
+
+  renderVals() {
+    const st = this.state;
+    this._T = this.theme();
+    const T = this._T;
+    const isLight = st.theme === 'light';
+    const base = {
+      T: T, isDark: !isLight, isLight: isLight,
+      toggleTheme: () => this.setTheme(isLight ? 'dark' : 'light'),
+      themeBtnStyle: 'display: grid; place-items: center; width: 32px; height: 32px; cursor: pointer; border: 1px solid ' + T.edge + '; background: ' + T.panel2 + '; color: ' + T.mute + ';',
+      clock: st.clock,
+      hubFilters: ['All', 'BLR', 'DEL'].map((h) => ({ label: h, go: () => this.setState({ hub: h }),
+        style: MONO + 'font-size: 11px; padding: 6px 11px; cursor: pointer; border: 1px solid ' + (st.hub === h ? CYAN : this._T.edge) +
+          '; background: ' + (st.hub === h ? 'rgba(34,211,238,0.12)' : this._T.panel) + '; color: ' + (st.hub === h ? this._T.ink : this._T.mute) + ';' }))
+    };
+    if (!window.NAMMA_DATA) return base;
+
+    const D = window.NAMMA_DATA;
+    const maxNamma = Math.max.apply(null, D.THREATS.map((t) => t.namma));
+    const netColor = sevColor(maxNamma);
+    const netLabel = maxNamma >= 80 ? 'RED — ELEVATED, VP THRESHOLD CROSSED' : maxNamma >= 55 ? 'AMBER — ELEVATED' : 'GREEN — NOMINAL';
+
+    const sel = D.THREATS.filter((t) => t.id === st.sel)[0] || D.THREATS[0];
+    const ex = D.EXPOSURE[sel.id];
+    const tiers = ['tier0', 'tier1', 'tier2', 'tier3', 'tier4'].map((k, i) => {
+      const t = ex[k];
+      const big = k === 'tier0' ? t.routeCount : k === 'tier1' ? t.count : k === 'tier2' ? t.count :
+        k === 'tier3' ? t.pax : t.esc;
+      const color = k === 'tier4' ? sevColor(t.esc * 22) : (big > 0 ? CYAN : this._T.mute2);
+      return { num: 'TIER ' + i, label: t.label, note: t.note, big: k === 'tier3' ? big.toLocaleString() : big, color: color };
+    });
+
+    const flights = D.FLIGHTS.filter((f) => f.threat === sel.id);
+    const pairings = D.PAIRINGS.filter((p) => p.threat === sel.id).map((p) => ({
+      id: p.id, route: p.route, margin: p.margin,
+      marginStyle: MONO + 'font-size: 11px; font-weight: 600; text-align: right; color: ' +
+        (p.status === 'Red' ? CRIT : p.status === 'Amber' ? HIGH : OK) + ';'
+    }));
+
+    const banks = D.BANKS.map((b) => {
+      const c = sevColor(b.severity * 22);
+      return { label: b.label, sub: b.sub, window: b.window, kind: b.kind,
+        sevLabel: b.severity >= 4 ? 'HIGH' : b.severity >= 3 ? 'ELEVATED' : b.severity >= 2 ? 'WATCH' : 'NOMINAL',
+        sevStyle: MONO + 'font-size: 9px; letter-spacing: 0.08em; color: ' + c + ';',
+        style: 'padding: 12px 14px; background: ' + this._T.panel2 + '; border: 1px solid ' + this._T.line + '; border-top: 3px solid ' + c + ';' };
+    });
+
+    return Object.assign(base, {
+      networkStatusStyle: 'display: flex; align-items: center; gap: 9px; padding: 7px 13px; border: 1px solid ' + netColor + '; background: ' + netColor + '14; white-space: nowrap; ' + MONO + 'font-size: 11px; letter-spacing: 0.06em; color: ' + netColor + ';',
+      networkDotColor: netColor, networkLabel: netLabel,
+      threatList: D.THREATS.slice().sort((a, b) => b.namma - a.namma).map((t) => ({
+        edps: t.edps, code: t.code, name: t.name, region: t.region, tti: t.tti,
+        chipStyle: MONO + 'font-weight: 700; font-size: 15px; text-align: center; padding: 6px 8px; color: ' + sevColor(t.edps) + '; border: 1px solid ' + sevColor(t.edps) + '; background: ' + sevColor(t.edps) + '1A;',
+        codeStyle: MONO + 'font-size: 9px; letter-spacing: 0.08em; padding: 2px 6px; border: 1px solid ' + this._T.edge + '; color: ' + this._T.ink3 + ';',
+        go: () => this.setState({ sel: t.id }),
+        style: 'padding: 11px 12px; cursor: pointer; border: 1px solid ' + (st.sel === t.id ? CYAN : this._T.line) + '; background: ' + (st.sel === t.id ? 'rgba(34,211,238,0.08)' : this._T.panel) + ';'
+      })),
+      sel: {
+        name: sel.name, region: sel.region, edps: sel.edps, namma: sel.namma, summary: sel.summary,
+        nammaColor: sevColor(sel.namma), nammaBg: sevColor(sel.namma) + '14',
+        tiers: tiers, flights: flights, noFlights: flights.length === 0, pairings: pairings, noPairings: pairings.length === 0,
+        fixScheduleHref: 'Namma Air Data Explorer.dc.html?tab=gantt&threat=' + sel.id
+      },
+      vulnerabilities: D.VULNERABILITIES,
+      snapshot: Object.keys(D.SNAPSHOT).map((k) => {
+        const s = D.SNAPSHOT[k];
+        return { label: s.label, value: s.value, unit: s.unit,
+          valueStyle: MONO + 'font-size: 15px; font-weight: 700; color: ' + toneColor(s.tone, this._T) + ';',
+          hasSpark: !!s.trend, points: s.trend ? pointsFor(s.trend) : '', sparkColor: toneColor(s.tone, this._T),
+          hasNote: !s.trend, note: s.note };
+      }),
+      banks: banks
+    });
+  }
+}
+</script>
+</body>
+</html>

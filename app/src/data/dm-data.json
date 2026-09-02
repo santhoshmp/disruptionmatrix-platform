@@ -1,0 +1,3921 @@
+{
+  "DOMAINS": [
+    "Flight schedule",
+    "Crew",
+    "Aircraft rotations",
+    "Airport operations",
+    "Passengers",
+    "Cargo",
+    "Catering",
+    "Maintenance",
+    "Regulatory"
+  ],
+  "EVENTS": [
+    {
+      "id": "monsoon",
+      "ref": "DM-2026-0410",
+      "name": "Bay of Bengal Monsoon Depression",
+      "cat": "Weather",
+      "where": "Bay of Bengal → South/East India",
+      "detected": "11 FEB 06:00Z",
+      "score": 84,
+      "conf": 4,
+      "traj": "Escalating",
+      "tti": "10h",
+      "esc": 4,
+      "ttiMin": 600,
+      "summary": "Deepening low-pressure system tracking toward the southeast coast. Heavy rain and low-level wind shear forecast over BLR and Chennai approach corridors through the evening bank.",
+      "factors": [
+        {
+          "label": "Probability of occurrence",
+          "val": 89,
+          "weight": 0.18,
+          "readout": "89/100",
+          "why": "Assessed from source corroboration and forecast confidence."
+        },
+        {
+          "label": "Severity if realised",
+          "val": 84,
+          "weight": 0.18,
+          "readout": "84/100",
+          "why": "Based on historical impact of comparable events."
+        },
+        {
+          "label": "Geographic reach",
+          "val": 79,
+          "weight": 0.12,
+          "readout": "2 airports",
+          "why": "Affects BLR, MAA."
+        },
+        {
+          "label": "Expected duration",
+          "val": 74,
+          "weight": 0.12,
+          "readout": "10h",
+          "why": "Estimated from forecast window and recovery time."
+        },
+        {
+          "label": "Time to impact",
+          "val": 90,
+          "weight": 0.14,
+          "readout": "10h",
+          "why": "First operational effect expected within the stated window."
+        },
+        {
+          "label": "Escalation rate",
+          "val": 75,
+          "weight": 0.1,
+          "readout": "Escalating",
+          "why": "Trajectory assessed from recent score movement."
+        },
+        {
+          "label": "Source credibility",
+          "val": 82,
+          "weight": 0.1,
+          "readout": "Tier 1-2",
+          "why": "Official notices and meteorological services."
+        },
+        {
+          "label": "Prediction confidence",
+          "val": 78,
+          "weight": 0.06,
+          "readout": "High",
+          "why": "Based on source agreement and forecast spread."
+        }
+      ],
+      "domains": [
+        {
+          "name": "Airport operations",
+          "v": 84
+        },
+        {
+          "name": "Flight schedule",
+          "v": 76
+        },
+        {
+          "name": "Aircraft rotations",
+          "v": 68
+        },
+        {
+          "name": "Passengers",
+          "v": 60
+        },
+        {
+          "name": "Crew",
+          "v": 52
+        },
+        {
+          "name": "Cargo",
+          "v": 44
+        },
+        {
+          "name": "Catering",
+          "v": 36
+        },
+        {
+          "name": "Maintenance",
+          "v": 28
+        },
+        {
+          "name": "Regulatory",
+          "v": 20
+        }
+      ],
+      "chain": [
+        {
+          "ord": "First order",
+          "title": "Direct operational impact",
+          "detail": "Deepening low-pressure system tracking toward the southeast coast. Heavy rain and low-level wind shear forecast over BLR and Chennai approach corridors through the evening bank.",
+          "lik": "84%",
+          "lead": "At onset"
+        },
+        {
+          "ord": "Second order",
+          "title": "Delay accumulation and rotation displacement",
+          "detail": "Reduced capacity leads to delay propagation through connected banks and rotations.",
+          "lik": "69%",
+          "lead": "2-6h"
+        },
+        {
+          "ord": "Third order",
+          "title": "Crew duty and passenger misconnection load",
+          "detail": "Extended duty days and misconnect populations concentrate on subsequent banks.",
+          "lik": "54%",
+          "lead": "6-24h"
+        }
+      ],
+      "evidence": [
+        {
+          "time": "11 FEB 06:00Z",
+          "source": "Intelligence desk",
+          "cred": "Tier 1",
+          "role": "Origin",
+          "text": "Deepening low-pressure system tracking toward the southeast coast. Heavy rain and low-level wind shear forecast over BLR and Chennai approach corridors through the evening bank."
+        },
+        {
+          "time": "11 FEB 09:00Z",
+          "source": "OCC monitoring",
+          "cred": "Tier 2",
+          "role": "Corroborates",
+          "text": "Operational impact confirmed through airline exposure assessment."
+        }
+      ],
+      "assumptions": [
+        "Event develops as forecast without significant deviation.",
+        "Standard operating procedures apply without additional local restrictions."
+      ],
+      "gaps": [
+        "Exact timing and intensity may vary from forecast.",
+        "Recovery timeline depends on local conditions."
+      ],
+      "sopKey": "storm"
+    },
+    {
+      "id": "fuel",
+      "ref": "DM-2026-0411",
+      "name": "BLR Fuel Depot Supply Disruption",
+      "cat": "Infrastructure",
+      "where": "Bengaluru (BLR)",
+      "detected": "11 FEB 06:00Z",
+      "score": 68,
+      "conf": 3,
+      "traj": "Escalating",
+      "tti": "6h",
+      "esc": 3,
+      "ttiMin": 360,
+      "summary": "Primary into-plane fuel supplier at BLR reports a pipeline valve fault reducing uplift rate by ~40%. Secondary supplier has limited hydrant access. Namma Air sources over 90% of BLR uplift from the affected supplier.",
+      "factors": [
+        {
+          "label": "Probability of occurrence",
+          "val": 73,
+          "weight": 0.18,
+          "readout": "73/100",
+          "why": "Assessed from source corroboration and forecast confidence."
+        },
+        {
+          "label": "Severity if realised",
+          "val": 68,
+          "weight": 0.18,
+          "readout": "68/100",
+          "why": "Based on historical impact of comparable events."
+        },
+        {
+          "label": "Geographic reach",
+          "val": 63,
+          "weight": 0.12,
+          "readout": "1 airports",
+          "why": "Affects BLR."
+        },
+        {
+          "label": "Expected duration",
+          "val": 58,
+          "weight": 0.12,
+          "readout": "6h",
+          "why": "Estimated from forecast window and recovery time."
+        },
+        {
+          "label": "Time to impact",
+          "val": 94,
+          "weight": 0.14,
+          "readout": "6h",
+          "why": "First operational effect expected within the stated window."
+        },
+        {
+          "label": "Escalation rate",
+          "val": 75,
+          "weight": 0.1,
+          "readout": "Escalating",
+          "why": "Trajectory assessed from recent score movement."
+        },
+        {
+          "label": "Source credibility",
+          "val": 82,
+          "weight": 0.1,
+          "readout": "Tier 1-2",
+          "why": "Official notices and meteorological services."
+        },
+        {
+          "label": "Prediction confidence",
+          "val": 78,
+          "weight": 0.06,
+          "readout": "High",
+          "why": "Based on source agreement and forecast spread."
+        }
+      ],
+      "domains": [
+        {
+          "name": "Airport operations",
+          "v": 68
+        },
+        {
+          "name": "Flight schedule",
+          "v": 60
+        },
+        {
+          "name": "Aircraft rotations",
+          "v": 52
+        },
+        {
+          "name": "Passengers",
+          "v": 44
+        },
+        {
+          "name": "Crew",
+          "v": 36
+        },
+        {
+          "name": "Cargo",
+          "v": 28
+        },
+        {
+          "name": "Maintenance",
+          "v": 20
+        },
+        {
+          "name": "Regulatory",
+          "v": 12
+        },
+        {
+          "name": "Catering",
+          "v": 10
+        }
+      ],
+      "chain": [
+        {
+          "ord": "First order",
+          "title": "Direct operational impact",
+          "detail": "Primary into-plane fuel supplier at BLR reports a pipeline valve fault reducing uplift rate by ~40%. Secondary supplier has limited hydrant access. Namma Air sources over 90% of BLR uplift from the affected supplier.",
+          "lik": "68%",
+          "lead": "At onset"
+        },
+        {
+          "ord": "Second order",
+          "title": "Delay accumulation and rotation displacement",
+          "detail": "Reduced capacity leads to delay propagation through connected banks and rotations.",
+          "lik": "53%",
+          "lead": "2-6h"
+        },
+        {
+          "ord": "Third order",
+          "title": "Crew duty and passenger misconnection load",
+          "detail": "Extended duty days and misconnect populations concentrate on subsequent banks.",
+          "lik": "38%",
+          "lead": "6-24h"
+        }
+      ],
+      "evidence": [
+        {
+          "time": "11 FEB 06:00Z",
+          "source": "Intelligence desk",
+          "cred": "Tier 1",
+          "role": "Origin",
+          "text": "Primary into-plane fuel supplier at BLR reports a pipeline valve fault reducing uplift rate by ~40%. Secondary supplier has limited hydrant access. Namma Air sources over 90% of BLR uplift from the affected supplier."
+        },
+        {
+          "time": "11 FEB 09:00Z",
+          "source": "OCC monitoring",
+          "cred": "Tier 2",
+          "role": "Corroborates",
+          "text": "Operational impact confirmed through airline exposure assessment."
+        }
+      ],
+      "assumptions": [
+        "Event develops as forecast without significant deviation.",
+        "Standard operating procedures apply without additional local restrictions."
+      ],
+      "gaps": [
+        "Exact timing and intensity may vary from forecast.",
+        "Recovery timeline depends on local conditions."
+      ],
+      "sopKey": "runway"
+    },
+    {
+      "id": "delfog",
+      "ref": "DM-2026-0412",
+      "name": "Delhi Winter Fog — CAT III Demand Surge",
+      "cat": "Weather",
+      "where": "Delhi (DEL)",
+      "detected": "11 FEB 06:00Z",
+      "score": 76,
+      "conf": 3,
+      "traj": "Stable",
+      "tti": "14h",
+      "esc": 3,
+      "ttiMin": 840,
+      "summary": "Dense fog advisory for DEL with visibility below 200m expected overnight. CAT IIIB approach capability required; Namma Air fleet certification is split.",
+      "factors": [
+        {
+          "label": "Probability of occurrence",
+          "val": 81,
+          "weight": 0.18,
+          "readout": "81/100",
+          "why": "Assessed from source corroboration and forecast confidence."
+        },
+        {
+          "label": "Severity if realised",
+          "val": 76,
+          "weight": 0.18,
+          "readout": "76/100",
+          "why": "Based on historical impact of comparable events."
+        },
+        {
+          "label": "Geographic reach",
+          "val": 71,
+          "weight": 0.12,
+          "readout": "1 airports",
+          "why": "Affects DEL."
+        },
+        {
+          "label": "Expected duration",
+          "val": 66,
+          "weight": 0.12,
+          "readout": "14h",
+          "why": "Estimated from forecast window and recovery time."
+        },
+        {
+          "label": "Time to impact",
+          "val": 86,
+          "weight": 0.14,
+          "readout": "14h",
+          "why": "First operational effect expected within the stated window."
+        },
+        {
+          "label": "Escalation rate",
+          "val": 45,
+          "weight": 0.1,
+          "readout": "Stable",
+          "why": "Trajectory assessed from recent score movement."
+        },
+        {
+          "label": "Source credibility",
+          "val": 82,
+          "weight": 0.1,
+          "readout": "Tier 1-2",
+          "why": "Official notices and meteorological services."
+        },
+        {
+          "label": "Prediction confidence",
+          "val": 78,
+          "weight": 0.06,
+          "readout": "High",
+          "why": "Based on source agreement and forecast spread."
+        }
+      ],
+      "domains": [
+        {
+          "name": "Airport operations",
+          "v": 76
+        },
+        {
+          "name": "Flight schedule",
+          "v": 68
+        },
+        {
+          "name": "Aircraft rotations",
+          "v": 60
+        },
+        {
+          "name": "Passengers",
+          "v": 52
+        },
+        {
+          "name": "Crew",
+          "v": 44
+        },
+        {
+          "name": "Cargo",
+          "v": 36
+        },
+        {
+          "name": "Catering",
+          "v": 28
+        },
+        {
+          "name": "Maintenance",
+          "v": 20
+        },
+        {
+          "name": "Regulatory",
+          "v": 12
+        }
+      ],
+      "chain": [
+        {
+          "ord": "First order",
+          "title": "Direct operational impact",
+          "detail": "Dense fog advisory for DEL with visibility below 200m expected overnight. CAT IIIB approach capability required; Namma Air fleet certification is split.",
+          "lik": "76%",
+          "lead": "At onset"
+        },
+        {
+          "ord": "Second order",
+          "title": "Delay accumulation and rotation displacement",
+          "detail": "Reduced capacity leads to delay propagation through connected banks and rotations.",
+          "lik": "61%",
+          "lead": "2-6h"
+        },
+        {
+          "ord": "Third order",
+          "title": "Crew duty and passenger misconnection load",
+          "detail": "Extended duty days and misconnect populations concentrate on subsequent banks.",
+          "lik": "46%",
+          "lead": "6-24h"
+        }
+      ],
+      "evidence": [
+        {
+          "time": "11 FEB 06:00Z",
+          "source": "Intelligence desk",
+          "cred": "Tier 1",
+          "role": "Origin",
+          "text": "Dense fog advisory for DEL with visibility below 200m expected overnight. CAT IIIB approach capability required; Namma Air fleet certification is split."
+        },
+        {
+          "time": "11 FEB 09:00Z",
+          "source": "OCC monitoring",
+          "cred": "Tier 2",
+          "role": "Corroborates",
+          "text": "Operational impact confirmed through airline exposure assessment."
+        }
+      ],
+      "assumptions": [
+        "Event develops as forecast without significant deviation.",
+        "Standard operating procedures apply without additional local restrictions."
+      ],
+      "gaps": [
+        "Exact timing and intensity may vary from forecast.",
+        "Recovery timeline depends on local conditions."
+      ],
+      "sopKey": "storm"
+    },
+    {
+      "id": "chnAtc",
+      "ref": "DM-2026-0413",
+      "name": "Chennai ACC Flow Restriction",
+      "cat": "ATC / Airspace",
+      "where": "Chennai FIR (VOMF)",
+      "detected": "11 FEB 06:00Z",
+      "score": 71,
+      "conf": 3,
+      "traj": "Stable",
+      "tti": "4h",
+      "esc": 3,
+      "ttiMin": 240,
+      "summary": "Reduced sector capacity in Chennai ACC following an equipment fault. Flow control affects southbound departures from BLR.",
+      "factors": [
+        {
+          "label": "Probability of occurrence",
+          "val": 76,
+          "weight": 0.18,
+          "readout": "76/100",
+          "why": "Assessed from source corroboration and forecast confidence."
+        },
+        {
+          "label": "Severity if realised",
+          "val": 71,
+          "weight": 0.18,
+          "readout": "71/100",
+          "why": "Based on historical impact of comparable events."
+        },
+        {
+          "label": "Geographic reach",
+          "val": 66,
+          "weight": 0.12,
+          "readout": "2 airports",
+          "why": "Affects MAA, BLR."
+        },
+        {
+          "label": "Expected duration",
+          "val": 61,
+          "weight": 0.12,
+          "readout": "4h",
+          "why": "Estimated from forecast window and recovery time."
+        },
+        {
+          "label": "Time to impact",
+          "val": 96,
+          "weight": 0.14,
+          "readout": "4h",
+          "why": "First operational effect expected within the stated window."
+        },
+        {
+          "label": "Escalation rate",
+          "val": 45,
+          "weight": 0.1,
+          "readout": "Stable",
+          "why": "Trajectory assessed from recent score movement."
+        },
+        {
+          "label": "Source credibility",
+          "val": 82,
+          "weight": 0.1,
+          "readout": "Tier 1-2",
+          "why": "Official notices and meteorological services."
+        },
+        {
+          "label": "Prediction confidence",
+          "val": 78,
+          "weight": 0.06,
+          "readout": "High",
+          "why": "Based on source agreement and forecast spread."
+        }
+      ],
+      "domains": [
+        {
+          "name": "Flight schedule",
+          "v": 71
+        },
+        {
+          "name": "Aircraft rotations",
+          "v": 63
+        },
+        {
+          "name": "Crew",
+          "v": 55
+        },
+        {
+          "name": "Airport operations",
+          "v": 47
+        },
+        {
+          "name": "Passengers",
+          "v": 39
+        },
+        {
+          "name": "Cargo",
+          "v": 31
+        },
+        {
+          "name": "Regulatory",
+          "v": 23
+        },
+        {
+          "name": "Catering",
+          "v": 15
+        },
+        {
+          "name": "Maintenance",
+          "v": 10
+        }
+      ],
+      "chain": [
+        {
+          "ord": "First order",
+          "title": "Direct operational impact",
+          "detail": "Reduced sector capacity in Chennai ACC following an equipment fault. Flow control affects southbound departures from BLR.",
+          "lik": "71%",
+          "lead": "At onset"
+        },
+        {
+          "ord": "Second order",
+          "title": "Delay accumulation and rotation displacement",
+          "detail": "Reduced capacity leads to delay propagation through connected banks and rotations.",
+          "lik": "56%",
+          "lead": "2-6h"
+        },
+        {
+          "ord": "Third order",
+          "title": "Crew duty and passenger misconnection load",
+          "detail": "Extended duty days and misconnect populations concentrate on subsequent banks.",
+          "lik": "41%",
+          "lead": "6-24h"
+        }
+      ],
+      "evidence": [
+        {
+          "time": "11 FEB 06:00Z",
+          "source": "Intelligence desk",
+          "cred": "Tier 1",
+          "role": "Origin",
+          "text": "Reduced sector capacity in Chennai ACC following an equipment fault. Flow control affects southbound departures from BLR."
+        },
+        {
+          "time": "11 FEB 09:00Z",
+          "source": "OCC monitoring",
+          "cred": "Tier 2",
+          "role": "Corroborates",
+          "text": "Operational impact confirmed through airline exposure assessment."
+        }
+      ],
+      "assumptions": [
+        "Event develops as forecast without significant deviation.",
+        "Standard operating procedures apply without additional local restrictions."
+      ],
+      "gaps": [
+        "Exact timing and intensity may vary from forecast.",
+        "Recovery timeline depends on local conditions."
+      ],
+      "sopKey": "atc"
+    },
+    {
+      "id": "gulf",
+      "ref": "DM-2026-0414",
+      "name": "Gulf Airspace Overflight Restriction",
+      "cat": "Geopolitical",
+      "where": "Iran / Gulf corridor (LHR sectors)",
+      "detected": "11 FEB 06:00Z",
+      "score": 62,
+      "conf": 2,
+      "traj": "Stable",
+      "tti": "2d",
+      "esc": 2,
+      "ttiMin": 2880,
+      "summary": "Reserved airspace block over the Gulf corridor narrows the standard BLR–LHR overflight routing, adding distance and fuel burn on affected A350 sectors.",
+      "factors": [
+        {
+          "label": "Probability of occurrence",
+          "val": 67,
+          "weight": 0.18,
+          "readout": "67/100",
+          "why": "Assessed from source corroboration and forecast confidence."
+        },
+        {
+          "label": "Severity if realised",
+          "val": 62,
+          "weight": 0.18,
+          "readout": "62/100",
+          "why": "Based on historical impact of comparable events."
+        },
+        {
+          "label": "Geographic reach",
+          "val": 57,
+          "weight": 0.12,
+          "readout": "2 airports",
+          "why": "Affects DXB, LHR."
+        },
+        {
+          "label": "Expected duration",
+          "val": 52,
+          "weight": 0.12,
+          "readout": "2d",
+          "why": "Estimated from forecast window and recovery time."
+        },
+        {
+          "label": "Time to impact",
+          "val": 52,
+          "weight": 0.14,
+          "readout": "2d",
+          "why": "First operational effect expected within the stated window."
+        },
+        {
+          "label": "Escalation rate",
+          "val": 45,
+          "weight": 0.1,
+          "readout": "Stable",
+          "why": "Trajectory assessed from recent score movement."
+        },
+        {
+          "label": "Source credibility",
+          "val": 82,
+          "weight": 0.1,
+          "readout": "Tier 1-2",
+          "why": "Official notices and meteorological services."
+        },
+        {
+          "label": "Prediction confidence",
+          "val": 52,
+          "weight": 0.06,
+          "readout": "Moderate",
+          "why": "Based on source agreement and forecast spread."
+        }
+      ],
+      "domains": [
+        {
+          "name": "Flight schedule",
+          "v": 62
+        },
+        {
+          "name": "Regulatory",
+          "v": 54
+        },
+        {
+          "name": "Aircraft rotations",
+          "v": 46
+        },
+        {
+          "name": "Crew",
+          "v": 38
+        },
+        {
+          "name": "Cargo",
+          "v": 30
+        },
+        {
+          "name": "Passengers",
+          "v": 22
+        },
+        {
+          "name": "Airport operations",
+          "v": 14
+        },
+        {
+          "name": "Maintenance",
+          "v": 10
+        },
+        {
+          "name": "Catering",
+          "v": 10
+        }
+      ],
+      "chain": [
+        {
+          "ord": "First order",
+          "title": "Direct operational impact",
+          "detail": "Reserved airspace block over the Gulf corridor narrows the standard BLR–LHR overflight routing, adding distance and fuel burn on affected A350 sectors.",
+          "lik": "62%",
+          "lead": "At onset"
+        },
+        {
+          "ord": "Second order",
+          "title": "Delay accumulation and rotation displacement",
+          "detail": "Reduced capacity leads to delay propagation through connected banks and rotations.",
+          "lik": "47%",
+          "lead": "2-6h"
+        },
+        {
+          "ord": "Third order",
+          "title": "Crew duty and passenger misconnection load",
+          "detail": "Extended duty days and misconnect populations concentrate on subsequent banks.",
+          "lik": "32%",
+          "lead": "6-24h"
+        }
+      ],
+      "evidence": [
+        {
+          "time": "11 FEB 06:00Z",
+          "source": "Intelligence desk",
+          "cred": "Tier 1",
+          "role": "Origin",
+          "text": "Reserved airspace block over the Gulf corridor narrows the standard BLR–LHR overflight routing, adding distance and fuel burn on affected A350 sectors."
+        },
+        {
+          "time": "11 FEB 09:00Z",
+          "source": "OCC monitoring",
+          "cred": "Tier 2",
+          "role": "Corroborates",
+          "text": "Operational impact confirmed through airline exposure assessment."
+        }
+      ],
+      "assumptions": [
+        "Event develops as forecast without significant deviation.",
+        "Standard operating procedures apply without additional local restrictions."
+      ],
+      "gaps": [
+        "Exact timing and intensity may vary from forecast.",
+        "Recovery timeline depends on local conditions."
+      ],
+      "sopKey": "airspace"
+    },
+    {
+      "id": "cabincrew",
+      "ref": "DM-2026-0415",
+      "name": "Cabin Crew Go-Slow Notice — DEL Base",
+      "cat": "Industrial action",
+      "where": "Delhi (DEL)",
+      "detected": "11 FEB 06:00Z",
+      "score": 45,
+      "conf": 2,
+      "traj": "Improving",
+      "tti": "3d",
+      "esc": 2,
+      "ttiMin": 4320,
+      "summary": "DEL-based cabin crew union has issued a go-slow notice over a rostering grievance. No strike date named; local action risk only.",
+      "factors": [
+        {
+          "label": "Probability of occurrence",
+          "val": 50,
+          "weight": 0.18,
+          "readout": "50/100",
+          "why": "Assessed from source corroboration and forecast confidence."
+        },
+        {
+          "label": "Severity if realised",
+          "val": 45,
+          "weight": 0.18,
+          "readout": "45/100",
+          "why": "Based on historical impact of comparable events."
+        },
+        {
+          "label": "Geographic reach",
+          "val": 40,
+          "weight": 0.12,
+          "readout": "1 airports",
+          "why": "Affects DEL."
+        },
+        {
+          "label": "Expected duration",
+          "val": 35,
+          "weight": 0.12,
+          "readout": "3d",
+          "why": "Estimated from forecast window and recovery time."
+        },
+        {
+          "label": "Time to impact",
+          "val": 28,
+          "weight": 0.14,
+          "readout": "3d",
+          "why": "First operational effect expected within the stated window."
+        },
+        {
+          "label": "Escalation rate",
+          "val": 25,
+          "weight": 0.1,
+          "readout": "Improving",
+          "why": "Trajectory assessed from recent score movement."
+        },
+        {
+          "label": "Source credibility",
+          "val": 82,
+          "weight": 0.1,
+          "readout": "Tier 1-2",
+          "why": "Official notices and meteorological services."
+        },
+        {
+          "label": "Prediction confidence",
+          "val": 52,
+          "weight": 0.06,
+          "readout": "Moderate",
+          "why": "Based on source agreement and forecast spread."
+        }
+      ],
+      "domains": [
+        {
+          "name": "Airport operations",
+          "v": 45
+        },
+        {
+          "name": "Passengers",
+          "v": 37
+        },
+        {
+          "name": "Flight schedule",
+          "v": 29
+        },
+        {
+          "name": "Cargo",
+          "v": 21
+        },
+        {
+          "name": "Catering",
+          "v": 13
+        },
+        {
+          "name": "Aircraft rotations",
+          "v": 10
+        },
+        {
+          "name": "Crew",
+          "v": 10
+        },
+        {
+          "name": "Maintenance",
+          "v": 10
+        },
+        {
+          "name": "Regulatory",
+          "v": 10
+        }
+      ],
+      "chain": [
+        {
+          "ord": "First order",
+          "title": "Direct operational impact",
+          "detail": "DEL-based cabin crew union has issued a go-slow notice over a rostering grievance. No strike date named; local action risk only.",
+          "lik": "45%",
+          "lead": "At onset"
+        },
+        {
+          "ord": "Second order",
+          "title": "Delay accumulation and rotation displacement",
+          "detail": "Reduced capacity leads to delay propagation through connected banks and rotations.",
+          "lik": "30%",
+          "lead": "2-6h"
+        },
+        {
+          "ord": "Third order",
+          "title": "Crew duty and passenger misconnection load",
+          "detail": "Extended duty days and misconnect populations concentrate on subsequent banks.",
+          "lik": "20%",
+          "lead": "6-24h"
+        }
+      ],
+      "evidence": [
+        {
+          "time": "11 FEB 06:00Z",
+          "source": "Intelligence desk",
+          "cred": "Tier 1",
+          "role": "Origin",
+          "text": "DEL-based cabin crew union has issued a go-slow notice over a rostering grievance. No strike date named; local action risk only."
+        },
+        {
+          "time": "11 FEB 09:00Z",
+          "source": "OCC monitoring",
+          "cred": "Tier 2",
+          "role": "Corroborates",
+          "text": "Operational impact confirmed through airline exposure assessment."
+        }
+      ],
+      "assumptions": [
+        "Event develops as forecast without significant deviation.",
+        "Standard operating procedures apply without additional local restrictions."
+      ],
+      "gaps": [
+        "Exact timing and intensity may vary from forecast.",
+        "Recovery timeline depends on local conditions."
+      ],
+      "sopKey": "ground"
+    },
+    {
+      "id": "convwx",
+      "ref": "DM-2026-0416",
+      "name": "Central European Convective Weather",
+      "cat": "Weather",
+      "where": "Frankfurt · Munich · Vienna corridor",
+      "detected": "11 FEB 06:00Z",
+      "score": 82,
+      "conf": 4,
+      "traj": "Escalating",
+      "tti": "4h",
+      "esc": 4,
+      "ttiMin": 240,
+      "summary": "Severe CB activity forecast across the FRA–MUC–VIE corridor through the afternoon wave. Embedded thunderstorms, hail, and wind shear on approach corridors. Ground stops likely at VIE during peak arrival bank.",
+      "factors": [
+        {
+          "label": "Probability of occurrence",
+          "val": 87,
+          "weight": 0.18,
+          "readout": "87/100",
+          "why": "Assessed from source corroboration and forecast confidence."
+        },
+        {
+          "label": "Severity if realised",
+          "val": 82,
+          "weight": 0.18,
+          "readout": "82/100",
+          "why": "Based on historical impact of comparable events."
+        },
+        {
+          "label": "Geographic reach",
+          "val": 77,
+          "weight": 0.12,
+          "readout": "3 airports",
+          "why": "Affects FRA, MUC, VIE."
+        },
+        {
+          "label": "Expected duration",
+          "val": 72,
+          "weight": 0.12,
+          "readout": "4h",
+          "why": "Estimated from forecast window and recovery time."
+        },
+        {
+          "label": "Time to impact",
+          "val": 96,
+          "weight": 0.14,
+          "readout": "4h",
+          "why": "First operational effect expected within the stated window."
+        },
+        {
+          "label": "Escalation rate",
+          "val": 75,
+          "weight": 0.1,
+          "readout": "Escalating",
+          "why": "Trajectory assessed from recent score movement."
+        },
+        {
+          "label": "Source credibility",
+          "val": 82,
+          "weight": 0.1,
+          "readout": "Tier 1-2",
+          "why": "Official notices and meteorological services."
+        },
+        {
+          "label": "Prediction confidence",
+          "val": 78,
+          "weight": 0.06,
+          "readout": "High",
+          "why": "Based on source agreement and forecast spread."
+        }
+      ],
+      "domains": [
+        {
+          "name": "Airport operations",
+          "v": 82
+        },
+        {
+          "name": "Flight schedule",
+          "v": 74
+        },
+        {
+          "name": "Aircraft rotations",
+          "v": 66
+        },
+        {
+          "name": "Passengers",
+          "v": 58
+        },
+        {
+          "name": "Crew",
+          "v": 50
+        },
+        {
+          "name": "Cargo",
+          "v": 42
+        },
+        {
+          "name": "Catering",
+          "v": 34
+        },
+        {
+          "name": "Maintenance",
+          "v": 26
+        },
+        {
+          "name": "Regulatory",
+          "v": 18
+        }
+      ],
+      "chain": [
+        {
+          "ord": "First order",
+          "title": "Direct operational impact",
+          "detail": "Severe CB activity forecast across the FRA–MUC–VIE corridor through the afternoon wave. Embedded thunderstorms, hail, and wind shear on approach corridors. Ground stops likely at VIE during peak arrival bank.",
+          "lik": "82%",
+          "lead": "At onset"
+        },
+        {
+          "ord": "Second order",
+          "title": "Delay accumulation and rotation displacement",
+          "detail": "Reduced capacity leads to delay propagation through connected banks and rotations.",
+          "lik": "67%",
+          "lead": "2-6h"
+        },
+        {
+          "ord": "Third order",
+          "title": "Crew duty and passenger misconnection load",
+          "detail": "Extended duty days and misconnect populations concentrate on subsequent banks.",
+          "lik": "52%",
+          "lead": "6-24h"
+        }
+      ],
+      "evidence": [
+        {
+          "time": "11 FEB 06:00Z",
+          "source": "Intelligence desk",
+          "cred": "Tier 1",
+          "role": "Origin",
+          "text": "Severe CB activity forecast across the FRA–MUC–VIE corridor through the afternoon wave. Embedded thunderstorms, hail, and wind shear on approach corridors. Ground stops likely at VIE during peak arrival bank."
+        },
+        {
+          "time": "11 FEB 09:00Z",
+          "source": "OCC monitoring",
+          "cred": "Tier 2",
+          "role": "Corroborates",
+          "text": "Operational impact confirmed through airline exposure assessment."
+        }
+      ],
+      "assumptions": [
+        "Event develops as forecast without significant deviation.",
+        "Standard operating procedures apply without additional local restrictions."
+      ],
+      "gaps": [
+        "Exact timing and intensity may vary from forecast.",
+        "Recovery timeline depends on local conditions."
+      ],
+      "sopKey": "storm"
+    },
+    {
+      "id": "fraatfm",
+      "ref": "DM-2026-0417",
+      "name": "Frankfurt ATFM Regulation — Sector Overload",
+      "cat": "ATC / Airspace",
+      "where": "EDUU UIR — Frankfurt sector",
+      "detected": "11 FEB 06:00Z",
+      "score": 74,
+      "conf": 3,
+      "traj": "Stable",
+      "tti": "2h",
+      "esc": 3,
+      "ttiMin": 120,
+      "summary": "EUROCONTROL Network Manager has activated an ATFM regulation for the Frankfurt airspace sector due to predicted overload. Delays of 30–60 minutes expected on all EuroVista sectors transiting the EDUU UIR.",
+      "factors": [
+        {
+          "label": "Probability of occurrence",
+          "val": 79,
+          "weight": 0.18,
+          "readout": "79/100",
+          "why": "Assessed from source corroboration and forecast confidence."
+        },
+        {
+          "label": "Severity if realised",
+          "val": 74,
+          "weight": 0.18,
+          "readout": "74/100",
+          "why": "Based on historical impact of comparable events."
+        },
+        {
+          "label": "Geographic reach",
+          "val": 69,
+          "weight": 0.12,
+          "readout": "1 airports",
+          "why": "Affects FRA."
+        },
+        {
+          "label": "Expected duration",
+          "val": 64,
+          "weight": 0.12,
+          "readout": "2h",
+          "why": "Estimated from forecast window and recovery time."
+        },
+        {
+          "label": "Time to impact",
+          "val": 98,
+          "weight": 0.14,
+          "readout": "2h",
+          "why": "First operational effect expected within the stated window."
+        },
+        {
+          "label": "Escalation rate",
+          "val": 45,
+          "weight": 0.1,
+          "readout": "Stable",
+          "why": "Trajectory assessed from recent score movement."
+        },
+        {
+          "label": "Source credibility",
+          "val": 82,
+          "weight": 0.1,
+          "readout": "Tier 1-2",
+          "why": "Official notices and meteorological services."
+        },
+        {
+          "label": "Prediction confidence",
+          "val": 78,
+          "weight": 0.06,
+          "readout": "High",
+          "why": "Based on source agreement and forecast spread."
+        }
+      ],
+      "domains": [
+        {
+          "name": "Flight schedule",
+          "v": 74
+        },
+        {
+          "name": "Aircraft rotations",
+          "v": 66
+        },
+        {
+          "name": "Crew",
+          "v": 58
+        },
+        {
+          "name": "Airport operations",
+          "v": 50
+        },
+        {
+          "name": "Passengers",
+          "v": 42
+        },
+        {
+          "name": "Cargo",
+          "v": 34
+        },
+        {
+          "name": "Regulatory",
+          "v": 26
+        },
+        {
+          "name": "Catering",
+          "v": 18
+        },
+        {
+          "name": "Maintenance",
+          "v": 10
+        }
+      ],
+      "chain": [
+        {
+          "ord": "First order",
+          "title": "Direct operational impact",
+          "detail": "EUROCONTROL Network Manager has activated an ATFM regulation for the Frankfurt airspace sector due to predicted overload. Delays of 30–60 minutes expected on all EuroVista sectors transiting the EDUU UIR.",
+          "lik": "74%",
+          "lead": "At onset"
+        },
+        {
+          "ord": "Second order",
+          "title": "Delay accumulation and rotation displacement",
+          "detail": "Reduced capacity leads to delay propagation through connected banks and rotations.",
+          "lik": "59%",
+          "lead": "2-6h"
+        },
+        {
+          "ord": "Third order",
+          "title": "Crew duty and passenger misconnection load",
+          "detail": "Extended duty days and misconnect populations concentrate on subsequent banks.",
+          "lik": "44%",
+          "lead": "6-24h"
+        }
+      ],
+      "evidence": [
+        {
+          "time": "11 FEB 06:00Z",
+          "source": "Intelligence desk",
+          "cred": "Tier 1",
+          "role": "Origin",
+          "text": "EUROCONTROL Network Manager has activated an ATFM regulation for the Frankfurt airspace sector due to predicted overload. Delays of 30–60 minutes expected on all EuroVista sectors transiting the EDUU UIR."
+        },
+        {
+          "time": "11 FEB 09:00Z",
+          "source": "OCC monitoring",
+          "cred": "Tier 2",
+          "role": "Corroborates",
+          "text": "Operational impact confirmed through airline exposure assessment."
+        }
+      ],
+      "assumptions": [
+        "Event develops as forecast without significant deviation.",
+        "Standard operating procedures apply without additional local restrictions."
+      ],
+      "gaps": [
+        "Exact timing and intensity may vary from forecast.",
+        "Recovery timeline depends on local conditions."
+      ],
+      "sopKey": "atc"
+    },
+    {
+      "id": "viesnow",
+      "ref": "DM-2026-0418",
+      "name": "Vienna Winter Storm — Snow Accumulation",
+      "cat": "Weather",
+      "where": "Vienna (VIE)",
+      "detected": "11 FEB 06:00Z",
+      "score": 69,
+      "conf": 3,
+      "traj": "Stable",
+      "tti": "8h",
+      "esc": 3,
+      "ttiMin": 480,
+      "summary": "Heavy snowfall forecast at VIE from late evening through overnight. Runway clearance cycles expected to reduce arrival rate by 40%. De-icing operations will extend turnaround times by 25–35 minutes.",
+      "factors": [
+        {
+          "label": "Probability of occurrence",
+          "val": 74,
+          "weight": 0.18,
+          "readout": "74/100",
+          "why": "Assessed from source corroboration and forecast confidence."
+        },
+        {
+          "label": "Severity if realised",
+          "val": 69,
+          "weight": 0.18,
+          "readout": "69/100",
+          "why": "Based on historical impact of comparable events."
+        },
+        {
+          "label": "Geographic reach",
+          "val": 64,
+          "weight": 0.12,
+          "readout": "1 airports",
+          "why": "Affects VIE."
+        },
+        {
+          "label": "Expected duration",
+          "val": 59,
+          "weight": 0.12,
+          "readout": "8h",
+          "why": "Estimated from forecast window and recovery time."
+        },
+        {
+          "label": "Time to impact",
+          "val": 92,
+          "weight": 0.14,
+          "readout": "8h",
+          "why": "First operational effect expected within the stated window."
+        },
+        {
+          "label": "Escalation rate",
+          "val": 45,
+          "weight": 0.1,
+          "readout": "Stable",
+          "why": "Trajectory assessed from recent score movement."
+        },
+        {
+          "label": "Source credibility",
+          "val": 82,
+          "weight": 0.1,
+          "readout": "Tier 1-2",
+          "why": "Official notices and meteorological services."
+        },
+        {
+          "label": "Prediction confidence",
+          "val": 78,
+          "weight": 0.06,
+          "readout": "High",
+          "why": "Based on source agreement and forecast spread."
+        }
+      ],
+      "domains": [
+        {
+          "name": "Airport operations",
+          "v": 69
+        },
+        {
+          "name": "Flight schedule",
+          "v": 61
+        },
+        {
+          "name": "Aircraft rotations",
+          "v": 53
+        },
+        {
+          "name": "Passengers",
+          "v": 45
+        },
+        {
+          "name": "Crew",
+          "v": 37
+        },
+        {
+          "name": "Cargo",
+          "v": 29
+        },
+        {
+          "name": "Catering",
+          "v": 21
+        },
+        {
+          "name": "Maintenance",
+          "v": 13
+        },
+        {
+          "name": "Regulatory",
+          "v": 10
+        }
+      ],
+      "chain": [
+        {
+          "ord": "First order",
+          "title": "Direct operational impact",
+          "detail": "Heavy snowfall forecast at VIE from late evening through overnight. Runway clearance cycles expected to reduce arrival rate by 40%. De-icing operations will extend turnaround times by 25–35 minutes.",
+          "lik": "69%",
+          "lead": "At onset"
+        },
+        {
+          "ord": "Second order",
+          "title": "Delay accumulation and rotation displacement",
+          "detail": "Reduced capacity leads to delay propagation through connected banks and rotations.",
+          "lik": "54%",
+          "lead": "2-6h"
+        },
+        {
+          "ord": "Third order",
+          "title": "Crew duty and passenger misconnection load",
+          "detail": "Extended duty days and misconnect populations concentrate on subsequent banks.",
+          "lik": "39%",
+          "lead": "6-24h"
+        }
+      ],
+      "evidence": [
+        {
+          "time": "11 FEB 06:00Z",
+          "source": "Intelligence desk",
+          "cred": "Tier 1",
+          "role": "Origin",
+          "text": "Heavy snowfall forecast at VIE from late evening through overnight. Runway clearance cycles expected to reduce arrival rate by 40%. De-icing operations will extend turnaround times by 25–35 minutes."
+        },
+        {
+          "time": "11 FEB 09:00Z",
+          "source": "OCC monitoring",
+          "cred": "Tier 2",
+          "role": "Corroborates",
+          "text": "Operational impact confirmed through airline exposure assessment."
+        }
+      ],
+      "assumptions": [
+        "Event develops as forecast without significant deviation.",
+        "Standard operating procedures apply without additional local restrictions."
+      ],
+      "gaps": [
+        "Exact timing and intensity may vary from forecast.",
+        "Recovery timeline depends on local conditions."
+      ],
+      "sopKey": "storm"
+    },
+    {
+      "id": "zrhfog",
+      "ref": "DM-2026-0419",
+      "name": "Zurich Low-Visibility Procedures",
+      "cat": "Weather",
+      "where": "Zurich (ZRH)",
+      "detected": "11 FEB 06:00Z",
+      "score": 58,
+      "conf": 2,
+      "traj": "Improving",
+      "tti": "6h",
+      "esc": 2,
+      "ttiMin": 360,
+      "summary": "Radiation fog at ZRH reducing visibility below 300m. CAT II/III approaches in effect. EuroVista E190 fleet limited to CAT I minima — diversions to MUC possible for 2 rotations.",
+      "factors": [
+        {
+          "label": "Probability of occurrence",
+          "val": 63,
+          "weight": 0.18,
+          "readout": "63/100",
+          "why": "Assessed from source corroboration and forecast confidence."
+        },
+        {
+          "label": "Severity if realised",
+          "val": 58,
+          "weight": 0.18,
+          "readout": "58/100",
+          "why": "Based on historical impact of comparable events."
+        },
+        {
+          "label": "Geographic reach",
+          "val": 53,
+          "weight": 0.12,
+          "readout": "1 airports",
+          "why": "Affects ZRH."
+        },
+        {
+          "label": "Expected duration",
+          "val": 48,
+          "weight": 0.12,
+          "readout": "6h",
+          "why": "Estimated from forecast window and recovery time."
+        },
+        {
+          "label": "Time to impact",
+          "val": 94,
+          "weight": 0.14,
+          "readout": "6h",
+          "why": "First operational effect expected within the stated window."
+        },
+        {
+          "label": "Escalation rate",
+          "val": 25,
+          "weight": 0.1,
+          "readout": "Improving",
+          "why": "Trajectory assessed from recent score movement."
+        },
+        {
+          "label": "Source credibility",
+          "val": 82,
+          "weight": 0.1,
+          "readout": "Tier 1-2",
+          "why": "Official notices and meteorological services."
+        },
+        {
+          "label": "Prediction confidence",
+          "val": 52,
+          "weight": 0.06,
+          "readout": "Moderate",
+          "why": "Based on source agreement and forecast spread."
+        }
+      ],
+      "domains": [
+        {
+          "name": "Airport operations",
+          "v": 58
+        },
+        {
+          "name": "Flight schedule",
+          "v": 50
+        },
+        {
+          "name": "Aircraft rotations",
+          "v": 42
+        },
+        {
+          "name": "Passengers",
+          "v": 34
+        },
+        {
+          "name": "Crew",
+          "v": 26
+        },
+        {
+          "name": "Cargo",
+          "v": 18
+        },
+        {
+          "name": "Catering",
+          "v": 10
+        },
+        {
+          "name": "Maintenance",
+          "v": 10
+        },
+        {
+          "name": "Regulatory",
+          "v": 10
+        }
+      ],
+      "chain": [
+        {
+          "ord": "First order",
+          "title": "Direct operational impact",
+          "detail": "Radiation fog at ZRH reducing visibility below 300m. CAT II/III approaches in effect. EuroVista E190 fleet limited to CAT I minima — diversions to MUC possible for 2 rotations.",
+          "lik": "58%",
+          "lead": "At onset"
+        },
+        {
+          "ord": "Second order",
+          "title": "Delay accumulation and rotation displacement",
+          "detail": "Reduced capacity leads to delay propagation through connected banks and rotations.",
+          "lik": "43%",
+          "lead": "2-6h"
+        },
+        {
+          "ord": "Third order",
+          "title": "Crew duty and passenger misconnection load",
+          "detail": "Extended duty days and misconnect populations concentrate on subsequent banks.",
+          "lik": "28%",
+          "lead": "6-24h"
+        }
+      ],
+      "evidence": [
+        {
+          "time": "11 FEB 06:00Z",
+          "source": "Intelligence desk",
+          "cred": "Tier 1",
+          "role": "Origin",
+          "text": "Radiation fog at ZRH reducing visibility below 300m. CAT II/III approaches in effect. EuroVista E190 fleet limited to CAT I minima — diversions to MUC possible for 2 rotations."
+        },
+        {
+          "time": "11 FEB 09:00Z",
+          "source": "OCC monitoring",
+          "cred": "Tier 2",
+          "role": "Corroborates",
+          "text": "Operational impact confirmed through airline exposure assessment."
+        }
+      ],
+      "assumptions": [
+        "Event develops as forecast without significant deviation.",
+        "Standard operating procedures apply without additional local restrictions."
+      ],
+      "gaps": [
+        "Exact timing and intensity may vary from forecast.",
+        "Recovery timeline depends on local conditions."
+      ],
+      "sopKey": "storm"
+    },
+    {
+      "id": "vniestrike",
+      "ref": "DM-2026-0420",
+      "name": "Vienna Ground Handler Industrial Action",
+      "cat": "Industrial action",
+      "where": "Vienna (VIE)",
+      "detected": "11 FEB 06:00Z",
+      "score": 54,
+      "conf": 2,
+      "traj": "Escalating",
+      "tti": "12h",
+      "esc": 2,
+      "ttiMin": 720,
+      "summary": "VIE ground handling staff have announced a 4-hour work-to-rule during the morning departure bank. Extended turnaround times and potential missed connections through the VIE hub.",
+      "factors": [
+        {
+          "label": "Probability of occurrence",
+          "val": 59,
+          "weight": 0.18,
+          "readout": "59/100",
+          "why": "Assessed from source corroboration and forecast confidence."
+        },
+        {
+          "label": "Severity if realised",
+          "val": 54,
+          "weight": 0.18,
+          "readout": "54/100",
+          "why": "Based on historical impact of comparable events."
+        },
+        {
+          "label": "Geographic reach",
+          "val": 49,
+          "weight": 0.12,
+          "readout": "0 airports",
+          "why": "Affects ."
+        },
+        {
+          "label": "Expected duration",
+          "val": 44,
+          "weight": 0.12,
+          "readout": "12h",
+          "why": "Estimated from forecast window and recovery time."
+        },
+        {
+          "label": "Time to impact",
+          "val": 88,
+          "weight": 0.14,
+          "readout": "12h",
+          "why": "First operational effect expected within the stated window."
+        },
+        {
+          "label": "Escalation rate",
+          "val": 75,
+          "weight": 0.1,
+          "readout": "Escalating",
+          "why": "Trajectory assessed from recent score movement."
+        },
+        {
+          "label": "Source credibility",
+          "val": 82,
+          "weight": 0.1,
+          "readout": "Tier 1-2",
+          "why": "Official notices and meteorological services."
+        },
+        {
+          "label": "Prediction confidence",
+          "val": 52,
+          "weight": 0.06,
+          "readout": "Moderate",
+          "why": "Based on source agreement and forecast spread."
+        }
+      ],
+      "domains": [
+        {
+          "name": "Airport operations",
+          "v": 54
+        },
+        {
+          "name": "Passengers",
+          "v": 46
+        },
+        {
+          "name": "Flight schedule",
+          "v": 38
+        },
+        {
+          "name": "Cargo",
+          "v": 30
+        },
+        {
+          "name": "Catering",
+          "v": 22
+        },
+        {
+          "name": "Aircraft rotations",
+          "v": 14
+        },
+        {
+          "name": "Crew",
+          "v": 10
+        },
+        {
+          "name": "Maintenance",
+          "v": 10
+        },
+        {
+          "name": "Regulatory",
+          "v": 10
+        }
+      ],
+      "chain": [
+        {
+          "ord": "First order",
+          "title": "Direct operational impact",
+          "detail": "VIE ground handling staff have announced a 4-hour work-to-rule during the morning departure bank. Extended turnaround times and potential missed connections through the VIE hub.",
+          "lik": "54%",
+          "lead": "At onset"
+        },
+        {
+          "ord": "Second order",
+          "title": "Delay accumulation and rotation displacement",
+          "detail": "Reduced capacity leads to delay propagation through connected banks and rotations.",
+          "lik": "39%",
+          "lead": "2-6h"
+        },
+        {
+          "ord": "Third order",
+          "title": "Crew duty and passenger misconnection load",
+          "detail": "Extended duty days and misconnect populations concentrate on subsequent banks.",
+          "lik": "24%",
+          "lead": "6-24h"
+        }
+      ],
+      "evidence": [
+        {
+          "time": "11 FEB 06:00Z",
+          "source": "Intelligence desk",
+          "cred": "Tier 1",
+          "role": "Origin",
+          "text": "VIE ground handling staff have announced a 4-hour work-to-rule during the morning departure bank. Extended turnaround times and potential missed connections through the VIE hub."
+        },
+        {
+          "time": "11 FEB 09:00Z",
+          "source": "OCC monitoring",
+          "cred": "Tier 2",
+          "role": "Corroborates",
+          "text": "Operational impact confirmed through airline exposure assessment."
+        }
+      ],
+      "assumptions": [
+        "Event develops as forecast without significant deviation.",
+        "Standard operating procedures apply without additional local restrictions."
+      ],
+      "gaps": [
+        "Exact timing and intensity may vary from forecast.",
+        "Recovery timeline depends on local conditions."
+      ],
+      "sopKey": "ground"
+    },
+    {
+      "id": "amslot",
+      "ref": "DM-2026-0421",
+      "name": "Amsterdam Slot Constraints — Runway Maintenance",
+      "cat": "Infrastructure",
+      "where": "Amsterdam (AMS)",
+      "detected": "11 FEB 06:00Z",
+      "score": 48,
+      "conf": 2,
+      "traj": "Stable",
+      "tti": "1d",
+      "esc": 2,
+      "ttiMin": 1440,
+      "summary": "AMS runway 18R/36L closed for scheduled maintenance through the week. Reduced arrival capacity during peak hours; slot adjustments required for EuroVista's 4 daily AMS rotations.",
+      "factors": [
+        {
+          "label": "Probability of occurrence",
+          "val": 53,
+          "weight": 0.18,
+          "readout": "53/100",
+          "why": "Assessed from source corroboration and forecast confidence."
+        },
+        {
+          "label": "Severity if realised",
+          "val": 48,
+          "weight": 0.18,
+          "readout": "48/100",
+          "why": "Based on historical impact of comparable events."
+        },
+        {
+          "label": "Geographic reach",
+          "val": 43,
+          "weight": 0.12,
+          "readout": "1 airports",
+          "why": "Affects AMS."
+        },
+        {
+          "label": "Expected duration",
+          "val": 38,
+          "weight": 0.12,
+          "readout": "1d",
+          "why": "Estimated from forecast window and recovery time."
+        },
+        {
+          "label": "Time to impact",
+          "val": 76,
+          "weight": 0.14,
+          "readout": "1d",
+          "why": "First operational effect expected within the stated window."
+        },
+        {
+          "label": "Escalation rate",
+          "val": 45,
+          "weight": 0.1,
+          "readout": "Stable",
+          "why": "Trajectory assessed from recent score movement."
+        },
+        {
+          "label": "Source credibility",
+          "val": 82,
+          "weight": 0.1,
+          "readout": "Tier 1-2",
+          "why": "Official notices and meteorological services."
+        },
+        {
+          "label": "Prediction confidence",
+          "val": 52,
+          "weight": 0.06,
+          "readout": "Moderate",
+          "why": "Based on source agreement and forecast spread."
+        }
+      ],
+      "domains": [
+        {
+          "name": "Airport operations",
+          "v": 48
+        },
+        {
+          "name": "Flight schedule",
+          "v": 40
+        },
+        {
+          "name": "Aircraft rotations",
+          "v": 32
+        },
+        {
+          "name": "Passengers",
+          "v": 24
+        },
+        {
+          "name": "Crew",
+          "v": 16
+        },
+        {
+          "name": "Cargo",
+          "v": 10
+        },
+        {
+          "name": "Maintenance",
+          "v": 10
+        },
+        {
+          "name": "Regulatory",
+          "v": 10
+        },
+        {
+          "name": "Catering",
+          "v": 10
+        }
+      ],
+      "chain": [
+        {
+          "ord": "First order",
+          "title": "Direct operational impact",
+          "detail": "AMS runway 18R/36L closed for scheduled maintenance through the week. Reduced arrival capacity during peak hours; slot adjustments required for EuroVista's 4 daily AMS rotations.",
+          "lik": "48%",
+          "lead": "At onset"
+        },
+        {
+          "ord": "Second order",
+          "title": "Delay accumulation and rotation displacement",
+          "detail": "Reduced capacity leads to delay propagation through connected banks and rotations.",
+          "lik": "33%",
+          "lead": "2-6h"
+        },
+        {
+          "ord": "Third order",
+          "title": "Crew duty and passenger misconnection load",
+          "detail": "Extended duty days and misconnect populations concentrate on subsequent banks.",
+          "lik": "20%",
+          "lead": "6-24h"
+        }
+      ],
+      "evidence": [
+        {
+          "time": "11 FEB 06:00Z",
+          "source": "Intelligence desk",
+          "cred": "Tier 1",
+          "role": "Origin",
+          "text": "AMS runway 18R/36L closed for scheduled maintenance through the week. Reduced arrival capacity during peak hours; slot adjustments required for EuroVista's 4 daily AMS rotations."
+        },
+        {
+          "time": "11 FEB 09:00Z",
+          "source": "OCC monitoring",
+          "cred": "Tier 2",
+          "role": "Corroborates",
+          "text": "Operational impact confirmed through airline exposure assessment."
+        }
+      ],
+      "assumptions": [
+        "Event develops as forecast without significant deviation.",
+        "Standard operating procedures apply without additional local restrictions."
+      ],
+      "gaps": [
+        "Exact timing and intensity may vary from forecast.",
+        "Recovery timeline depends on local conditions."
+      ],
+      "sopKey": "runway"
+    },
+    {
+      "id": "bommonsoon",
+      "ref": "DM-2026-0422",
+      "name": "Mumbai Monsoon Thunderstorms",
+      "cat": "Weather",
+      "where": "Mumbai (BOM)",
+      "detected": "11 FEB 06:00Z",
+      "score": 79,
+      "conf": 3,
+      "traj": "Escalating",
+      "tti": "3h",
+      "esc": 3,
+      "ttiMin": 180,
+      "summary": "Severe monsoon thunderstorms forecast over BOM through the afternoon. Heavy rain, low-level wind shear, and temporary runway closures possible. Departure bank delays of 45–90 minutes expected.",
+      "factors": [
+        {
+          "label": "Probability of occurrence",
+          "val": 84,
+          "weight": 0.18,
+          "readout": "84/100",
+          "why": "Assessed from source corroboration and forecast confidence."
+        },
+        {
+          "label": "Severity if realised",
+          "val": 79,
+          "weight": 0.18,
+          "readout": "79/100",
+          "why": "Based on historical impact of comparable events."
+        },
+        {
+          "label": "Geographic reach",
+          "val": 74,
+          "weight": 0.12,
+          "readout": "1 airports",
+          "why": "Affects BOM."
+        },
+        {
+          "label": "Expected duration",
+          "val": 69,
+          "weight": 0.12,
+          "readout": "3h",
+          "why": "Estimated from forecast window and recovery time."
+        },
+        {
+          "label": "Time to impact",
+          "val": 97,
+          "weight": 0.14,
+          "readout": "3h",
+          "why": "First operational effect expected within the stated window."
+        },
+        {
+          "label": "Escalation rate",
+          "val": 75,
+          "weight": 0.1,
+          "readout": "Escalating",
+          "why": "Trajectory assessed from recent score movement."
+        },
+        {
+          "label": "Source credibility",
+          "val": 82,
+          "weight": 0.1,
+          "readout": "Tier 1-2",
+          "why": "Official notices and meteorological services."
+        },
+        {
+          "label": "Prediction confidence",
+          "val": 78,
+          "weight": 0.06,
+          "readout": "High",
+          "why": "Based on source agreement and forecast spread."
+        }
+      ],
+      "domains": [
+        {
+          "name": "Airport operations",
+          "v": 79
+        },
+        {
+          "name": "Flight schedule",
+          "v": 71
+        },
+        {
+          "name": "Aircraft rotations",
+          "v": 63
+        },
+        {
+          "name": "Passengers",
+          "v": 55
+        },
+        {
+          "name": "Crew",
+          "v": 47
+        },
+        {
+          "name": "Cargo",
+          "v": 39
+        },
+        {
+          "name": "Catering",
+          "v": 31
+        },
+        {
+          "name": "Maintenance",
+          "v": 23
+        },
+        {
+          "name": "Regulatory",
+          "v": 15
+        }
+      ],
+      "chain": [
+        {
+          "ord": "First order",
+          "title": "Direct operational impact",
+          "detail": "Severe monsoon thunderstorms forecast over BOM through the afternoon. Heavy rain, low-level wind shear, and temporary runway closures possible. Departure bank delays of 45–90 minutes expected.",
+          "lik": "79%",
+          "lead": "At onset"
+        },
+        {
+          "ord": "Second order",
+          "title": "Delay accumulation and rotation displacement",
+          "detail": "Reduced capacity leads to delay propagation through connected banks and rotations.",
+          "lik": "64%",
+          "lead": "2-6h"
+        },
+        {
+          "ord": "Third order",
+          "title": "Crew duty and passenger misconnection load",
+          "detail": "Extended duty days and misconnect populations concentrate on subsequent banks.",
+          "lik": "49%",
+          "lead": "6-24h"
+        }
+      ],
+      "evidence": [
+        {
+          "time": "11 FEB 06:00Z",
+          "source": "Intelligence desk",
+          "cred": "Tier 1",
+          "role": "Origin",
+          "text": "Severe monsoon thunderstorms forecast over BOM through the afternoon. Heavy rain, low-level wind shear, and temporary runway closures possible. Departure bank delays of 45–90 minutes expected."
+        },
+        {
+          "time": "11 FEB 09:00Z",
+          "source": "OCC monitoring",
+          "cred": "Tier 2",
+          "role": "Corroborates",
+          "text": "Operational impact confirmed through airline exposure assessment."
+        }
+      ],
+      "assumptions": [
+        "Event develops as forecast without significant deviation.",
+        "Standard operating procedures apply without additional local restrictions."
+      ],
+      "gaps": [
+        "Exact timing and intensity may vary from forecast.",
+        "Recovery timeline depends on local conditions."
+      ],
+      "sopKey": "storm"
+    },
+    {
+      "id": "blrstorms",
+      "ref": "DM-2026-0423",
+      "name": "Bengaluru Thunderstorm Activity",
+      "cat": "Weather",
+      "where": "Bengaluru (BLR)",
+      "detected": "11 FEB 06:00Z",
+      "score": 66,
+      "conf": 3,
+      "traj": "Stable",
+      "tti": "5h",
+      "esc": 3,
+      "ttiMin": 300,
+      "summary": "Convective activity forecast over BLR through late afternoon. Arrival rate reductions and go-around risk for inbound flights during the peak arrival window.",
+      "factors": [
+        {
+          "label": "Probability of occurrence",
+          "val": 71,
+          "weight": 0.18,
+          "readout": "71/100",
+          "why": "Assessed from source corroboration and forecast confidence."
+        },
+        {
+          "label": "Severity if realised",
+          "val": 66,
+          "weight": 0.18,
+          "readout": "66/100",
+          "why": "Based on historical impact of comparable events."
+        },
+        {
+          "label": "Geographic reach",
+          "val": 61,
+          "weight": 0.12,
+          "readout": "1 airports",
+          "why": "Affects BLR."
+        },
+        {
+          "label": "Expected duration",
+          "val": 56,
+          "weight": 0.12,
+          "readout": "5h",
+          "why": "Estimated from forecast window and recovery time."
+        },
+        {
+          "label": "Time to impact",
+          "val": 95,
+          "weight": 0.14,
+          "readout": "5h",
+          "why": "First operational effect expected within the stated window."
+        },
+        {
+          "label": "Escalation rate",
+          "val": 45,
+          "weight": 0.1,
+          "readout": "Stable",
+          "why": "Trajectory assessed from recent score movement."
+        },
+        {
+          "label": "Source credibility",
+          "val": 82,
+          "weight": 0.1,
+          "readout": "Tier 1-2",
+          "why": "Official notices and meteorological services."
+        },
+        {
+          "label": "Prediction confidence",
+          "val": 78,
+          "weight": 0.06,
+          "readout": "High",
+          "why": "Based on source agreement and forecast spread."
+        }
+      ],
+      "domains": [
+        {
+          "name": "Airport operations",
+          "v": 66
+        },
+        {
+          "name": "Flight schedule",
+          "v": 58
+        },
+        {
+          "name": "Aircraft rotations",
+          "v": 50
+        },
+        {
+          "name": "Passengers",
+          "v": 42
+        },
+        {
+          "name": "Crew",
+          "v": 34
+        },
+        {
+          "name": "Cargo",
+          "v": 26
+        },
+        {
+          "name": "Catering",
+          "v": 18
+        },
+        {
+          "name": "Maintenance",
+          "v": 10
+        },
+        {
+          "name": "Regulatory",
+          "v": 10
+        }
+      ],
+      "chain": [
+        {
+          "ord": "First order",
+          "title": "Direct operational impact",
+          "detail": "Convective activity forecast over BLR through late afternoon. Arrival rate reductions and go-around risk for inbound flights during the peak arrival window.",
+          "lik": "66%",
+          "lead": "At onset"
+        },
+        {
+          "ord": "Second order",
+          "title": "Delay accumulation and rotation displacement",
+          "detail": "Reduced capacity leads to delay propagation through connected banks and rotations.",
+          "lik": "51%",
+          "lead": "2-6h"
+        },
+        {
+          "ord": "Third order",
+          "title": "Crew duty and passenger misconnection load",
+          "detail": "Extended duty days and misconnect populations concentrate on subsequent banks.",
+          "lik": "36%",
+          "lead": "6-24h"
+        }
+      ],
+      "evidence": [
+        {
+          "time": "11 FEB 06:00Z",
+          "source": "Intelligence desk",
+          "cred": "Tier 1",
+          "role": "Origin",
+          "text": "Convective activity forecast over BLR through late afternoon. Arrival rate reductions and go-around risk for inbound flights during the peak arrival window."
+        },
+        {
+          "time": "11 FEB 09:00Z",
+          "source": "OCC monitoring",
+          "cred": "Tier 2",
+          "role": "Corroborates",
+          "text": "Operational impact confirmed through airline exposure assessment."
+        }
+      ],
+      "assumptions": [
+        "Event develops as forecast without significant deviation.",
+        "Standard operating procedures apply without additional local restrictions."
+      ],
+      "gaps": [
+        "Exact timing and intensity may vary from forecast.",
+        "Recovery timeline depends on local conditions."
+      ],
+      "sopKey": "storm"
+    },
+    {
+      "id": "dxbacongest",
+      "ref": "DM-2026-0424",
+      "name": "Dubai Airspace Congestion — Peak Hour",
+      "cat": "ATC / Airspace",
+      "where": "Dubai (DXB)",
+      "detected": "11 FEB 06:00Z",
+      "score": 61,
+      "conf": 2,
+      "traj": "Stable",
+      "tti": "8h",
+      "esc": 2,
+      "ttiMin": 480,
+      "summary": "DXB approach congestion during evening peak. Flow control likely on IndiConnect's 3 daily DXB rotations — delays of 20–40 minutes expected.",
+      "factors": [
+        {
+          "label": "Probability of occurrence",
+          "val": 66,
+          "weight": 0.18,
+          "readout": "66/100",
+          "why": "Assessed from source corroboration and forecast confidence."
+        },
+        {
+          "label": "Severity if realised",
+          "val": 61,
+          "weight": 0.18,
+          "readout": "61/100",
+          "why": "Based on historical impact of comparable events."
+        },
+        {
+          "label": "Geographic reach",
+          "val": 56,
+          "weight": 0.12,
+          "readout": "1 airports",
+          "why": "Affects DXB."
+        },
+        {
+          "label": "Expected duration",
+          "val": 51,
+          "weight": 0.12,
+          "readout": "8h",
+          "why": "Estimated from forecast window and recovery time."
+        },
+        {
+          "label": "Time to impact",
+          "val": 92,
+          "weight": 0.14,
+          "readout": "8h",
+          "why": "First operational effect expected within the stated window."
+        },
+        {
+          "label": "Escalation rate",
+          "val": 45,
+          "weight": 0.1,
+          "readout": "Stable",
+          "why": "Trajectory assessed from recent score movement."
+        },
+        {
+          "label": "Source credibility",
+          "val": 82,
+          "weight": 0.1,
+          "readout": "Tier 1-2",
+          "why": "Official notices and meteorological services."
+        },
+        {
+          "label": "Prediction confidence",
+          "val": 52,
+          "weight": 0.06,
+          "readout": "Moderate",
+          "why": "Based on source agreement and forecast spread."
+        }
+      ],
+      "domains": [
+        {
+          "name": "Flight schedule",
+          "v": 61
+        },
+        {
+          "name": "Aircraft rotations",
+          "v": 53
+        },
+        {
+          "name": "Crew",
+          "v": 45
+        },
+        {
+          "name": "Airport operations",
+          "v": 37
+        },
+        {
+          "name": "Passengers",
+          "v": 29
+        },
+        {
+          "name": "Cargo",
+          "v": 21
+        },
+        {
+          "name": "Regulatory",
+          "v": 13
+        },
+        {
+          "name": "Catering",
+          "v": 10
+        },
+        {
+          "name": "Maintenance",
+          "v": 10
+        }
+      ],
+      "chain": [
+        {
+          "ord": "First order",
+          "title": "Direct operational impact",
+          "detail": "DXB approach congestion during evening peak. Flow control likely on IndiConnect's 3 daily DXB rotations — delays of 20–40 minutes expected.",
+          "lik": "61%",
+          "lead": "At onset"
+        },
+        {
+          "ord": "Second order",
+          "title": "Delay accumulation and rotation displacement",
+          "detail": "Reduced capacity leads to delay propagation through connected banks and rotations.",
+          "lik": "46%",
+          "lead": "2-6h"
+        },
+        {
+          "ord": "Third order",
+          "title": "Crew duty and passenger misconnection load",
+          "detail": "Extended duty days and misconnect populations concentrate on subsequent banks.",
+          "lik": "31%",
+          "lead": "6-24h"
+        }
+      ],
+      "evidence": [
+        {
+          "time": "11 FEB 06:00Z",
+          "source": "Intelligence desk",
+          "cred": "Tier 1",
+          "role": "Origin",
+          "text": "DXB approach congestion during evening peak. Flow control likely on IndiConnect's 3 daily DXB rotations — delays of 20–40 minutes expected."
+        },
+        {
+          "time": "11 FEB 09:00Z",
+          "source": "OCC monitoring",
+          "cred": "Tier 2",
+          "role": "Corroborates",
+          "text": "Operational impact confirmed through airline exposure assessment."
+        }
+      ],
+      "assumptions": [
+        "Event develops as forecast without significant deviation.",
+        "Standard operating procedures apply without additional local restrictions."
+      ],
+      "gaps": [
+        "Exact timing and intensity may vary from forecast.",
+        "Recovery timeline depends on local conditions."
+      ],
+      "sopKey": "atc"
+    },
+    {
+      "id": "delatc",
+      "ref": "DM-2026-0425",
+      "name": "Delhi ATC Sector Capacity Reduction",
+      "cat": "ATC / Airspace",
+      "where": "Delhi FIR (VIDP)",
+      "detected": "11 FEB 06:00Z",
+      "score": 57,
+      "conf": 2,
+      "traj": "Stable",
+      "tti": "4h",
+      "esc": 2,
+      "ttiMin": 240,
+      "summary": "Reduced sector capacity in Delhi FIR following an equipment fault. Flow control affects northbound departures from BOM and BLR.",
+      "factors": [
+        {
+          "label": "Probability of occurrence",
+          "val": 62,
+          "weight": 0.18,
+          "readout": "62/100",
+          "why": "Assessed from source corroboration and forecast confidence."
+        },
+        {
+          "label": "Severity if realised",
+          "val": 57,
+          "weight": 0.18,
+          "readout": "57/100",
+          "why": "Based on historical impact of comparable events."
+        },
+        {
+          "label": "Geographic reach",
+          "val": 52,
+          "weight": 0.12,
+          "readout": "2 airports",
+          "why": "Affects DEL, BOM."
+        },
+        {
+          "label": "Expected duration",
+          "val": 47,
+          "weight": 0.12,
+          "readout": "4h",
+          "why": "Estimated from forecast window and recovery time."
+        },
+        {
+          "label": "Time to impact",
+          "val": 96,
+          "weight": 0.14,
+          "readout": "4h",
+          "why": "First operational effect expected within the stated window."
+        },
+        {
+          "label": "Escalation rate",
+          "val": 45,
+          "weight": 0.1,
+          "readout": "Stable",
+          "why": "Trajectory assessed from recent score movement."
+        },
+        {
+          "label": "Source credibility",
+          "val": 82,
+          "weight": 0.1,
+          "readout": "Tier 1-2",
+          "why": "Official notices and meteorological services."
+        },
+        {
+          "label": "Prediction confidence",
+          "val": 52,
+          "weight": 0.06,
+          "readout": "Moderate",
+          "why": "Based on source agreement and forecast spread."
+        }
+      ],
+      "domains": [
+        {
+          "name": "Flight schedule",
+          "v": 57
+        },
+        {
+          "name": "Aircraft rotations",
+          "v": 49
+        },
+        {
+          "name": "Crew",
+          "v": 41
+        },
+        {
+          "name": "Airport operations",
+          "v": 33
+        },
+        {
+          "name": "Passengers",
+          "v": 25
+        },
+        {
+          "name": "Cargo",
+          "v": 17
+        },
+        {
+          "name": "Regulatory",
+          "v": 10
+        },
+        {
+          "name": "Catering",
+          "v": 10
+        },
+        {
+          "name": "Maintenance",
+          "v": 10
+        }
+      ],
+      "chain": [
+        {
+          "ord": "First order",
+          "title": "Direct operational impact",
+          "detail": "Reduced sector capacity in Delhi FIR following an equipment fault. Flow control affects northbound departures from BOM and BLR.",
+          "lik": "57%",
+          "lead": "At onset"
+        },
+        {
+          "ord": "Second order",
+          "title": "Delay accumulation and rotation displacement",
+          "detail": "Reduced capacity leads to delay propagation through connected banks and rotations.",
+          "lik": "42%",
+          "lead": "2-6h"
+        },
+        {
+          "ord": "Third order",
+          "title": "Crew duty and passenger misconnection load",
+          "detail": "Extended duty days and misconnect populations concentrate on subsequent banks.",
+          "lik": "27%",
+          "lead": "6-24h"
+        }
+      ],
+      "evidence": [
+        {
+          "time": "11 FEB 06:00Z",
+          "source": "Intelligence desk",
+          "cred": "Tier 1",
+          "role": "Origin",
+          "text": "Reduced sector capacity in Delhi FIR following an equipment fault. Flow control affects northbound departures from BOM and BLR."
+        },
+        {
+          "time": "11 FEB 09:00Z",
+          "source": "OCC monitoring",
+          "cred": "Tier 2",
+          "role": "Corroborates",
+          "text": "Operational impact confirmed through airline exposure assessment."
+        }
+      ],
+      "assumptions": [
+        "Event develops as forecast without significant deviation.",
+        "Standard operating procedures apply without additional local restrictions."
+      ],
+      "gaps": [
+        "Exact timing and intensity may vary from forecast.",
+        "Recovery timeline depends on local conditions."
+      ],
+      "sopKey": "atc"
+    },
+    {
+      "id": "cokmonsoon",
+      "ref": "DM-2026-0426",
+      "name": "Kochi Monsoon Flooding — Airport Access",
+      "cat": "Weather",
+      "where": "Kochi (COK)",
+      "detected": "11 FEB 06:00Z",
+      "score": 49,
+      "conf": 2,
+      "traj": "Improving",
+      "tti": "12h",
+      "esc": 2,
+      "ttiMin": 720,
+      "summary": "Localised flooding on access roads to COK. Ground transport delays for crew and passengers. No runway impact but check-in closures possible if flooding worsens.",
+      "factors": [
+        {
+          "label": "Probability of occurrence",
+          "val": 54,
+          "weight": 0.18,
+          "readout": "54/100",
+          "why": "Assessed from source corroboration and forecast confidence."
+        },
+        {
+          "label": "Severity if realised",
+          "val": 49,
+          "weight": 0.18,
+          "readout": "49/100",
+          "why": "Based on historical impact of comparable events."
+        },
+        {
+          "label": "Geographic reach",
+          "val": 44,
+          "weight": 0.12,
+          "readout": "1 airports",
+          "why": "Affects COK."
+        },
+        {
+          "label": "Expected duration",
+          "val": 39,
+          "weight": 0.12,
+          "readout": "12h",
+          "why": "Estimated from forecast window and recovery time."
+        },
+        {
+          "label": "Time to impact",
+          "val": 88,
+          "weight": 0.14,
+          "readout": "12h",
+          "why": "First operational effect expected within the stated window."
+        },
+        {
+          "label": "Escalation rate",
+          "val": 25,
+          "weight": 0.1,
+          "readout": "Improving",
+          "why": "Trajectory assessed from recent score movement."
+        },
+        {
+          "label": "Source credibility",
+          "val": 82,
+          "weight": 0.1,
+          "readout": "Tier 1-2",
+          "why": "Official notices and meteorological services."
+        },
+        {
+          "label": "Prediction confidence",
+          "val": 52,
+          "weight": 0.06,
+          "readout": "Moderate",
+          "why": "Based on source agreement and forecast spread."
+        }
+      ],
+      "domains": [
+        {
+          "name": "Airport operations",
+          "v": 49
+        },
+        {
+          "name": "Flight schedule",
+          "v": 41
+        },
+        {
+          "name": "Aircraft rotations",
+          "v": 33
+        },
+        {
+          "name": "Passengers",
+          "v": 25
+        },
+        {
+          "name": "Crew",
+          "v": 17
+        },
+        {
+          "name": "Cargo",
+          "v": 10
+        },
+        {
+          "name": "Catering",
+          "v": 10
+        },
+        {
+          "name": "Maintenance",
+          "v": 10
+        },
+        {
+          "name": "Regulatory",
+          "v": 10
+        }
+      ],
+      "chain": [
+        {
+          "ord": "First order",
+          "title": "Direct operational impact",
+          "detail": "Localised flooding on access roads to COK. Ground transport delays for crew and passengers. No runway impact but check-in closures possible if flooding worsens.",
+          "lik": "49%",
+          "lead": "At onset"
+        },
+        {
+          "ord": "Second order",
+          "title": "Delay accumulation and rotation displacement",
+          "detail": "Reduced capacity leads to delay propagation through connected banks and rotations.",
+          "lik": "34%",
+          "lead": "2-6h"
+        },
+        {
+          "ord": "Third order",
+          "title": "Crew duty and passenger misconnection load",
+          "detail": "Extended duty days and misconnect populations concentrate on subsequent banks.",
+          "lik": "20%",
+          "lead": "6-24h"
+        }
+      ],
+      "evidence": [
+        {
+          "time": "11 FEB 06:00Z",
+          "source": "Intelligence desk",
+          "cred": "Tier 1",
+          "role": "Origin",
+          "text": "Localised flooding on access roads to COK. Ground transport delays for crew and passengers. No runway impact but check-in closures possible if flooding worsens."
+        },
+        {
+          "time": "11 FEB 09:00Z",
+          "source": "OCC monitoring",
+          "cred": "Tier 2",
+          "role": "Corroborates",
+          "text": "Operational impact confirmed through airline exposure assessment."
+        }
+      ],
+      "assumptions": [
+        "Event develops as forecast without significant deviation.",
+        "Standard operating procedures apply without additional local restrictions."
+      ],
+      "gaps": [
+        "Exact timing and intensity may vary from forecast.",
+        "Recovery timeline depends on local conditions."
+      ],
+      "sopKey": "storm"
+    }
+  ],
+  "ESC": [
+    {
+      "code": "LEVEL 1",
+      "badge": "Watch",
+      "title": "Desk-level watch",
+      "desc": "Monitored on the OCC board. No action beyond continued observation and evidence accumulation.",
+      "trigger": "EDPS below 45, any confidence"
+    },
+    {
+      "code": "LEVEL 2",
+      "badge": "Assess",
+      "title": "Duty manager assessment",
+      "desc": "Duty manager reviews exposure and knock-on pathways, then sets a review interval.",
+      "trigger": "EDPS 45–64, or 65+ at low confidence"
+    },
+    {
+      "code": "LEVEL 3",
+      "badge": "Engage",
+      "title": "VP engagement",
+      "desc": "VP Network Control Centre briefed on scale, duration, exposure and time available.",
+      "trigger": "EDPS 65–79 at moderate confidence or above"
+    },
+    {
+      "code": "LEVEL 4",
+      "badge": "Decide",
+      "title": "VP decision · response cell",
+      "desc": "VP chairs the response cell and approves pre-tactical measures. All decisions remain with the airline.",
+      "trigger": "EDPS 80+ at high confidence, or hub threatened"
+    }
+  ],
+  "PHASES": [
+    {
+      "num": "01",
+      "title": "Detect & verify",
+      "owner": "Intelligence desk",
+      "window": "T−72h to T−24h",
+      "steps": [
+        "Confirm event correlated across two or more tier-1 sources",
+        "Resolve flagged contradictions in the evidence trail",
+        "Record stated assumptions and information gaps",
+        "Set monitoring interval"
+      ]
+    },
+    {
+      "num": "02",
+      "title": "Assess exposure",
+      "owner": "OCC duty manager",
+      "window": "T−48h to T−12h",
+      "steps": [
+        "Review the domain implication profile",
+        "Walk the knock-on pathway with each desk",
+        "Identify hub and wave exposure windows",
+        "Log residual uncertainty"
+      ]
+    },
+    {
+      "num": "03",
+      "title": "Escalation decision",
+      "owner": "Duty manager → VP",
+      "window": "At threshold crossing",
+      "steps": [
+        "Compare score and confidence to the threshold table",
+        "Brief VP on scale, duration, exposure, time available",
+        "Record the decision and its timestamp",
+        "Agree the next review point"
+      ]
+    },
+    {
+      "num": "04",
+      "title": "Pre-tactical actions",
+      "owner": "VP NCC (approval)",
+      "window": "T−24h to T−4h",
+      "steps": [
+        "Approve the schedule thinning envelope",
+        "Approve the pre-cancellation window",
+        "Authorise resource pre-positioning",
+        "Hand parameters to the airline disruption solver"
+      ]
+    },
+    {
+      "num": "05",
+      "title": "Activate & communicate",
+      "owner": "Response cell",
+      "window": "T−4h to T+end",
+      "steps": [
+        "Stand up the response cell and briefing cadence",
+        "Issue internal and station briefings",
+        "Align customer communication timing",
+        "Track deviation from the expected profile"
+      ]
+    },
+    {
+      "num": "06",
+      "title": "Recover & review",
+      "owner": "VP NCC · Intelligence",
+      "window": "T+end to T+7d",
+      "steps": [
+        "Close out the event and stand down the cell",
+        "Reconstruct the intelligence versus action timeline",
+        "Test whether thresholds were set correctly",
+        "Update playbook content"
+      ]
+    }
+  ],
+  "SOPS": {
+    "storm": {
+      "title": "SOP — Winter storm / severe wind",
+      "meta": "Airline-configured playbook · 4 gates · 12 actions · owner: OCC standards",
+      "gates": [
+        {
+          "name": "Watch",
+          "window": "T−72h to T−36h",
+          "state": "Closed"
+        },
+        {
+          "name": "Prepare",
+          "window": "T−36h to T−18h",
+          "state": "Active"
+        },
+        {
+          "name": "Storm window",
+          "window": "T−18h to T+16h",
+          "state": "Pending"
+        },
+        {
+          "name": "Restore",
+          "window": "T+16h to T+48h",
+          "state": "Pending"
+        }
+      ],
+      "actions": [
+        {
+          "gate": "Watch",
+          "timing": "T−72h",
+          "text": "Confirm forecast agreement across national met services and record ensemble spread.",
+          "desk": "Intelligence",
+          "type": "Standing"
+        },
+        {
+          "gate": "Watch",
+          "timing": "T−48h",
+          "text": "Identify hubs and waves inside the forecast wind field.",
+          "desk": "Network control",
+          "type": "Standing"
+        },
+        {
+          "gate": "Prepare",
+          "timing": "T−36h",
+          "text": "Request de-icing and wind-plan capacity statements from affected airports.",
+          "desk": "Station ops",
+          "type": "Standing"
+        },
+        {
+          "gate": "Prepare",
+          "timing": "T−30h",
+          "text": "Review alternate airports for exposure to the same wind field.",
+          "desk": "Flight ops",
+          "type": "Standing"
+        },
+        {
+          "gate": "Prepare",
+          "timing": "T−24h",
+          "text": "Brief VP NCC if EDPS remains at or above 80 with high confidence.",
+          "desk": "Duty manager",
+          "type": "Conditional"
+        },
+        {
+          "gate": "Prepare",
+          "timing": "T−18h",
+          "text": "If the gust forecast exceeds crosswind limits, prepare schedule thinning options for approval.",
+          "desk": "Network control",
+          "type": "Conditional"
+        },
+        {
+          "gate": "Storm window",
+          "timing": "T−6h",
+          "text": "Confirm pre-cancellation decisions are published to stations and customer channels.",
+          "desk": "Response cell",
+          "type": "Gate"
+        },
+        {
+          "gate": "Storm window",
+          "timing": "T−2h",
+          "text": "Move to declared disruption cadence with fixed briefing intervals.",
+          "desk": "Response cell",
+          "type": "Gate"
+        },
+        {
+          "gate": "Storm window",
+          "timing": "T+0h",
+          "text": "Track actual acceptance rates against the forecast reduction and report deviation.",
+          "desk": "Network control",
+          "type": "Standing"
+        },
+        {
+          "gate": "Storm window",
+          "timing": "T+8h",
+          "text": "If diversion count exceeds the agreed threshold, open the recovery aircraft review.",
+          "desk": "Duty manager",
+          "type": "Conditional"
+        },
+        {
+          "gate": "Restore",
+          "timing": "T+16h",
+          "text": "Assess overnight positioning and morning wave readiness.",
+          "desk": "Network control",
+          "type": "Standing"
+        },
+        {
+          "gate": "Restore",
+          "timing": "T+48h",
+          "text": "Complete the post-event review including the intelligence-versus-action timeline.",
+          "desk": "Intelligence",
+          "type": "Gate"
+        }
+      ]
+    },
+    "atc": {
+      "title": "SOP — ATC industrial action",
+      "meta": "Airline-configured playbook · 4 gates · 10 actions · owner: OCC standards",
+      "gates": [
+        {
+          "name": "Notice",
+          "window": "Filing to T−96h",
+          "state": "Closed"
+        },
+        {
+          "name": "Prepare",
+          "window": "T−96h to T−48h",
+          "state": "Active"
+        },
+        {
+          "name": "Commit",
+          "window": "T−48h to T−12h",
+          "state": "Pending"
+        },
+        {
+          "name": "Strike window",
+          "window": "T−0h to T+48h",
+          "state": "Pending"
+        }
+      ],
+      "actions": [
+        {
+          "gate": "Notice",
+          "timing": "At filing",
+          "text": "Record notice scope, unions involved and the declared window.",
+          "desk": "Intelligence",
+          "type": "Standing"
+        },
+        {
+          "gate": "Notice",
+          "timing": "T−120h",
+          "text": "Retrieve capacity reduction outcomes from comparable previous notices.",
+          "desk": "Intelligence",
+          "type": "Standing"
+        },
+        {
+          "gate": "Prepare",
+          "timing": "T−96h",
+          "text": "If the third union ballot passes, re-score the event and re-brief.",
+          "desk": "Intelligence",
+          "type": "Conditional"
+        },
+        {
+          "gate": "Prepare",
+          "timing": "T−72h",
+          "text": "Map exposed overflight corridors and identify reroute options.",
+          "desk": "Flight ops",
+          "type": "Standing"
+        },
+        {
+          "gate": "Prepare",
+          "timing": "T−60h",
+          "text": "Brief VP NCC on the projected reduction range and cost envelope.",
+          "desk": "Duty manager",
+          "type": "Gate"
+        },
+        {
+          "gate": "Commit",
+          "timing": "T−48h",
+          "text": "Await the DGAC reduction requirement; if unpublished by T−36h, plan against the historical range.",
+          "desk": "Network control",
+          "type": "Conditional"
+        },
+        {
+          "gate": "Commit",
+          "timing": "T−36h",
+          "text": "Submit the pre-cancellation list to the airline disruption solver for construction.",
+          "desk": "Network control",
+          "type": "Gate"
+        },
+        {
+          "gate": "Commit",
+          "timing": "T−24h",
+          "text": "Confirm crew and passenger communication timing.",
+          "desk": "Response cell",
+          "type": "Standing"
+        },
+        {
+          "gate": "Strike window",
+          "timing": "T−0h",
+          "text": "Monitor actual slot issue rates against the planned reduction.",
+          "desk": "Network control",
+          "type": "Standing"
+        },
+        {
+          "gate": "Strike window",
+          "timing": "T+48h",
+          "text": "Close out and record when the reduction requirement became known.",
+          "desk": "Intelligence",
+          "type": "Gate"
+        }
+      ]
+    },
+    "airspace": {
+      "title": "SOP — Airspace restriction",
+      "meta": "Airline-configured playbook · 3 gates · 8 actions · owner: Flight ops standards",
+      "gates": [
+        {
+          "name": "Publication",
+          "window": "At NOTAM issue",
+          "state": "Closed"
+        },
+        {
+          "name": "Assess",
+          "window": "Issue to activation",
+          "state": "Active"
+        },
+        {
+          "name": "Active period",
+          "window": "Activation onward",
+          "state": "Pending"
+        }
+      ],
+      "actions": [
+        {
+          "gate": "Publication",
+          "timing": "At issue",
+          "text": "Record boundaries, altitude bands and stated duration.",
+          "desk": "Intelligence",
+          "type": "Standing"
+        },
+        {
+          "gate": "Publication",
+          "timing": "T−12h",
+          "text": "Cross-check against adjacent state publications for conflicting extents.",
+          "desk": "Intelligence",
+          "type": "Standing"
+        },
+        {
+          "gate": "Assess",
+          "timing": "T−10h",
+          "text": "Identify affected flows and corridor capacity after displacement.",
+          "desk": "Flight ops",
+          "type": "Standing"
+        },
+        {
+          "gate": "Assess",
+          "timing": "T−8h",
+          "text": "If reroutes cross states requiring permits, open the permit review.",
+          "desk": "Regulatory",
+          "type": "Conditional"
+        },
+        {
+          "gate": "Assess",
+          "timing": "T−6h",
+          "text": "Review the security risk assessment for alternate routings.",
+          "desk": "Safety & security",
+          "type": "Gate"
+        },
+        {
+          "gate": "Assess",
+          "timing": "T−4h",
+          "text": "Brief the duty manager on fuel and payload consequences.",
+          "desk": "Flight ops",
+          "type": "Standing"
+        },
+        {
+          "gate": "Active period",
+          "timing": "T+0h",
+          "text": "Monitor for extension or altitude release amendments.",
+          "desk": "Intelligence",
+          "type": "Standing"
+        },
+        {
+          "gate": "Active period",
+          "timing": "Daily",
+          "text": "Re-confirm the restriction remains as published while the duration is open-ended.",
+          "desk": "Intelligence",
+          "type": "Standing"
+        }
+      ]
+    },
+    "runway": {
+      "title": "SOP — Runway closure / works overrun",
+      "meta": "Airline-configured playbook · 3 gates · 7 actions · owner: Station ops standards",
+      "gates": [
+        {
+          "name": "Planned works",
+          "window": "Notice to T−7d",
+          "state": "Closed"
+        },
+        {
+          "name": "Slippage watch",
+          "window": "T−7d to planned end",
+          "state": "Active"
+        },
+        {
+          "name": "Extended period",
+          "window": "Beyond planned end",
+          "state": "Pending"
+        }
+      ],
+      "actions": [
+        {
+          "gate": "Planned works",
+          "timing": "At notice",
+          "text": "Record scope, published acceptance rates and the planned reopening date.",
+          "desk": "Intelligence",
+          "type": "Standing"
+        },
+        {
+          "gate": "Slippage watch",
+          "timing": "Weekly",
+          "text": "Track contractor milestone progress against plan.",
+          "desk": "Station ops",
+          "type": "Standing"
+        },
+        {
+          "gate": "Slippage watch",
+          "timing": "T−72h",
+          "text": "If completion slips, model reduced-capacity days beyond the planned end.",
+          "desk": "Network control",
+          "type": "Conditional"
+        },
+        {
+          "gate": "Slippage watch",
+          "timing": "T−48h",
+          "text": "Request a revised completion date in writing from the airport.",
+          "desk": "Station ops",
+          "type": "Gate"
+        },
+        {
+          "gate": "Slippage watch",
+          "timing": "T−24h",
+          "text": "Brief the duty manager on peak-hour exposure per affected day.",
+          "desk": "Network control",
+          "type": "Standing"
+        },
+        {
+          "gate": "Extended period",
+          "timing": "Daily",
+          "text": "Review slot compliance and reactionary delay carry-over.",
+          "desk": "Network control",
+          "type": "Standing"
+        },
+        {
+          "gate": "Extended period",
+          "timing": "At reopening",
+          "text": "Confirm the full acceptance rate is restored before releasing buffer.",
+          "desk": "Station ops",
+          "type": "Gate"
+        }
+      ]
+    },
+    "ground": {
+      "title": "SOP — Ground handler industrial action",
+      "meta": "Airline-configured playbook · 4 gates · 9 actions · owner: Station ops standards",
+      "gates": [
+        {
+          "name": "Ballot",
+          "window": "Ballot open to close",
+          "state": "Active"
+        },
+        {
+          "name": "Prepare",
+          "window": "Mandate to notice",
+          "state": "Pending"
+        },
+        {
+          "name": "Commit",
+          "window": "T−48h to T−0h",
+          "state": "Pending"
+        },
+        {
+          "name": "Action window",
+          "window": "T−0h onward",
+          "state": "Pending"
+        }
+      ],
+      "actions": [
+        {
+          "gate": "Ballot",
+          "timing": "At opening",
+          "text": "Record the bargaining unit, airports covered and ballot close date.",
+          "desk": "Intelligence",
+          "type": "Standing"
+        },
+        {
+          "gate": "Ballot",
+          "timing": "Ongoing",
+          "text": "Down-weight unsourced participation estimates in the evidence trail.",
+          "desk": "Intelligence",
+          "type": "Standing"
+        },
+        {
+          "gate": "Ballot",
+          "timing": "At close",
+          "text": "If the ballot passes, re-score the event and move to Prepare.",
+          "desk": "Intelligence",
+          "type": "Conditional"
+        },
+        {
+          "gate": "Prepare",
+          "timing": "At mandate",
+          "text": "Confirm alternative handling capacity and contractual coverage per station.",
+          "desk": "Station ops",
+          "type": "Standing"
+        },
+        {
+          "gate": "Prepare",
+          "timing": "T−96h",
+          "text": "Assess minimum service obligations where they apply.",
+          "desk": "Regulatory",
+          "type": "Conditional"
+        },
+        {
+          "gate": "Commit",
+          "timing": "T−48h",
+          "text": "Brief the duty manager on turnaround time assumptions per station.",
+          "desk": "Station ops",
+          "type": "Gate"
+        },
+        {
+          "gate": "Commit",
+          "timing": "T−24h",
+          "text": "Agree the baggage acceptance and customer communication position.",
+          "desk": "Response cell",
+          "type": "Standing"
+        },
+        {
+          "gate": "Action window",
+          "timing": "T−0h",
+          "text": "Track actual ground times against assumption and report deviation.",
+          "desk": "Station ops",
+          "type": "Standing"
+        },
+        {
+          "gate": "Action window",
+          "timing": "T+24h",
+          "text": "Monitor baggage backlog clearance rate.",
+          "desk": "Station ops",
+          "type": "Standing"
+        }
+      ]
+    },
+    "regulatory": {
+      "title": "SOP — Regulatory change / consultation",
+      "meta": "Airline-configured playbook · 3 gates · 6 actions · owner: Regulatory affairs",
+      "gates": [
+        {
+          "name": "Open",
+          "window": "Publication to close",
+          "state": "Active"
+        },
+        {
+          "name": "Decision",
+          "window": "Close to determination",
+          "state": "Pending"
+        },
+        {
+          "name": "Implementation",
+          "window": "Determination onward",
+          "state": "Pending"
+        }
+      ],
+      "actions": [
+        {
+          "gate": "Open",
+          "timing": "At publication",
+          "text": "Record scope, affected airports and the consultation timetable.",
+          "desk": "Regulatory",
+          "type": "Standing"
+        },
+        {
+          "gate": "Open",
+          "timing": "Monthly",
+          "text": "Track published submissions for indications of likely direction.",
+          "desk": "Regulatory",
+          "type": "Standing"
+        },
+        {
+          "gate": "Open",
+          "timing": "T−14d",
+          "text": "If draft figures are published, model the schedule construction impact.",
+          "desk": "Network planning",
+          "type": "Conditional"
+        },
+        {
+          "gate": "Decision",
+          "timing": "At close",
+          "text": "Submit the airline response and log the expected determination date.",
+          "desk": "Regulatory",
+          "type": "Gate"
+        },
+        {
+          "gate": "Decision",
+          "timing": "At determination",
+          "text": "Re-score the event against the final measure.",
+          "desk": "Intelligence",
+          "type": "Standing"
+        },
+        {
+          "gate": "Implementation",
+          "timing": "Season build",
+          "text": "Feed confirmed limits into the season timetable build.",
+          "desk": "Network planning",
+          "type": "Gate"
+        }
+      ]
+    }
+  },
+  "RETRO": {
+    "storm": {
+      "stats": [
+        {
+          "k": "FIRST SIGNAL",
+          "v": "11 FEB 04:12Z",
+          "note": "KNMI code orange"
+        },
+        {
+          "k": "FIRST ACTION",
+          "v": "11 FEB 16:05Z",
+          "note": "Duty manager assessment"
+        },
+        {
+          "k": "LEAD TIME LOST",
+          "v": "11h 53m",
+          "note": "First signal to first action"
+        }
+      ],
+      "rows": [
+        {
+          "time": "04:12Z",
+          "edps": 58,
+          "conf": "Mod",
+          "intelTitle": "Single-source wind warning detected",
+          "intelDetail": "KNMI code orange issued for the Dutch coast. Event created at Level 1 desk watch."
+        },
+        {
+          "time": "07:40Z",
+          "edps": 66,
+          "conf": "Mod",
+          "intelTitle": "Second tier-1 source corroborates",
+          "intelDetail": "DMI storm warning for the Danish west coast confirms track and timing."
+        },
+        {
+          "time": "09:05Z",
+          "edps": 71,
+          "conf": "Mod",
+          "intelTitle": "Storm named, third source agrees",
+          "intelDetail": "Met Office names Ingrid; amber warning covers eastern Scotland."
+        },
+        {
+          "time": "12:22Z",
+          "edps": 78,
+          "conf": "High",
+          "intelTitle": "Network capacity advisory published",
+          "intelDetail": "Eurocontrol flags probable reductions in EHAA and EKDK. Level 3 threshold crossed."
+        },
+        {
+          "time": "16:05Z",
+          "edps": 81,
+          "conf": "High",
+          "actionTitle": "Duty manager assessment opened",
+          "actionDetail": "Exposure review started 3h 43m after the Level 3 threshold was crossed.",
+          "actionRole": "OCC duty manager"
+        },
+        {
+          "time": "18:58Z",
+          "edps": 84,
+          "conf": "High",
+          "intelTitle": "Airport confirms wind-plan staffing",
+          "intelDetail": "AMS ops bulletin corroborates the operational read of the forecast."
+        },
+        {
+          "time": "21:30Z",
+          "edps": 87,
+          "conf": "High",
+          "actionTitle": "VP briefed · response cell stood up",
+          "actionDetail": "Briefing held 9h 08m after the Level 3 threshold and 17h 18m after first signal.",
+          "actionRole": "VP Network Control Centre"
+        },
+        {
+          "time": "02:10Z",
+          "edps": 87,
+          "conf": "High",
+          "actionTitle": "Pre-tactical thinning approved",
+          "actionDetail": "Schedule thinning envelope and pre-cancellation window approved for the evening wave.",
+          "actionRole": "VP Network Control Centre"
+        }
+      ]
+    }
+  },
+  "OPS": {
+    "monsoon": {
+      "basis": "Airline exposure data cross-referenced with published schedules.",
+      "airports": [
+        {
+          "iata": "BLR",
+          "name": "Bengaluru",
+          "role": "Affected",
+          "movements": 200,
+          "window": "10h",
+          "exposure": 84,
+          "note": "Deepening low-pressure system tracking toward the southeast coast. Heavy rain and low-level wind shear forecast over BLR and Chennai approach corridors through the evening bank."
+        },
+        {
+          "iata": "MAA",
+          "name": "Chennai",
+          "role": "Affected",
+          "movements": 200,
+          "window": "10h",
+          "exposure": 84,
+          "note": "Deepening low-pressure system tracking toward the southeast coast. Heavy rain and low-level wind shear forecast over BLR and Chennai approach corridors through the evening bank."
+        }
+      ],
+      "airlines": [
+        {
+          "name": "Namma Air",
+          "code": "N7",
+          "hub": "BLR",
+          "daily": 180,
+          "netShare": 50,
+          "airports": "BLR · MAA",
+          "exposure": "Critical",
+          "note": "Direct exposure through BLR operations."
+        }
+      ]
+    },
+    "fuel": {
+      "basis": "Airline exposure data cross-referenced with published schedules.",
+      "airports": [
+        {
+          "iata": "BLR",
+          "name": "Bengaluru",
+          "role": "Affected",
+          "movements": 200,
+          "window": "6h",
+          "exposure": 68,
+          "note": "Primary into-plane fuel supplier at BLR reports a pipeline valve fault reducing uplift rate by ~40%. Secondary supplier has limited hydrant access. Namma Air sources over 90% of BLR uplift from the affected supplier."
+        }
+      ],
+      "airlines": [
+        {
+          "name": "Namma Air",
+          "code": "N7",
+          "hub": "BLR",
+          "daily": 180,
+          "netShare": 50,
+          "airports": "BLR",
+          "exposure": "High",
+          "note": "Direct exposure through BLR operations."
+        }
+      ]
+    },
+    "delfog": {
+      "basis": "Airline exposure data cross-referenced with published schedules.",
+      "airports": [
+        {
+          "iata": "DEL",
+          "name": "Delhi",
+          "role": "Affected",
+          "movements": 200,
+          "window": "14h",
+          "exposure": 76,
+          "note": "Dense fog advisory for DEL with visibility below 200m expected overnight. CAT IIIB approach capability required; Namma Air fleet certification is split."
+        }
+      ],
+      "airlines": [
+        {
+          "name": "Namma Air",
+          "code": "N7",
+          "hub": "BLR",
+          "daily": 180,
+          "netShare": 50,
+          "airports": "DEL",
+          "exposure": "Critical",
+          "note": "Direct exposure through BLR operations."
+        },
+        {
+          "name": "IndiConnect Airways",
+          "code": "IC",
+          "hub": "DEL",
+          "daily": 210,
+          "netShare": 50,
+          "airports": "DEL",
+          "exposure": "Critical",
+          "note": "Direct exposure through DEL operations."
+        }
+      ]
+    },
+    "chnAtc": {
+      "basis": "Airline exposure data cross-referenced with published schedules.",
+      "airports": [
+        {
+          "iata": "MAA",
+          "name": "Chennai",
+          "role": "Affected",
+          "movements": 200,
+          "window": "4h",
+          "exposure": 71,
+          "note": "Reduced sector capacity in Chennai ACC following an equipment fault. Flow control affects southbound departures from BLR."
+        },
+        {
+          "iata": "BLR",
+          "name": "Bengaluru",
+          "role": "Affected",
+          "movements": 200,
+          "window": "4h",
+          "exposure": 71,
+          "note": "Reduced sector capacity in Chennai ACC following an equipment fault. Flow control affects southbound departures from BLR."
+        }
+      ],
+      "airlines": [
+        {
+          "name": "Namma Air",
+          "code": "N7",
+          "hub": "BLR",
+          "daily": 180,
+          "netShare": 50,
+          "airports": "MAA · BLR",
+          "exposure": "High",
+          "note": "Direct exposure through BLR operations."
+        }
+      ]
+    },
+    "gulf": {
+      "basis": "Airline exposure data cross-referenced with published schedules.",
+      "airports": [
+        {
+          "iata": "DXB",
+          "name": "Dubai",
+          "role": "Affected",
+          "movements": 200,
+          "window": "2d",
+          "exposure": 62,
+          "note": "Reserved airspace block over the Gulf corridor narrows the standard BLR–LHR overflight routing, adding distance and fuel burn on affected A350 sectors."
+        },
+        {
+          "iata": "LHR",
+          "name": "London Heathrow",
+          "role": "Affected",
+          "movements": 200,
+          "window": "2d",
+          "exposure": 62,
+          "note": "Reserved airspace block over the Gulf corridor narrows the standard BLR–LHR overflight routing, adding distance and fuel burn on affected A350 sectors."
+        }
+      ],
+      "airlines": [
+        {
+          "name": "Namma Air",
+          "code": "N7",
+          "hub": "BLR",
+          "daily": 180,
+          "netShare": 50,
+          "airports": "DXB · LHR",
+          "exposure": "High",
+          "note": "Direct exposure through BLR operations."
+        }
+      ]
+    },
+    "cabincrew": {
+      "basis": "Airline exposure data cross-referenced with published schedules.",
+      "airports": [
+        {
+          "iata": "DEL",
+          "name": "Delhi",
+          "role": "Affected",
+          "movements": 200,
+          "window": "3d",
+          "exposure": 45,
+          "note": "DEL-based cabin crew union has issued a go-slow notice over a rostering grievance. No strike date named; local action risk only."
+        }
+      ],
+      "airlines": [
+        {
+          "name": "Namma Air",
+          "code": "N7",
+          "hub": "BLR",
+          "daily": 180,
+          "netShare": 50,
+          "airports": "DEL",
+          "exposure": "Moderate",
+          "note": "Direct exposure through BLR operations."
+        }
+      ]
+    },
+    "convwx": {
+      "basis": "Airline exposure data cross-referenced with published schedules.",
+      "airports": [
+        {
+          "iata": "FRA",
+          "name": "Frankfurt",
+          "role": "Affected",
+          "movements": 200,
+          "window": "4h",
+          "exposure": 82,
+          "note": "Severe CB activity forecast across the FRA–MUC–VIE corridor through the afternoon wave. Embedded thunderstorms, hail, and wind shear on approach corridors. Ground stops likely at VIE during peak arrival bank."
+        },
+        {
+          "iata": "MUC",
+          "name": "Munich",
+          "role": "Affected",
+          "movements": 200,
+          "window": "4h",
+          "exposure": 82,
+          "note": "Severe CB activity forecast across the FRA–MUC–VIE corridor through the afternoon wave. Embedded thunderstorms, hail, and wind shear on approach corridors. Ground stops likely at VIE during peak arrival bank."
+        },
+        {
+          "iata": "VIE",
+          "name": "Vienna",
+          "role": "Affected",
+          "movements": 200,
+          "window": "4h",
+          "exposure": 82,
+          "note": "Severe CB activity forecast across the FRA–MUC–VIE corridor through the afternoon wave. Embedded thunderstorms, hail, and wind shear on approach corridors. Ground stops likely at VIE during peak arrival bank."
+        }
+      ],
+      "airlines": [
+        {
+          "name": "EuroVista Airways",
+          "code": "EV",
+          "hub": "VIE",
+          "daily": 142,
+          "netShare": 50,
+          "airports": "FRA · MUC · VIE",
+          "exposure": "Critical",
+          "note": "Direct exposure through VIE operations."
+        }
+      ]
+    },
+    "fraatfm": {
+      "basis": "Airline exposure data cross-referenced with published schedules.",
+      "airports": [
+        {
+          "iata": "FRA",
+          "name": "Frankfurt",
+          "role": "Affected",
+          "movements": 200,
+          "window": "2h",
+          "exposure": 74,
+          "note": "EUROCONTROL Network Manager has activated an ATFM regulation for the Frankfurt airspace sector due to predicted overload. Delays of 30–60 minutes expected on all EuroVista sectors transiting the EDUU UIR."
+        }
+      ],
+      "airlines": [
+        {
+          "name": "EuroVista Airways",
+          "code": "EV",
+          "hub": "VIE",
+          "daily": 142,
+          "netShare": 50,
+          "airports": "FRA",
+          "exposure": "High",
+          "note": "Direct exposure through VIE operations."
+        }
+      ]
+    },
+    "viesnow": {
+      "basis": "Airline exposure data cross-referenced with published schedules.",
+      "airports": [
+        {
+          "iata": "VIE",
+          "name": "Vienna",
+          "role": "Affected",
+          "movements": 200,
+          "window": "8h",
+          "exposure": 69,
+          "note": "Heavy snowfall forecast at VIE from late evening through overnight. Runway clearance cycles expected to reduce arrival rate by 40%. De-icing operations will extend turnaround times by 25–35 minutes."
+        }
+      ],
+      "airlines": [
+        {
+          "name": "EuroVista Airways",
+          "code": "EV",
+          "hub": "VIE",
+          "daily": 142,
+          "netShare": 50,
+          "airports": "VIE",
+          "exposure": "High",
+          "note": "Direct exposure through VIE operations."
+        }
+      ]
+    },
+    "zrhfog": {
+      "basis": "Airline exposure data cross-referenced with published schedules.",
+      "airports": [
+        {
+          "iata": "ZRH",
+          "name": "Zurich",
+          "role": "Affected",
+          "movements": 200,
+          "window": "6h",
+          "exposure": 58,
+          "note": "Radiation fog at ZRH reducing visibility below 300m. CAT II/III approaches in effect. EuroVista E190 fleet limited to CAT I minima — diversions to MUC possible for 2 rotations."
+        }
+      ],
+      "airlines": [
+        {
+          "name": "EuroVista Airways",
+          "code": "EV",
+          "hub": "VIE",
+          "daily": 142,
+          "netShare": 50,
+          "airports": "ZRH",
+          "exposure": "Moderate",
+          "note": "Direct exposure through VIE operations."
+        }
+      ]
+    },
+    "vniestrike": {
+      "basis": "Airline exposure data cross-referenced with published schedules.",
+      "airports": [],
+      "airlines": [
+        {
+          "name": "EuroVista Airways",
+          "code": "EV",
+          "hub": "VIE",
+          "daily": 142,
+          "netShare": 50,
+          "airports": "",
+          "exposure": "Moderate",
+          "note": "Direct exposure through VIE operations."
+        }
+      ]
+    },
+    "amslot": {
+      "basis": "Airline exposure data cross-referenced with published schedules.",
+      "airports": [
+        {
+          "iata": "AMS",
+          "name": "Amsterdam",
+          "role": "Affected",
+          "movements": 200,
+          "window": "1d",
+          "exposure": 48,
+          "note": "AMS runway 18R/36L closed for scheduled maintenance through the week. Reduced arrival capacity during peak hours; slot adjustments required for EuroVista's 4 daily AMS rotations."
+        }
+      ],
+      "airlines": [
+        {
+          "name": "EuroVista Airways",
+          "code": "EV",
+          "hub": "VIE",
+          "daily": 142,
+          "netShare": 50,
+          "airports": "AMS",
+          "exposure": "Moderate",
+          "note": "Direct exposure through VIE operations."
+        }
+      ]
+    },
+    "bommonsoon": {
+      "basis": "Airline exposure data cross-referenced with published schedules.",
+      "airports": [
+        {
+          "iata": "BOM",
+          "name": "Mumbai",
+          "role": "Affected",
+          "movements": 200,
+          "window": "3h",
+          "exposure": 79,
+          "note": "Severe monsoon thunderstorms forecast over BOM through the afternoon. Heavy rain, low-level wind shear, and temporary runway closures possible. Departure bank delays of 45–90 minutes expected."
+        }
+      ],
+      "airlines": [
+        {
+          "name": "IndiConnect Airways",
+          "code": "IC",
+          "hub": "DEL",
+          "daily": 210,
+          "netShare": 50,
+          "airports": "BOM",
+          "exposure": "Critical",
+          "note": "Direct exposure through DEL operations."
+        }
+      ]
+    },
+    "blrstorms": {
+      "basis": "Airline exposure data cross-referenced with published schedules.",
+      "airports": [
+        {
+          "iata": "BLR",
+          "name": "Bengaluru",
+          "role": "Affected",
+          "movements": 200,
+          "window": "5h",
+          "exposure": 66,
+          "note": "Convective activity forecast over BLR through late afternoon. Arrival rate reductions and go-around risk for inbound flights during the peak arrival window."
+        }
+      ],
+      "airlines": [
+        {
+          "name": "IndiConnect Airways",
+          "code": "IC",
+          "hub": "DEL",
+          "daily": 210,
+          "netShare": 50,
+          "airports": "BLR",
+          "exposure": "High",
+          "note": "Direct exposure through DEL operations."
+        }
+      ]
+    },
+    "dxbacongest": {
+      "basis": "Airline exposure data cross-referenced with published schedules.",
+      "airports": [
+        {
+          "iata": "DXB",
+          "name": "Dubai",
+          "role": "Affected",
+          "movements": 200,
+          "window": "8h",
+          "exposure": 61,
+          "note": "DXB approach congestion during evening peak. Flow control likely on IndiConnect's 3 daily DXB rotations — delays of 20–40 minutes expected."
+        }
+      ],
+      "airlines": [
+        {
+          "name": "IndiConnect Airways",
+          "code": "IC",
+          "hub": "DEL",
+          "daily": 210,
+          "netShare": 50,
+          "airports": "DXB",
+          "exposure": "High",
+          "note": "Direct exposure through DEL operations."
+        }
+      ]
+    },
+    "delatc": {
+      "basis": "Airline exposure data cross-referenced with published schedules.",
+      "airports": [
+        {
+          "iata": "DEL",
+          "name": "Delhi",
+          "role": "Affected",
+          "movements": 200,
+          "window": "4h",
+          "exposure": 57,
+          "note": "Reduced sector capacity in Delhi FIR following an equipment fault. Flow control affects northbound departures from BOM and BLR."
+        },
+        {
+          "iata": "BOM",
+          "name": "Mumbai",
+          "role": "Affected",
+          "movements": 200,
+          "window": "4h",
+          "exposure": 57,
+          "note": "Reduced sector capacity in Delhi FIR following an equipment fault. Flow control affects northbound departures from BOM and BLR."
+        }
+      ],
+      "airlines": [
+        {
+          "name": "IndiConnect Airways",
+          "code": "IC",
+          "hub": "DEL",
+          "daily": 210,
+          "netShare": 50,
+          "airports": "DEL · BOM",
+          "exposure": "Moderate",
+          "note": "Direct exposure through DEL operations."
+        }
+      ]
+    },
+    "cokmonsoon": {
+      "basis": "Airline exposure data cross-referenced with published schedules.",
+      "airports": [
+        {
+          "iata": "COK",
+          "name": "Kochi",
+          "role": "Affected",
+          "movements": 200,
+          "window": "12h",
+          "exposure": 49,
+          "note": "Localised flooding on access roads to COK. Ground transport delays for crew and passengers. No runway impact but check-in closures possible if flooding worsens."
+        }
+      ],
+      "airlines": [
+        {
+          "name": "IndiConnect Airways",
+          "code": "IC",
+          "hub": "DEL",
+          "daily": 210,
+          "netShare": 50,
+          "airports": "COK",
+          "exposure": "Moderate",
+          "note": "Direct exposure through DEL operations."
+        }
+      ]
+    }
+  }
+}

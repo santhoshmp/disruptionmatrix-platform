@@ -1,0 +1,168 @@
+{
+  "THREATS": [
+    { "id": "convwx", "name": "Central European Convective Weather", "cat": "Weather", "code": "WX", "region": "Frankfurt · Munich · Vienna corridor", "edps": 82, "eva": 85, "traj": "Escalating", "tti": "4h",
+      "summary": "Severe CB activity forecast across the FRA–MUC–VIE corridor through the afternoon wave. Embedded thunderstorms, hail, and wind shear on approach corridors. Ground stops likely at VIE during peak arrival bank." },
+    { "id": "fraatfm", "name": "Frankfurt ATFM Regulation — Sector Overload", "cat": "ATC / Airspace", "code": "ATC", "region": "EDUU UIR — Frankfurt sector", "edps": 74, "eva": 78, "traj": "Stable", "tti": "2h",
+      "summary": "EUROCONTROL Network Manager has activated an ATFM regulation for the Frankfurt airspace sector due to predicted overload. Delays of 30–60 minutes expected on all EuroVista sectors transiting the EDUU UIR." },
+    { "id": "viesnow", "name": "Vienna Winter Storm — Snow Accumulation", "cat": "Weather", "code": "WX", "region": "Vienna (VIE)", "edps": 69, "eva": 72, "traj": "Stable", "tti": "8h",
+      "summary": "Heavy snowfall forecast at VIE from late evening through overnight. Runway clearance cycles expected to reduce arrival rate by 40%. De-icing operations will extend turnaround times by 25–35 minutes." },
+    { "id": "zrhfog", "name": "Zurich Low-Visibility Procedures", "cat": "Weather", "code": "WX", "region": "Zurich (ZRH)", "edps": 58, "eva": 61, "traj": "Improving", "tti": "6h",
+      "summary": "Radiation fog at ZRH reducing visibility below 300m. CAT II/III approaches in effect. EuroVista E190 fleet limited to CAT I minima — diversions to MUC possible for 2 rotations." },
+    { "id": "vniestrike", "name": "Vienna Ground Handler Industrial Action", "cat": "Industrial action", "code": "IND", "region": "Vienna (VIE)", "edps": 54, "eva": 63, "traj": "Escalating", "tti": "12h",
+      "summary": "VIE ground handling staff have announced a 4-hour work-to-rule during the morning departure bank. Extended turnaround times and potential missed connections through the VIE hub." },
+    { "id": "amslot", "name": "Amsterdam Slot Constraints — Runway Maintenance", "cat": "Infrastructure", "code": "INF", "region": "Amsterdam (AMS)", "edps": 48, "eva": 52, "traj": "Stable", "tti": "1d",
+      "summary": "AMS runway 18R/36L closed for scheduled maintenance through the week. Reduced arrival capacity during peak hours; slot adjustments required for EuroVista's 4 daily AMS rotations." }
+  ],
+  "EXPOSURE": {
+    "convwx": {
+      "tier0": { "label": "Schedule / fleet exposure", "banks": ["Bank 1 (Morning wave)", "Bank 2 (Afternoon wave)"], "routeCount": 22, "note": "22 EuroVista departures scheduled through the FRA–MUC–VIE corridor during the convective weather window." },
+      "tier1": { "label": "Tail / rotation chains at risk", "tails": ["OE-LAA", "OE-LAB", "OE-LAC", "OE-LDA", "OE-LDB"], "count": 5, "note": "5 aircraft rotations through the affected corridor — 3 A320neo and 2 E195 with downstream connections at risk." },
+      "tier2": { "label": "Crew pairings near duty limits", "pairings": ["VIE-3101", "VIE-3118", "VIE-3122"], "count": 3, "note": "3 crew pairings within 40 minutes of FDP limits if ground stops extend beyond 45 minutes at VIE." },
+      "tier3": { "label": "Connecting pax / cargo exposure", "pax": 980, "cargo": 12, "note": "~980 connecting passengers routed through VIE hub during the affected window; 12t of transfer cargo on the same connection." },
+      "tier4": { "label": "Station dependency & escalation", "esc": 4, "note": "VIE is the sole hub — no alternate European gateway. VP escalation threshold crossed at 14:30 local." }
+    },
+    "fraatfm": {
+      "tier0": { "label": "Schedule / fleet exposure", "banks": ["Bank 1 (Morning wave)", "Bank 2 (Afternoon wave)"], "routeCount": 14, "note": "14 EuroVista sectors transit the Frankfurt airspace sector under ATFM regulation." },
+      "tier1": { "label": "Tail / rotation chains at risk", "tails": ["OE-LAA", "OE-LDE", "OE-LDF"], "count": 3, "note": "3 A320neo rotations likely to absorb 30–60 min ATFM delay, cascading into evening connections." },
+      "tier2": { "label": "Crew pairings near duty limits", "pairings": ["VIE-3101"], "count": 1, "note": "1 pairing at risk if ATFM delay exceeds 45 minutes on the FRA–VIE sector." },
+      "tier3": { "label": "Connecting pax / cargo exposure", "pax": 420, "cargo": 5, "note": "420 connecting passengers on FRA-originating flights with onward connections at VIE." },
+      "tier4": { "label": "Station dependency & escalation", "esc": 3, "note": "Duty manager assessment opened — ATFM delay is time-boxed to the regulation window." }
+    },
+    "viesnow": {
+      "tier0": { "label": "Schedule / fleet exposure", "banks": ["Bank 3 (Evening wave)", "Bank 4 (Overnight)"], "routeCount": 12, "note": "12 VIE movements inside the snowfall window, including overnight A321LR departures to DEL and DXB." },
+      "tier1": { "label": "Tail / rotation chains at risk", "tails": ["OE-LDA", "OE-LDB", "OE-LDC"], "count": 3, "note": "3 A321neo rotations affected by de-icing delays and reduced arrival rate at VIE." },
+      "tier2": { "label": "Crew pairings near duty limits", "pairings": ["VIE-3205", "VIE-3211"], "count": 2, "note": "2 pairings would exceed duty limits if runway clearance cycles extend ground times beyond 35 minutes." },
+      "tier3": { "label": "Connecting pax / cargo exposure", "pax": 340, "cargo": 7, "note": "340 pax connecting onto the VIE–DEL and VIE–DXB evening departures; 7t of cargo with fixed uplift windows." },
+      "tier4": { "label": "Station dependency & escalation", "esc": 3, "note": "VIE is the only hub — no alternate. De-icing fluid supply is adequate for 6 hours of continuous operations." }
+    },
+    "zrhfog": {
+      "tier0": { "label": "Schedule / fleet exposure", "banks": ["Bank 1 (Morning wave)"], "routeCount": 4, "note": "4 ZRH movements inside the LVP window — 2 E195 rotations limited to CAT I minima." },
+      "tier1": { "label": "Tail / rotation chains at risk", "tails": ["OE-LAB"], "count": 1, "note": "1 E195 rotation may require diversion to MUC if visibility drops below CAT I minima." },
+      "tier2": { "label": "Crew pairings near duty limits", "pairings": [], "count": 0, "note": "No pairings currently within margin." },
+      "tier3": { "label": "Connecting pax / cargo exposure", "pax": 85, "cargo": 1, "note": "85 pax with onward connections at VIE from ZRH-origin flights." },
+      "tier4": { "label": "Station dependency & escalation", "esc": 2, "note": "Desk-level watch — LVP is expected to lift by mid-morning." }
+    },
+    "viestrike": {
+      "tier0": { "label": "Schedule / fleet exposure", "banks": ["Bank 1 (Morning wave)"], "routeCount": 18, "note": "18 VIE departures scheduled during the 4-hour work-to-rule window." },
+      "tier1": { "label": "Tail / rotation chains at risk", "tails": ["OE-LAA", "OE-LAC", "OE-LDE"], "count": 3, "note": "3 rotations likely to see extended turnarounds of 25+ minutes due to slow baggage and ground handling." },
+      "tier2": { "label": "Crew pairings near duty limits", "pairings": ["VIE-3101", "VIE-3108"], "count": 2, "note": "2 pairings at risk if extended turnarounds push departures beyond planned times." },
+      "tier3": { "label": "Connecting pax / cargo exposure", "pax": 520, "cargo": 4, "note": "520 connecting passengers at risk of misconnection during the morning wave." },
+      "tier4": { "label": "Station dependency & escalation", "esc": 3, "note": "Duty manager assessment opened — no alternate handler available at VIE on short notice." }
+    },
+    "amslot": {
+      "tier0": { "label": "Schedule / fleet exposure", "banks": ["Bank 2 (Afternoon wave)"], "routeCount": 4, "note": "4 AMS rotations affected by reduced capacity during runway maintenance." },
+      "tier1": { "label": "Tail / rotation chains at risk", "tails": ["OE-LDD"], "count": 1, "note": "1 A321neo rotation may require slot adjustment and reduced payload." },
+      "tier2": { "label": "Crew pairings near duty limits", "pairings": [], "count": 0, "note": "No duty-margin impact identified." },
+      "tier3": { "label": "Connecting pax / cargo exposure", "pax": 110, "cargo": 2, "note": "110 pax with onward connections at VIE from AMS." },
+      "tier4": { "label": "Station dependency & escalation", "esc": 1, "note": "Desk-level watch — slot adjustments are pre-planned." }
+    }
+  },
+  "FLIGHTS": [
+    { "flt": "EV412", "route": "GVA–VIE", "tail": "OE-LAB", "type": "E195", "bank": "Bank 1", "threat": "convwx", "pax": 112, "connectPax": 78, "cargo": 3.2 },
+    { "flt": "EV234", "route": "FRA–VIE", "tail": "OE-LAA", "type": "A320neo", "bank": "Bank 1", "threat": "fraatfm", "pax": 168, "connectPax": 94, "cargo": 5.8 },
+    { "flt": "EV567", "route": "ZRH–VIE", "tail": "OE-LAC", "type": "E195", "bank": "Bank 1", "threat": "zrhfog", "pax": 108, "connectPax": 62, "cargo": 2.4 },
+    { "flt": "EV301", "route": "VIE–CDG", "tail": "OE-LDA", "type": "A320neo", "bank": "Bank 2", "threat": "convwx", "pax": 162, "connectPax": 38, "cargo": 4.6 },
+    { "flt": "EV302", "route": "VIE–AMS", "tail": "OE-LDB", "type": "A320neo", "bank": "Bank 2", "threat": "amslot", "pax": 158, "connectPax": 42, "cargo": 3.8 },
+    { "flt": "EV303", "route": "VIE–FRA", "tail": "OE-LDE", "type": "A320neo", "bank": "Bank 2", "threat": "fraatfm", "pax": 171, "connectPax": 56, "cargo": 6.1 },
+    { "flt": "EV304", "route": "VIE–MUC", "tail": "OE-LDF", "type": "A320neo", "bank": "Bank 2", "threat": "convwx", "pax": 155, "connectPax": 48, "cargo": 3.4 },
+    { "flt": "EV415", "route": "PRG–VIE", "tail": "OE-LAD", "type": "E195", "bank": "Bank 2", "threat": "convwx", "pax": 118, "connectPax": 71, "cargo": 2.8 },
+    { "flt": "EV416", "route": "BUD–VIE", "tail": "OE-LAE", "type": "E195", "bank": "Bank 2", "threat": "convwx", "pax": 104, "connectPax": 58, "cargo": 1.9 },
+    { "flt": "EV501", "route": "VIE–DEL", "tail": "OE-LDG", "type": "A321neo", "bank": "Bank 3", "threat": "viesnow", "pax": 198, "connectPax": 142, "cargo": 8.5 },
+    { "flt": "EV502", "route": "VIE–DXB", "tail": "OE-LDH", "type": "A321neo", "bank": "Bank 3", "threat": "viesnow", "pax": 192, "connectPax": 108, "cargo": 7.2 },
+    { "flt": "EV503", "route": "VIE–IST", "tail": "OE-LDI", "type": "A321neo", "bank": "Bank 3", "threat": "viesnow", "pax": 186, "connectPax": 64, "cargo": 4.8 },
+    { "flt": "EV601", "route": "VIE–CPH", "tail": "OE-LAA", "type": "A320neo", "bank": "Bank 1", "threat": "viestrike", "pax": 164, "connectPax": 52, "cargo": 3.6 },
+    { "flt": "EV602", "route": "VIE–WAW", "tail": "OE-LAC", "type": "E195", "bank": "Bank 1", "threat": "viestrike", "pax": 121, "connectPax": 44, "cargo": 2.1 },
+    { "flt": "EV603", "route": "VIE–BRU", "tail": "OE-LDE", "type": "A320neo", "bank": "Bank 1", "threat": "viestrike", "pax": 159, "connectPax": 61, "cargo": 4.2 },
+    { "flt": "EV604", "route": "VIE–MAD", "tail": "OE-LDA", "type": "A320neo", "bank": "Bank 2", "threat": "fraatfm", "pax": 166, "connectPax": 38, "cargo": 5.1 },
+    { "flt": "EV605", "route": "VIE–FCO", "tail": "OE-LDB", "type": "A320neo", "bank": "Bank 2", "threat": "convwx", "pax": 170, "connectPax": 46, "cargo": 4.4 },
+    { "flt": "EV701", "route": "MUC–VIE", "tail": "OE-LAF", "type": "E195", "bank": "Bank 3", "threat": "viesnow", "pax": 115, "connectPax": 82, "cargo": 2.6 }
+  ],
+  "PAIRINGS": [
+    { "id": "VIE-3101", "base": "VIE", "route": "VIE–FRA–VIE–CPH", "margin": 35, "status": "Red", "threat": "fraatfm" },
+    { "id": "VIE-3108", "base": "VIE", "route": "VIE–AMS–VIE–WAW", "margin": 42, "status": "Amber", "threat": "viestrike" },
+    { "id": "VIE-3118", "base": "VIE", "route": "VIE–MUC–VIE–CDG", "margin": 48, "status": "Amber", "threat": "convwx" },
+    { "id": "VIE-3122", "base": "VIE", "route": "VIE–ZRH–VIE–BRU", "margin": 55, "status": "Amber", "threat": "convwx" },
+    { "id": "VIE-3205", "base": "VIE", "route": "VIE–DEL turnaround", "margin": 38, "status": "Red", "threat": "viesnow" },
+    { "id": "VIE-3211", "base": "VIE", "route": "VIE–DXB–VIE", "margin": 51, "status": "Amber", "threat": "viesnow" },
+    { "id": "MUC-4101", "base": "MUC", "route": "MUC–VIE–MUC", "margin": 78, "status": "Green", "threat": "convwx" },
+    { "id": "ZRH-5101", "base": "ZRH", "route": "ZRH–VIE–ZRH", "margin": 92, "status": "Green", "threat": "zrhfog" }
+  ],
+  "BANKS": [
+    { "id": "b1", "label": "Bank 1", "sub": "Morning wave — European feed", "window": "06:00–09:30", "kind": "European feeder", "severity": 4 },
+    { "id": "b2", "label": "Bank 2", "sub": "Midday wave — trunk rotations", "window": "11:00–14:30", "kind": "European trunk", "severity": 3 },
+    { "id": "b3", "label": "Bank 3", "sub": "Evening wave — medium-haul departures", "window": "17:00–21:00", "kind": "A321neo medium-haul", "severity": 4 },
+    { "id": "b4", "label": "Bank 4", "sub": "Overnight — long-haul connections", "window": "22:00–01:00", "kind": "Intercontinental", "severity": 2 },
+    { "id": "sec", "label": "MUC/ZRH", "sub": "Secondary bases", "window": "All-day", "kind": "Regional", "severity": 2 }
+  ],
+  "VULNERABILITIES": [
+    { "title": "VIE hub concentration", "detail": "All connecting traffic flows through a single hub — no secondary European gateway. Any VIE disruption has system-wide impact." },
+    { "title": "E195 CAT I limitation", "detail": "The E190/E195 fleet is limited to CAT I approach minima, creating diversion risk at fog-affected airports like ZRH and GVA." },
+    { "title": "FRA corridor dependency", "detail": "Over 40% of European trunk routes transit the Frankfurt airspace sector — ATFM regulations here have outsized impact." },
+    { "title": "Single ground handler at VIE", "detail": "One handler serves all EuroVista turns at VIE — industrial action has no immediate alternate." }
+  ],
+  "SNAPSHOT": {
+    "otp": { "label": "On-time performance", "value": 81, "unit": "%", "trend": [88, 87.5, 88, 87, 86.4, 86.8, 86, 85.2, 85.6, 84.8, 84.2, 84.6, 83.8, 83.4, 83.9, 83.1, 82.6, 83, 82.4, 82.8, 82.2, 81.9, 82.3, 81], "tone": "amber" },
+    "delays": { "label": "Active delays", "value": 18, "unit": "", "trend": [6, 7, 6.5, 7.5, 8, 7.6, 8.4, 9, 8.6, 9.4, 9.8, 9.2, 10, 10.6, 10.2, 11, 10.8, 11.4, 11.1, 11.8, 12.5, 13.1, 14.8, 18], "tone": "red" },
+    "aog": { "label": "AOG count", "value": 1, "unit": "", "trend": [0, 0.2, 0, 0.4, 0.2, 0.5, 0.3, 0.6, 0.4, 0.7, 0.5, 0.8, 0.6, 0.9, 0.7, 1, 0.8, 1.1, 0.9, 1, 1, 1, 1, 1], "tone": "amber" },
+    "crewAlerts": { "label": "Crew legality alerts", "value": 4, "unit": "", "trend": [1, 1.2, 1.1, 1.4, 1.3, 1.6, 1.5, 1.8, 1.7, 2, 1.9, 2.2, 2.1, 2.4, 2.3, 2.6, 2.5, 2.8, 2.7, 3, 2.9, 3.2, 3.5, 4], "tone": "amber" },
+    "escalations": { "label": "Active escalations", "value": 1, "unit": "", "trend": [0, 0, 0.2, 0.1, 0.3, 0.2, 0.4, 0.3, 0.5, 0.4, 0.6, 0.5, 0.7, 0.6, 0.8, 0.7, 0.9, 0.8, 1, 0.9, 1, 1, 1, 1], "tone": "red" },
+    "deice": { "label": "De-icing status", "value": "Active", "unit": "", "note": "VIE Type I/IV", "tone": "amber" },
+    "atfm": { "label": "ATFM regulations", "value": 3, "unit": "", "note": "EDUU · LIRR · LFFF", "tone": "red" }
+  },
+  "FLEET": [
+    { "tail": "OE-LAA", "type": "A320neo", "base": "VIE", "catIIIB": true, "status": "In service" },
+    { "tail": "OE-LAB", "type": "E195", "base": "VIE", "catIIIB": false, "status": "In service" },
+    { "tail": "OE-LAC", "type": "E195", "base": "VIE", "catIIIB": false, "status": "In service" },
+    { "tail": "OE-LAD", "type": "E195", "base": "PRG", "catIIIB": false, "status": "In service" },
+    { "tail": "OE-LAE", "type": "E195", "base": "VIE", "catIIIB": false, "status": "In service" },
+    { "tail": "OE-LAF", "type": "E195", "base": "MUC", "catIIIB": false, "status": "In service" },
+    { "tail": "OE-LAG", "type": "E195", "base": "ZRH", "catIIIB": false, "status": "In service" },
+    { "tail": "OE-LAH", "type": "E195", "base": "VIE", "catIIIB": false, "status": "Scheduled maintenance" },
+    { "tail": "OE-LDA", "type": "A320neo", "base": "VIE", "catIIIB": true, "status": "In service" },
+    { "tail": "OE-LDB", "type": "A320neo", "base": "VIE", "catIIIB": true, "status": "In service" },
+    { "tail": "OE-LDC", "type": "A320neo", "base": "MUC", "catIIIB": false, "status": "In service" },
+    { "tail": "OE-LDD", "type": "A320neo", "base": "VIE", "catIIIB": true, "status": "In service" },
+    { "tail": "OE-LDE", "type": "A320neo", "base": "VIE", "catIIIB": true, "status": "In service" },
+    { "tail": "OE-LDF", "type": "A320neo", "base": "VIE", "catIIIB": false, "status": "In service" },
+    { "tail": "OE-LDG", "type": "A321neo", "base": "VIE", "catIIIB": true, "status": "In service" },
+    { "tail": "OE-LDH", "type": "A321neo", "base": "VIE", "catIIIB": true, "status": "In service" },
+    { "tail": "OE-LDI", "type": "A321neo", "base": "VIE", "catIIIB": false, "status": "In service" },
+    { "tail": "OE-LDJ", "type": "A321neo", "base": "VIE", "catIIIB": true, "status": "AOG" }
+  ],
+  "CREW": [
+    { "id": "C-3001", "name": "Capt. M. Weber", "rank": "Captain", "base": "VIE", "status": "On duty", "dutyRemaining": 0.55, "pairing": "VIE-3101" },
+    { "id": "C-3002", "name": "F/O T. Schmidt", "rank": "First Officer", "base": "VIE", "status": "On duty", "dutyRemaining": 0.55, "pairing": "VIE-3101" },
+    { "id": "C-3015", "name": "Capt. L. Gruber", "rank": "Captain", "base": "VIE", "status": "On duty", "dutyRemaining": 0.68, "pairing": "VIE-3118" },
+    { "id": "C-3016", "name": "F/O S. Bauer", "rank": "First Officer", "base": "VIE", "status": "On duty", "dutyRemaining": 0.68, "pairing": "VIE-3118" },
+    { "id": "C-3028", "name": "Capt. R. Steiner", "rank": "Captain", "base": "VIE", "status": "On duty", "dutyRemaining": 0.82, "pairing": "VIE-3122" },
+    { "id": "C-3029", "name": "F/O K. Wagner", "rank": "First Officer", "base": "VIE", "status": "On duty", "dutyRemaining": 0.82, "pairing": "VIE-3122" },
+    { "id": "C-3050", "name": "Capt. A. Hoffmann", "rank": "Captain", "base": "VIE", "status": "Standby", "dutyRemaining": 1.0, "pairing": "VIE-3205" },
+    { "id": "C-3051", "name": "F/O D. Mayer", "rank": "First Officer", "base": "VIE", "status": "Standby", "dutyRemaining": 1.0, "pairing": "VIE-3205" },
+    { "id": "C-3065", "name": "Capt. J. Pichler", "rank": "Captain", "base": "VIE", "status": "On duty", "dutyRemaining": 0.88, "pairing": "VIE-3211" },
+    { "id": "C-3066", "name": "F/O N. Eberhard", "rank": "First Officer", "base": "VIE", "status": "On duty", "dutyRemaining": 0.88, "pairing": "VIE-3211" },
+    { "id": "C-4001", "name": "Capt. F. Zellner", "rank": "Captain", "base": "MUC", "status": "On duty", "dutyRemaining": 0.72, "pairing": "MUC-4101" },
+    { "id": "C-4002", "name": "F/O P. Leitner", "rank": "First Officer", "base": "MUC", "status": "On duty", "dutyRemaining": 0.72, "pairing": "MUC-4101" },
+    { "id": "C-5001", "name": "Capt. H. Brunner", "rank": "Captain", "base": "ZRH", "status": "Rest", "dutyRemaining": 1.0, "pairing": "ZRH-5101" },
+    { "id": "C-5002", "name": "Sr. Cabin Crew G. Fischer", "rank": "Cabin Crew", "base": "ZRH", "status": "On duty", "dutyRemaining": 0.62, "pairing": "ZRH-5101" }
+  ],
+  "SCHEDULE": {
+    "EV412": { "dep": 7.5, "dur": 95 },
+    "EV234": { "dep": 7.75, "dur": 80 },
+    "EV567": { "dep": 8, "dur": 70 },
+    "EV301": { "dep": 12, "dur": 125 },
+    "EV302": { "dep": 12.25, "dur": 110 },
+    "EV303": { "dep": 12.5, "dur": 80 },
+    "EV304": { "dep": 12.75, "dur": 65 },
+    "EV415": { "dep": 11.5, "dur": 55 },
+    "EV416": { "dep": 11.75, "dur": 50 },
+    "EV501": { "dep": 18.5, "dur": 460 },
+    "EV502": { "dep": 19, "dur": 340 },
+    "EV503": { "dep": 19.5, "dur": 120 },
+    "EV601": { "dep": 6.5, "dur": 115 },
+    "EV602": { "dep": 7, "dur": 95 },
+    "EV603": { "dep": 7.25, "dur": 125 },
+    "EV604": { "dep": 13, "dur": 165 },
+    "EV605": { "dep": 13.5, "dur": 90 },
+    "EV701": { "dep": 17.5, "dur": 60 }
+  }
+}

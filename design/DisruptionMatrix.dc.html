@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<script src="./dm-data.js"></script>
+<style>
+  html, body { margin: 0; height: 100%; background: #0A0E13; font-family: 'IBM Plex Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: #4CC2CE; text-decoration: none; }
+  a:hover { color: #7BD9E2; }
+  ::-webkit-scrollbar { width: 11px; height: 11px; }
+  ::-webkit-scrollbar-track { background: #0A0E13; }
+  ::-webkit-scrollbar-thumb { background: #24313F; border-radius: 6px; }
+  @keyframes dmPulse { 0%,100% { opacity: 1 } 50% { opacity: .3 } }
+</style>
+</helmet>
+
+<div style="display: flex; height: 100vh; width: 100%; background: {{ T.bg }}; color: {{ T.ink }}; font-size: 15px; overflow: hidden">
+
+  <div style="width: 296px; flex: 0 0 296px; background: {{ T.sunken }}; border-right: 1px solid {{ T.line }}; display: flex; flex-direction: column; min-height: 0">
+    <div style="padding: 20px 20px 18px; border-bottom: 1px solid {{ T.line }}; display: flex; align-items: center; gap: 12px">
+      <div style="width: 30px; height: 30px; border: 2px solid {{ T.teal }}; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; padding: 4px; gap: 3px">
+        <div style="background: {{ T.teal }}"></div>
+        <div style="background: {{ T.edge }}"></div>
+        <div style="background: {{ T.edge }}"></div>
+        <div style="background: #F59E2B"></div>
+      </div>
+      <div>
+        <div style="font-size: 17px; font-weight: 700; letter-spacing: -0.2px">DisruptionMatrix</div>
+        <div style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{ T.faint }}; letter-spacing: 0.1em">EXTERNAL INTELLIGENCE</div>
+      </div>
+    </div>
+
+    <div style="padding: 14px 12px 10px; display: flex; flex-direction: column; gap: 7px">
+      <div onClick="{{ goBoard }}" style="{{ boardNavStyle }}" style-hover="background: {{ T.hover }}">
+        <span>Threat board</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; opacity: .7">{{ activeCount }} active</span>
+      </div>
+      <a href="Threat Map.html" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; font-size: 15px; font-weight: 600; border: 1px solid {{ T.line2 }}; background: {{ T.panel }}; color: {{ T.ink3 }}" style-hover="background: {{ T.hover }}">
+        <span>World threat map</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: {{ T.faint }}">geographic</span>
+      </a>
+      <a href="Namma Air Threat Radar.dc.html" style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; font-size: 15px; font-weight: 600; border: 1px solid {{ T.line2 }}; background: {{ T.panel }}; color: {{ T.ink3 }}" style-hover="background: {{ T.hover }}">
+        <span>Namma Air view</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: {{ T.faint }}">airline</span>
+      </a>
+      <a href="Home.dc.html" style="display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; border: 1px solid {{ T.line2 }}; color: {{ T.faint }}" style-hover="background: {{ T.hover }}">← Home</a>
+    </div>
+
+    <div style="padding: 6px 12px 8px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{ T.faint2 }}; letter-spacing: 0.14em">ACTIVE EVENTS</div>
+    <div style="flex: 1; min-height: 0; overflow: auto; padding: 0 12px 12px; display: flex; flex-direction: column; gap: 6px">
+      <sc-for list="{{ eventList }}" as="e" hint-placeholder-count="6">
+        <div onClick="{{ e.go }}" style="{{ e.style }}" style-hover="border-color: {{ T.hoverBorder }}">
+          <div style="display: flex; align-items: flex-start; gap: 10px">
+            <div style="{{ e.scoreBox }}">{{ e.score }}</div>
+            <div style="min-width: 0; flex: 1">
+              <div style="font-size: 14px; font-weight: 600; line-height: 1.3; margin-bottom: 3px; text-wrap: pretty">{{ e.name }}</div>
+              <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{ T.mute2 }}; display: flex; gap: 8px">
+                <span style="{{ e.trajStyle }}">{{ e.trajArrow }}</span>
+                <span>{{ e.tti }}</span>
+                <span>L{{ e.esc }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="padding: 14px 16px; border-top: 1px solid {{ T.line }}; display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; flex-direction: column; gap: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: {{ T.mute }}">
+        <div style="display: flex; justify-content: space-between"><span>Sources polled</span><span style="color: {{ T.ink2 }}">1,284</span></div>
+        <div style="display: flex; justify-content: space-between"><span>Reports / 24h</span><span style="color: {{ T.ink2 }}">9,417</span></div>
+        <div style="display: flex; justify-content: space-between"><span>Contradictions</span><span style="color: #F59E2B">4</span></div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px; padding-top: 11px; border-top: 1px solid {{ T.track }}">
+        <div style="width: 7px; height: 7px; border-radius: 50%; background: #31C48D; animation: dmPulse 2.4s ease-in-out infinite"></div>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: {{ T.mute }}">Ingest live · EUR region</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+
+    <div style="flex: 0 0 auto; border-bottom: 1px solid {{ T.line }}; background: {{ T.panel }}; display: flex; align-items: center; padding: 14px 26px; gap: 24px">
+      <div style="min-width: 0">
+        <div style="font-size: 18px; font-weight: 600; letter-spacing: -0.2px">{{ screenTitle }}</div>
+        <div style="font-size: 13px; color: {{ T.faint }}">{{ screenSub }}</div>
+      </div>
+      <div style="margin-left: auto; display: flex; align-items: center; gap: 20px">
+        <div onClick="{{ toggleTheme }}" title="Switch theme" style="{{ themeBtnStyle }}">
+          <sc-if value="{{ isDark }}" hint-placeholder-val="{{ true }}">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+          </sc-if>
+          <sc-if value="{{ isLight }}" hint-placeholder-val="{{ false }}">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path></svg>
+          </sc-if>
+        </div>
+        <div style="display: flex; align-items: center; gap: 9px; padding: 7px 13px; border: 1px solid {{ T.edge }}; background: {{ T.panel2 }}">
+          <div style="width: 7px; height: 7px; background: #F04A52; animation: dmPulse 1.6s ease-in-out infinite"></div>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: {{ T.ink2 }}">2 events at VP threshold</span>
+        </div>
+        <div style="text-align: right; font-family: 'IBM Plex Mono', monospace">
+          <div style="font-size: 18px; font-weight: 600">{{ clock }}</div>
+          <div style="font-size: 10px; color: {{ T.faint }}; letter-spacing: 0.12em">UTC · 11 FEB 2026</div>
+        </div>
+        <div style="width: 34px; height: 34px; border: 1px solid {{ T.edge }}; background: {{ T.track }}; display: grid; place-items: center; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: {{ T.ink3 }}">DM</div>
+      </div>
+    </div>
+
+    <sc-if value="{{ isEvent }}" hint-placeholder-val="{{ false }}">
+      <div style="flex: 0 0 auto; background: {{ T.panelAlt }}; border-bottom: 1px solid {{ T.line }}; padding: 16px 26px 0">
+        <div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 22px; margin-bottom: 14px">
+          <div style="{{ ev.bigScoreBox }}">
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 40px; font-weight: 600; line-height: 1">{{ ev.score }}</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.16em; opacity: .85; margin-top: 5px">EDPS</div>
+          </div>
+          <div style="flex: 1 1 460px; min-width: 380px">
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-bottom: 6px; font-family: 'IBM Plex Mono', monospace; font-size: 12px">
+              <span style="color: {{ T.teal }}; letter-spacing: 0.08em">{{ ev.ref }}</span>
+              <span style="color: {{ T.mute2 }}">{{ ev.cat }}</span>
+              <span style="color: {{ T.mute2 }}">{{ ev.where }}</span>
+              <span style="color: {{ T.mute2 }}">Detected {{ ev.detected }}</span>
+            </div>
+            <div style="font-size: 27px; font-weight: 700; letter-spacing: -0.6px; margin-bottom: 9px">{{ ev.name }}</div>
+            <div style="font-size: 14.5px; color: {{ T.ink3 }}; line-height: 1.6; max-width: 1080px; text-wrap: pretty">{{ ev.summary }}</div>
+          </div>
+          <div style="flex: 0 0 auto; display: grid; grid-template-columns: repeat(2, auto); gap: 1px; background: {{ T.line2 }}; border: 1px solid {{ T.line2 }}">
+            <sc-for list="{{ ev.headStats }}" as="h" hint-placeholder-count="4">
+              <div style="background: {{ T.panel2 }}; padding: 12px 18px; min-width: 124px">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: {{ T.faint2 }}; letter-spacing: 0.14em; margin-bottom: 6px">{{ h.k }}</div>
+                <div style="{{ h.style }}">{{ h.v }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display: flex; gap: 4px">
+          <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+            <div onClick="{{ t.go }}" style="{{ t.style }}" style-hover="color: {{ T.ink }}">{{ t.label }}</div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <div style="flex: 1; min-height: 0; overflow: auto">
+
+      <sc-if value="{{ isBoard }}" hint-placeholder-val="{{ true }}">
+        <div style="padding: 18px 26px 28px">
+          <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-bottom: 16px; border-bottom: 1px solid {{ T.track }}; margin-bottom: 18px">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{ T.faint2 }}; letter-spacing: 0.14em">CATEGORY</span>
+            <div style="display: flex; gap: 7px; flex-wrap: wrap">
+              <sc-for list="{{ catFilters }}" as="c" hint-placeholder-count="6">
+                <div onClick="{{ c.go }}" style="{{ c.style }}">{{ c.label }}</div>
+              </sc-for>
+            </div>
+            <div style="width: 1px; height: 24px; background: {{ T.line2 }}"></div>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{ T.faint2 }}; letter-spacing: 0.14em">MIN EDPS</span>
+            <input type="range" min="0" max="90" step="5" value="{{ minScore }}" onChange="{{ setMin }}" style="width: 140px; accent-color: {{ T.teal }}" />
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: {{ T.ink2 }}; width: 24px">{{ minScore }}</span>
+            <div style="width: 1px; height: 24px; background: {{ T.line2 }}"></div>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{ T.faint2 }}; letter-spacing: 0.14em">SORT</span>
+            <div style="display: flex; gap: 7px">
+              <sc-for list="{{ sortOpts }}" as="s" hint-placeholder-count="3">
+                <div onClick="{{ s.go }}" style="{{ s.style }}">{{ s.label }}</div>
+              </sc-for>
+            </div>
+            <div style="margin-left: auto; display: flex; align-items: center; gap: 10px">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{ T.faint2 }}; letter-spacing: 0.14em">LAYOUT</span>
+              <div style="display: flex; gap: 7px">
+                <sc-for list="{{ layoutOpts }}" as="l" hint-placeholder-count="2">
+                  <div onClick="{{ l.go }}" style="{{ l.style }}">{{ l.label }}</div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+
+          <sc-if value="{{ isRanked }}" hint-placeholder-val="{{ true }}">
+            <div>
+              <div style="display: grid; grid-template-columns: 64px minmax(200px, 2.4fr) minmax(96px, 0.9fr) minmax(110px, 1fr) 88px 124px 118px; gap: 16px; padding: 0 16px 10px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{ T.faint2 }}; letter-spacing: 0.12em; border-bottom: 1px solid {{ T.line2 }}">
+                <div>EDPS</div><div>EVENT</div><div>CONFIDENCE</div><div>TRAJECTORY</div><div>TO IMPACT</div><div>DOMAINS</div><div>ESCALATION</div>
+              </div>
+              <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+                <div onClick="{{ r.go }}" style="{{ r.rowStyle }}" style-hover="background: {{ T.selBg }}">
+                  <div style="{{ r.scoreBox }}">{{ r.score }}</div>
+                  <div style="min-width: 0; align-self: center">
+                    <div style="font-size: 16px; font-weight: 600; letter-spacing: -0.2px; margin-bottom: 3px">{{ r.name }}</div>
+                    <div style="font-size: 12.5px; color: {{ T.mute2 }}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ r.cat }} · {{ r.where }}</div>
+                  </div>
+                  <div style="align-self: center">
+                    <div style="display: flex; gap: 4px; margin-bottom: 6px">
+                      <sc-for list="{{ r.confBars }}" as="b" hint-placeholder-count="4">
+                        <div style="{{ b.style }}"></div>
+                      </sc-for>
+                    </div>
+                    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: {{ T.mute2 }}">{{ r.confLabel }}</div>
+                  </div>
+                  <div style="align-self: center; font-family: 'IBM Plex Mono', monospace; font-size: 13px; display: flex; align-items: center; gap: 7px">
+                    <span style="{{ r.trajStyle }}">{{ r.trajArrow }}</span>
+                    <span style="color: {{ T.mute }}">{{ r.traj }}</span>
+                  </div>
+                  <div style="align-self: center; font-family: 'IBM Plex Mono', monospace; font-size: 15px; color: {{ T.ink2 }}">{{ r.tti }}</div>
+                  <div style="align-self: center; display: flex; gap: 4px">
+                    <sc-for list="{{ r.domDots }}" as="d" hint-placeholder-count="9">
+                      <div title="{{ d.name }}" style="{{ d.style }}"></div>
+                    </sc-for>
+                  </div>
+                  <div style="align-self: center"><div style="{{ r.escStyle }}">{{ r.escShort }}</div></div>
+                </div>
+              </sc-for>
+              <div style="display: flex; gap: 26px; padding: 16px 16px 0; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: {{ T.faint2 }}">
+                <span>EDPS = External Disruption Potential Score (0–100)</span>
+                <span>Domain squares shaded by strength of implication</span>
+                <span>{{ rowCount }} of 6 active events shown</span>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isLanes }}" hint-placeholder-val="{{ false }}">
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: start">
+              <sc-for list="{{ lanes }}" as="ln" hint-placeholder-count="4">
+                <div style="border: 1px solid {{ T.line2 }}; background: {{ T.panel }}; min-height: 220px">
+                  <div style="{{ ln.headStyle }}">
+                    <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px">
+                      <span style="font-size: 15px; font-weight: 700">{{ ln.title }}</span>
+                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: {{ T.mute }}">{{ ln.count }}</span>
+                    </div>
+                    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: {{ T.mute2 }}; margin-top: 5px">{{ ln.owner }}</div>
+                  </div>
+                  <div style="padding: 13px; display: flex; flex-direction: column; gap: 13px">
+                    <sc-for list="{{ ln.events }}" as="e" hint-placeholder-count="2">
+                      <div onClick="{{ e.go }}" style="{{ e.cardStyle }}" style-hover="border-color: {{ T.hoverBorder }}">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 9px">
+                          <div style="font-size: 15px; font-weight: 600; line-height: 1.3; text-wrap: pretty">{{ e.name }}</div>
+                          <div style="{{ e.scoreBox }}">{{ e.score }}</div>
+                        </div>
+                        <div style="font-size: 12.5px; color: {{ T.mute2 }}; margin-bottom: 11px">{{ e.where }}</div>
+                        <div style="display: flex; flex-direction: column; gap: 5px; font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: {{ T.mute }}">
+                          <div style="display: flex; justify-content: space-between"><span>Impact in</span><span style="color: {{ T.ink2 }}">{{ e.tti }}</span></div>
+                          <div style="display: flex; justify-content: space-between"><span>Confidence</span><span style="color: {{ T.ink2 }}">{{ e.confLabel }}</span></div>
+                          <div style="display: flex; justify-content: space-between"><span>Trajectory</span><span style="{{ e.trajStyle }}">{{ e.traj }}</span></div>
+                        </div>
+                        <div style="display: flex; gap: 4px; margin-top: 12px; padding-top: 11px; border-top: 1px solid {{ T.line }}">
+                          <sc-for list="{{ e.domDots }}" as="d" hint-placeholder-count="9">
+                            <div title="{{ d.name }}" style="{{ d.style }}"></div>
+                          </sc-for>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+        <div style="padding: 18px 26px 28px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start">
+
+          <div style="border: 1px solid {{ T.line2 }}; background: {{ T.panel }}">
+            <div style="padding: 14px 18px; border-bottom: 1px solid {{ T.line }}; display: flex; justify-content: space-between; align-items: baseline; gap: 12px">
+              <span style="font-size: 15px; font-weight: 600">Score composition</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: {{ T.faint }}">hover a factor for its evidence</span>
+            </div>
+            <div style="padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 13px">
+              <sc-for list="{{ ev.factors }}" as="f" hint-placeholder-count="8">
+                <div title="{{ f.why }}" style="cursor: help">
+                  <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px">
+                    <span style="font-size: 14px; color: {{ T.ink2 }}">{{ f.label }}</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: {{ T.mute }}">{{ f.readout }}</span>
+                  </div>
+                  <div style="height: 6px; background: {{ T.track }}"><div style="{{ f.barStyle }}"></div></div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="border: 1px solid {{ T.line2 }}; background: {{ T.panel }}">
+            <div style="padding: 14px 18px; border-bottom: 1px solid {{ T.line }}; display: flex; justify-content: space-between; align-items: baseline; gap: 12px">
+              <span style="font-size: 15px; font-weight: 600">Potentially affected operational domains</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: {{ T.faint }}">implication strength</span>
+            </div>
+            <div style="padding: 8px 0">
+              <sc-for list="{{ ev.domains }}" as="d" hint-placeholder-count="9">
+                <div style="display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(60px, 1fr) 68px; gap: 12px; align-items: center; padding: 9px 18px">
+                  <span style="font-size: 14px; color: {{ T.ink2 }}; min-width: 0">{{ d.name }}</span>
+                  <div style="height: 6px; background: {{ T.track }}"><div style="{{ d.barStyle }}"></div></div>
+                  <span style="{{ d.tagStyle }}">{{ d.level }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="padding: 13px 18px; border-top: 1px solid {{ T.line }}; font-size: 13px; color: {{ T.mute2 }}; line-height: 1.55; text-wrap: pretty">External indication only. DisruptionMatrix holds no airline schedule, crew or fleet data and does not identify affected flights.</div>
+          </div>
+
+          <div style="grid-column: 1 / -1; min-width: 0; border: 1px solid {{ T.line2 }}; background: {{ T.panel }}">
+            <div style="padding: 14px 18px; border-bottom: 1px solid {{ T.line }}; display: flex; justify-content: space-between; align-items: baseline; gap: 12px">
+              <span style="font-size: 15px; font-weight: 600">Airports in the area of effect</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: {{ T.faint }}">{{ ops.airportCount }} airports · published movements</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 56px minmax(200px, 1fr) 88px 100px; gap: 12px; padding: 9px 18px; border-bottom: 1px solid {{ T.line2 }}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{ T.faint2 }}; letter-spacing: 0.12em">
+              <div>IATA</div><div>AIRPORT</div><div>MOVES/DAY</div><div>EXPOSURE</div>
+            </div>
+            <sc-for list="{{ ops.airports }}" as="a" hint-placeholder-count="6">
+              <div style="display: grid; grid-template-columns: 56px minmax(200px, 1fr) 88px 100px; gap: 12px; padding: 11px 18px; border-bottom: 1px solid {{ T.hover }}; align-items: center">
+                <div style="{{ a.codeStyle }}">{{ a.iata }}</div>
+                <div style="min-width: 0">
+                  <div style="display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap">
+                    <span style="font-size: 14px; font-weight: 600">{{ a.name }}</span>
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{ T.mute }}">{{ a.role }}</span>
+                  </div>
+                  <div style="font-size: 12px; color: {{ T.mute2 }}; line-height: 1.45; text-wrap: pretty">{{ a.note }}</div>
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{ T.teal }}; margin-top: 3px">{{ a.window }}</div>
+                </div>
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: {{ T.ink2 }}">{{ a.movements }}</div>
+                <div>
+                  <div style="height: 6px; background: {{ T.track }}; margin-bottom: 5px"><div style="{{ a.barStyle }}"></div></div>
+                  <div style="{{ a.tagStyle }}">{{ a.level }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="grid-column: 1 / -1; min-width: 0; border: 1px solid {{ T.line2 }}; background: {{ T.panel }}">
+            <div style="padding: 14px 18px; border-bottom: 1px solid {{ T.line }}; display: flex; justify-content: space-between; align-items: baseline; gap: 12px">
+              <span style="font-size: 15px; font-weight: 600">Airlines with operations at these airports</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: {{ T.faint }}">{{ ops.airlineCount }} carriers</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 48px minmax(200px, 1fr) 108px 96px; gap: 12px; padding: 9px 18px; border-bottom: 1px solid {{ T.line2 }}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{ T.faint2 }}; letter-spacing: 0.12em">
+              <div>CODE</div><div>CARRIER</div><div>FLIGHTS · NETWORK</div><div>EXPOSURE</div>
+            </div>
+            <sc-for list="{{ ops.airlines }}" as="c" hint-placeholder-count="7">
+              <div style="display: grid; grid-template-columns: 48px minmax(200px, 1fr) 108px 96px; gap: 12px; padding: 11px 18px; border-bottom: 1px solid {{ T.hover }}; align-items: center">
+                <div style="{{ c.codeStyle }}">{{ c.code }}</div>
+                <div style="min-width: 0">
+                  <div style="font-size: 14px; font-weight: 600">{{ c.name }}</div>
+                  <div style="font-size: 12px; color: {{ T.mute2 }}; line-height: 1.45; text-wrap: pretty">{{ c.note }}</div>
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: {{ T.faint }}; margin-top: 3px">{{ c.airports }}</div>
+                </div>
+                <div>
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: {{ T.ink2 }}">{{ c.daily }} <span style="font-size: 11.5px; color: {{ T.mute }}">· {{ c.netShare }}%</span></div>
+                  <div style="height: 6px; background: {{ T.track }}; margin-top: 5px"><div style="{{ c.barStyle }}"></div></div>
+                </div>
+                <div style="{{ c.tagStyle }}">{{ c.exposure }}</div>
+              </div>
+            </sc-for>
+            <div style="padding: 13px 18px; border-top: 1px solid {{ T.line }}; font-size: 12.5px; color: {{ T.mute2 }}; line-height: 1.55; text-wrap: pretty">{{ ops.basis }} Carrier exposure is inferred from public data only — DisruptionMatrix holds no airline's own schedule, crew or fleet records.</div>
+          </div>
+
+          <div style="border: 1px solid {{ T.line2 }}; background: {{ T.panel }}">
+            <div style="padding: 14px 18px; border-bottom: 1px solid {{ T.line }}; display: flex; justify-content: space-between; align-items: baseline; gap: 12px">
+              <span style="font-size: 15px; font-weight: 600">Knock-on effect pathway</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: {{ T.faint }}">reasoned causal chain</span>
+            </div>
+            <div style="padding: 16px 18px 18px">
+              <sc-for list="{{ ev.chain }}" as="c" hint-placeholder-count="4">
+                <div style="display: grid; grid-template-columns: 108px 1fr; gap: 14px; padding-bottom: 16px">
+                  <div><div style="{{ c.ordStyle }}">{{ c.ord }}</div></div>
+                  <div style="border-left: 1px solid {{ T.edge }}; padding-left: 16px">
+                    <div style="font-size: 15px; font-weight: 600; margin-bottom: 5px">{{ c.title }}</div>
+                    <div style="font-size: 13.5px; color: {{ T.mute }}; line-height: 1.55; text-wrap: pretty">{{ c.detail }}</div>
+                    <div style="display: flex; gap: 16px; margin-top: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: {{ T.faint }}">
+                      <span>likelihood {{ c.lik }}</span>
+                      <span>lead time {{ c.lead }}</span>
+                    </div>
+                  </div>
+                </div>
+              </sc-for>
+              <div style="font-size: 13px; color: {{ T.mute2 }}; line-height: 1.55; padding-top: 4px; border-top: 1px solid {{ T.track }}; text-wrap: pretty">Pathways are plausible consequences offered for scenario framing. They are not a recovery plan.</div>
+            </div>
+          </div>
+
+          <div style="border: 1px solid {{ T.line2 }}; background: {{ T.panel }}">
+            <div style="padding: 14px 18px; border-bottom: 1px solid {{ T.line }}; display: flex; justify-content: space-between; align-items: baseline; gap: 12px">
+              <span style="font-size: 15px; font-weight: 600">Evidence trail</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: {{ T.faint }}">{{ ev.evidenceCount }} correlated reports</span>
+            </div>
+            <div>
+              <sc-for list="{{ ev.evidence }}" as="s" hint-placeholder-count="6">
+                <div style="padding: 13px 18px; border-bottom: 1px solid {{ T.hover }}">
+                  <div style="display: flex; align-items: center; gap: 11px; margin-bottom: 6px; flex-wrap: wrap">
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: {{ T.faint }}">{{ s.time }}</span>
+                    <span style="font-size: 14px; font-weight: 600; color: {{ T.ink2 }}">{{ s.source }}</span>
+                    <span style="{{ s.credStyle }}">{{ s.cred }}</span>
+                    <span style="{{ s.roleStyle }}">{{ s.role }}</span>
+                  </div>
+                  <div style="font-size: 13.5px; color: {{ T.mute }}; line-height: 1.55; text-wrap: pretty">{{ s.text }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: {{ T.line }}; border-top: 1px solid {{ T.line }}">
+              <div style="background: {{ T.panel2 }}; padding: 15px 18px">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: {{ T.faint2 }}; letter-spacing: 0.14em; margin-bottom: 10px">STATED ASSUMPTIONS</div>
+                <sc-for list="{{ ev.assumptions }}" as="a" hint-placeholder-count="3">
+                  <div style="display: flex; gap: 9px; font-size: 13px; color: {{ T.ink3 }}; line-height: 1.5; margin-bottom: 7px">
+                    <span style="color: {{ T.teal }}">·</span><span style="text-wrap: pretty">{{ a }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="background: {{ T.panel2 }}; padding: 15px 18px">
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: {{ T.faint2 }}; letter-spacing: 0.14em; margin-bottom: 10px">INFORMATION GAPS</div>
+                <sc-for list="{{ ev.gaps }}" as="g" hint-placeholder-count="3">
+                  <div style="display: flex; gap: 9px; font-size: 13px; color: {{ T.ink3 }}; line-height: 1.5; margin-bottom: 7px">
+                    <span style="color: #F59E2B">?</span><span style="text-wrap: pretty">{{ g }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isProcess }}" hint-placeholder-val="{{ false }}">
+        <div style="padding: 18px 26px 28px">
+          <div style="border: 1px solid {{ T.line2 }}; background: {{ T.panel }}; margin-bottom: 18px">
+            <div style="padding: 14px 18px; border-bottom: 1px solid {{ T.line }}; display: flex; justify-content: space-between; align-items: baseline; gap: 12px">
+              <span style="font-size: 15px; font-weight: 600">Escalation model</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: {{ T.faint }}">level derived from score × confidence · current level highlighted</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: {{ T.line }}">
+              <sc-for list="{{ escLevels }}" as="l" hint-placeholder-count="4">
+                <div style="{{ l.cardStyle }}">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px">
+                    <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.12em; color: {{ T.mute2 }}">{{ l.code }}</span>
+                    <span style="{{ l.badgeStyle }}">{{ l.badge }}</span>
+                  </div>
+                  <div style="font-size: 15px; font-weight: 600; margin-bottom: 6px">{{ l.title }}</div>
+                  <div style="font-size: 13px; color: {{ T.mute }}; line-height: 1.5; margin-bottom: 10px; text-wrap: pretty">{{ l.desc }}</div>
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: {{ T.faint }}">{{ l.trigger }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="border: 1px solid {{ T.line2 }}; background: {{ T.panel }}">
+            <div style="padding: 14px 18px; border-bottom: 1px solid {{ T.line }}; display: flex; justify-content: space-between; align-items: baseline; gap: 12px">
+              <span style="font-size: 15px; font-weight: 600">Disruption response process</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: {{ T.faint }}">{{ processDone }} of {{ processTotal }} steps marked complete · click a step to toggle</span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 1px; background: {{ T.line }}">
+              <sc-for list="{{ phases }}" as="p" hint-placeholder-count="6">
+                <div style="background: {{ T.panel }}">
+                  <div style="{{ p.headStyle }}">
+                    <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px">
+                      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: {{ T.faint }}">{{ p.num }}</span>
+                      <span style="font-size: 14.5px; font-weight: 700; line-height: 1.25">{{ p.title }}</span>
+                    </div>
+                    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: {{ T.mute2 }}">{{ p.owner }}</div>
+                    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: {{ T.teal }}; margin-top: 3px">{{ p.window }}</div>
+                  </div>
+                  <div style="padding: 12px; display: flex; flex-direction: column; gap: 9px">
+                    <sc-for list="{{ p.steps }}" as="s" hint-placeholder-count="4">
+                      <div onClick="{{ s.toggle }}" style="display: grid; grid-template-columns: 16px 1fr; gap: 10px; cursor: pointer; padding: 5px 6px" style-hover="background: {{ T.selBg }}">
+                        <div style="{{ s.boxStyle }}">{{ s.mark }}</div>
+                        <div style="{{ s.textStyle }}">{{ s.text }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isSop }}" hint-placeholder-val="{{ false }}">
+        <div style="padding: 18px 26px 28px">
+          <div style="display: flex; align-items: baseline; gap: 18px; margin-bottom: 6px">
+            <div style="font-size: 17px; font-weight: 600">{{ sop.title }}</div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: {{ T.mute2 }}">{{ sop.meta }}</div>
+          </div>
+          <div style="font-size: 13.5px; color: {{ T.mute2 }}; margin-bottom: 18px; max-width: 1000px; line-height: 1.55; text-wrap: pretty">Playbook content is configured by the airline. DisruptionMatrix schedules and surfaces it against the event clock; it neither authors nor executes the actions.</div>
+
+          <div style="display: flex; gap: 1px; background: {{ T.line }}; border: 1px solid {{ T.line2 }}; margin-bottom: 16px">
+            <sc-for list="{{ sop.gates }}" as="g" hint-placeholder-count="4">
+              <div style="{{ g.gateStyle }}">
+                <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 14px; margin-bottom: 5px">
+                  <span style="font-size: 15px; font-weight: 700">{{ g.name }}</span>
+                  <span style="{{ g.stateStyle }}">{{ g.state }}</span>
+                </div>
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: {{ T.mute2 }}">{{ g.window }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="border: 1px solid {{ T.line2 }}; background: {{ T.panel }}">
+            <div style="display: grid; grid-template-columns: 160px 130px 1fr 180px 130px; gap: 18px; padding: 11px 18px; border-bottom: 1px solid {{ T.line2 }}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: {{ T.faint2 }}; letter-spacing: 0.12em">
+              <div>GATE</div><div>TIMING</div><div>ACTION</div><div>OWNING DESK</div><div>TYPE</div>
+            </div>
+            <sc-for list="{{ sop.actions }}" as="a" hint-placeholder-count="12">
+              <div style="{{ a.rowStyle }}" style-hover="background: {{ T.selBg }}">
+                <div><span style="{{ a.gateTagStyle }}">{{ a.gate }}</span></div>
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: {{ T.ink3 }}">{{ a.timing }}</div>
+                <div style="font-size: 14px; color: {{ T.ink2 }}; line-height: 1.5; text-wrap: pretty">{{ a.text }}</div>
+                <div style="font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; color: {{ T.mute }}">{{ a.desk }}</div>
+                <div><span style="{{ a.typeStyle }}">{{ a.type }}</span></div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isRetro }}" hint-placeholder-val="{{ false }}">
+        <div style="padding: 18px 26px 28px">
+          <div style="display: flex; align-items: flex-start; gap: 26px; margin-bottom: 18px">
+            <div>
+              <div style="font-size: 17px; font-weight: 600; margin-bottom: 6px">When could we have known?</div>
+              <div style="font-size: 13.5px; color: {{ T.mute2 }}; max-width: 760px; line-height: 1.55; text-wrap: pretty">Intelligence availability against organisational action, reconstructed for {{ ev.ref }}. Used in post-event review to test whether escalation thresholds were set correctly.</div>
+            </div>
+            <div style="margin-left: auto; display: grid; grid-template-columns: repeat(3, auto); gap: 1px; background: {{ T.line2 }}; border: 1px solid {{ T.line2 }}">
+              <sc-for list="{{ retro.stats }}" as="s" hint-placeholder-count="3">
+                <div style="background: {{ T.panel2 }}; padding: 13px 20px; min-width: 156px">
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: {{ T.faint2 }}; letter-spacing: 0.14em; margin-bottom: 7px">{{ s.k }}</div>
+                  <div style="{{ s.style }}">{{ s.v }}</div>
+                  <div style="font-size: 12px; color: {{ T.faint }}; margin-top: 4px">{{ s.note }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="border: 1px solid {{ T.line2 }}; background: {{ T.panel }}">
+            <div style="display: grid; grid-template-columns: 1fr 120px 1fr; gap: 1px; background: {{ T.line }}; border-bottom: 1px solid {{ T.line }}; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em">
+              <div style="background: {{ T.panel2 }}; padding: 11px 18px; text-align: right; color: {{ T.teal }}">INTELLIGENCE AVAILABLE</div>
+              <div style="background: {{ T.panel2 }}"></div>
+              <div style="background: {{ T.panel2 }}; padding: 11px 18px; color: #F59E2B">ORGANISATIONAL ACTION TAKEN</div>
+            </div>
+            <sc-for list="{{ retro.rows }}" as="r" hint-placeholder-count="8">
+              <div style="display: grid; grid-template-columns: 1fr 120px 1fr; align-items: stretch; border-bottom: 1px solid {{ T.hover }}">
+                <div style="padding: 15px 22px; display: flex; justify-content: flex-end; align-items: center">
+                  <sc-if value="{{ r.hasIntel }}" hint-placeholder-val="{{ true }}">
+                    <div style="text-align: right; max-width: 560px">
+                      <div style="font-size: 14.5px; font-weight: 600; color: {{ T.ink2 }}; margin-bottom: 4px">{{ r.intelTitle }}</div>
+                      <div style="font-size: 13px; color: {{ T.mute }}; line-height: 1.5; text-wrap: pretty">{{ r.intelDetail }}</div>
+                      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: {{ T.teal }}; margin-top: 5px">EDPS {{ r.edps }} · conf {{ r.conf }}</div>
+                    </div>
+                  </sc-if>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 9px; background: {{ T.panel }}; border-left: 1px solid {{ T.track }}; border-right: 1px solid {{ T.track }}; padding: 15px 0">
+                  <div style="font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: {{ T.ink3 }}">{{ r.time }}</div>
+                  <div style="{{ r.dotStyle }}"></div>
+                </div>
+                <div style="padding: 15px 22px; display: flex; align-items: center">
+                  <sc-if value="{{ r.hasAction }}" hint-placeholder-val="{{ false }}">
+                    <div style="max-width: 560px">
+                      <div style="font-size: 14.5px; font-weight: 600; color: {{ T.ink2 }}; margin-bottom: 4px">{{ r.actionTitle }}</div>
+                      <div style="font-size: 13px; color: {{ T.mute }}; line-height: 1.5; text-wrap: pretty">{{ r.actionDetail }}</div>
+                      <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: #F59E2B; margin-top: 5px">{{ r.actionRole }}</div>
+                    </div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+
+    <div style="flex: 0 0 auto; border-top: 1px solid {{ T.line }}; background: {{ T.sunken }}; display: flex; align-items: center; padding: 10px 26px; gap: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: {{ T.faint }}">
+      <span>DisruptionMatrix advises and qualifies external threats. It does not decide. No airline schedule, crew, fleet or passenger data is used.</span>
+      <span style="margin-left: auto">Synthetic data · IATA workshop build 0.9.4</span>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const CRIT = '#F04A52', HIGH = '#F59E2B', MOD = '#E0C64A', LOW = '#5B92C9', OK = '#31C48D', TEAL = '#4CC2CE';
+const THEME_DARK = { bg: '#0A0E13', sunken: '#080B10', panel: '#0C1118', panelAlt: '#0B1017', panel2: '#0F1620',
+  line: '#1B2531', line2: '#1F2A36', edge: '#22303E', hover: '#131C26', hoverBorder: '#3A4B5C', selBg: '#111A24',
+  track: '#16202B', dim: '#3C566E', ink: '#E7ECF2', ink2: '#C6D0DB', ink3: '#A9B5C2', mute: '#8794A5',
+  mute2: '#6C7A89', faint: '#5C6976', faint2: '#4A5663', teal: '#4CC2CE' };
+const THEME_LIGHT = { bg: '#F2F5F8', sunken: '#FFFFFF', panel: '#FFFFFF', panelAlt: '#FAFBFC', panel2: '#F5F8FA',
+  line: '#DCE3EA', line2: '#CFD8E1', edge: '#C3CDD8', hover: '#EEF3F7', hoverBorder: '#AEB9C4', selBg: '#E8F4F5',
+  track: '#E3E9EF', dim: '#B9C4CE', ink: '#121A22', ink2: '#22303E', ink3: '#3C4B5A', mute: '#5C6976',
+  mute2: '#6C7A89', faint: '#8794A5', faint2: '#94A2AF', teal: '#2F8E9C' };
+const MONO = "font-family: 'IBM Plex Mono', monospace; ";
+const TABS = [
+  { id: 'detail', label: 'Assessment' },
+  { id: 'process', label: 'Escalation & response' },
+  { id: 'sop', label: 'Event-type SOP' },
+  { id: 'retro', label: 'Retrospective' }
+];
+const TITLES = {
+  board: ['Active external threat board', 'Correlated public-source events ranked by disruption potential'],
+  detail: ['Event assessment', 'Score composition, exposure, knock-on reasoning and evidence'],
+  process: ['Escalation and response', 'Threshold model and phased flow, owned by role'],
+  sop: ['Event-type standard operating procedure', 'Airline-configured, time-phased action list'],
+  retro: ['Retrospective intelligence review', 'Intelligence availability versus action taken']
+};
+const CATS = ['All', 'Weather', 'Industrial action', 'Geopolitical', 'Infrastructure', 'Regulatory'];
+const SORTS = [{ id: 'score', label: 'EDPS' }, { id: 'tti', label: 'Time to impact' }, { id: 'traj', label: 'Trajectory' }];
+const LAYOUTS = [{ id: 'ranked', label: 'Ranked list' }, { id: 'lanes', label: 'Escalation lanes' }];
+
+function scoreColor(s) { return s >= 80 ? CRIT : s >= 65 ? HIGH : s >= 45 ? MOD : LOW; }
+function confLabel(c) { return c >= 4 ? 'High' : c >= 3 ? 'Moderate' : c >= 2 ? 'Low' : 'Very low'; }
+function tag(color, bg) { return MONO + 'font-size: 11px; letter-spacing: 0.06em; padding: 4px 8px; color: ' + color + '; border: 1px solid ' + color + '; background: ' + (bg || 'transparent') + ';'; }
+
+class Component extends DCLogic {
+  state = { screen: 'board', sel: 'storm', cat: 'All', minScore: 0, sort: 'score', layout: 'ranked', done: {}, clock: '18:42:07', theme: localStorage.getItem('dm-app-theme') || 'dark' };
+
+  theme() { return this.state.theme === 'light' ? THEME_LIGHT : THEME_DARK; }
+  setTheme(t) { localStorage.setItem('dm-app-theme', t); this.setState({ theme: t }); }
+
+  componentDidMount() {
+    const q = new URLSearchParams(window.location.search).get('event');
+    if (q) this.setState({ sel: q, screen: 'detail' });
+    this.t0 = Date.now();
+    this.timer = setInterval(() => this.tick(), 1000);
+    if (!window.DM_DATA) {
+      this.poll = setInterval(() => { if (window.DM_DATA) { clearInterval(this.poll); this.forceUpdate(); } }, 120);
+    }
+  }
+  componentWillUnmount() { clearInterval(this.timer); clearInterval(this.poll); }
+  tick() {
+    const d = new Date(Date.parse('2026-02-11T18:42:07Z') + (Date.now() - this.t0));
+    const p = (n) => String(n).padStart(2, '0');
+    this.setState({ clock: p(d.getUTCHours()) + ':' + p(d.getUTCMinutes()) + ':' + p(d.getUTCSeconds()) });
+  }
+
+  pill(active) {
+    return MONO + 'font-size: 12.5px; letter-spacing: 0.03em; padding: 7px 12px; cursor: pointer; border: 1px solid ' +
+      (active ? TEAL : this._T.edge) + '; background: ' + (active ? 'rgba(76,194,206,0.12)' : this._T.panel2) + '; color: ' + (active ? this._T.ink : this._T.mute) + ';';
+  }
+  domDots(e, D) {
+    return D.map((name) => {
+      const hit = e.domains.filter((d) => d.name === name)[0];
+      const v = hit ? hit.v : 0;
+      const c = v >= 70 ? CRIT : v >= 45 ? HIGH : v >= 25 ? this._T.dim : this._T.line2;
+      return { name: name + ' · ' + (v ? v : 'not implicated'), style: 'width: 11px; height: 11px; background: ' + c + ';' };
+    });
+  }
+  confBars(c) { return [1, 2, 3, 4].map((i) => ({ style: 'width: 15px; height: 6px; background: ' + (i <= c ? TEAL : this._T.line2) + ';' })); }
+  trajStyle(t) { return 'color: ' + (t === 'Escalating' ? CRIT : t === 'Improving' ? OK : this._T.mute) + '; font-weight: 600;'; }
+  trajArrow(t) { return t === 'Escalating' ? '\u25B2' : t === 'Improving' ? '\u25BC' : '\u25A0'; }
+  scoreBox(s, size) {
+    const c = scoreColor(s);
+    return MONO + 'font-weight: 600; font-size: ' + (size || 17) + 'px; color: ' + c + '; border: 1px solid ' + c + '; background: ' + c + '1A; padding: 6px 9px; align-self: center; text-align: center;';
+  }
+  escStyle(l) {
+    const c = l >= 4 ? CRIT : l === 3 ? HIGH : this._T.edge;
+    return MONO + 'font-size: 12px; padding: 6px 9px; text-align: center; border: 1px solid ' + c + '; color: ' + (l >= 3 ? c : this._T.mute) + ';';
+  }
+  bar(v, c) { return 'height: 6px; width: ' + v + '%; background: ' + c + ';'; }
+  open(id) { this.setState((s) => ({ sel: id, screen: s.screen === 'board' ? 'detail' : s.screen })); }
+
+  rowVals(e, D) {
+    const ESC = window.DM_DATA.ESC;
+    const cur = this.state.sel === e.id;
+    return {
+      go: () => this.setState({ sel: e.id, screen: 'detail' }),
+      score: e.score, name: e.name, where: e.where, cat: e.cat, tti: e.tti, traj: e.traj, esc: e.esc,
+      scoreBox: this.scoreBox(e.score), confBars: this.confBars(e.conf), confLabel: confLabel(e.conf),
+      trajStyle: this.trajStyle(e.traj), trajArrow: this.trajArrow(e.traj), domDots: this.domDots(e, D),
+      escShort: 'L' + e.esc + ' ' + ESC[e.esc - 1].badge, escStyle: this.escStyle(e.esc),
+      cardStyle: 'border: 1px solid ' + this._T.edge + '; background: ' + this._T.panel2 + '; padding: 14px 15px; cursor: pointer;',
+      rowStyle: 'display: grid; grid-template-columns: 64px minmax(200px, 2.4fr) minmax(96px, 0.9fr) minmax(110px, 1fr) 88px 124px 118px; gap: 16px; padding: 15px 16px; cursor: pointer; border-bottom: 1px solid ' + this._T.hover + '; background: ' +
+        (cur ? this._T.selBg : 'transparent') + '; border-left: 3px solid ' + (cur ? TEAL : 'transparent') + ';'
+    };
+  }
+
+  renderVals() {
+    const st = this.state;
+    this._T = this.theme();
+    const T = this._T;
+    const isBoard = st.screen === 'board';
+    const isLight = st.theme === 'light';
+    const base = {
+      T: T, isDark: !isLight, isLight: isLight,
+      toggleTheme: () => this.setTheme(isLight ? 'dark' : 'light'),
+      themeBtnStyle: 'display: grid; place-items: center; width: 32px; height: 32px; cursor: pointer; border: 1px solid ' + T.edge + '; background: ' + T.panel2 + '; color: ' + T.mute + ';',
+      clock: st.clock, screenTitle: TITLES[st.screen][0], screenSub: TITLES[st.screen][1], minScore: st.minScore,
+      goBoard: () => this.setState({ screen: 'board' }),
+      boardNavStyle: 'display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; cursor: pointer; font-size: 15px; font-weight: 600; border: 1px solid ' +
+        (isBoard ? TEAL : this._T.line2) + '; background: ' + (isBoard ? 'rgba(76,194,206,0.1)' : this._T.panel) + '; color: ' + (isBoard ? this._T.ink : this._T.ink3) + ';',
+      isBoard: isBoard, isEvent: !isBoard,
+      isDetail: st.screen === 'detail', isProcess: st.screen === 'process', isSop: st.screen === 'sop', isRetro: st.screen === 'retro',
+      isRanked: isBoard && st.layout === 'ranked', isLanes: isBoard && st.layout === 'lanes',
+      tabs: TABS.map((t) => ({ label: t.label, go: () => this.setState({ screen: t.id }),
+        style: 'padding: 11px 18px; cursor: pointer; font-size: 14.5px; font-weight: 600; border: 1px solid ' + (st.screen === t.id ? this._T.line2 : 'transparent') +
+          '; border-bottom: none; background: ' + (st.screen === t.id ? this._T.panel : 'transparent') + '; color: ' + (st.screen === t.id ? this._T.ink : this._T.mute2) +
+          '; margin-bottom: -1px; box-shadow: ' + (st.screen === t.id ? 'inset 0 2px 0 ' + TEAL : 'none') + ';' }))
+    };
+    if (!window.DM_DATA) return base;
+
+    const D = window.DM_DATA;
+    const e = D.EVENTS.filter((x) => x.id === st.sel)[0] || D.EVENTS[0];
+    const order = { Escalating: 0, Stable: 1, Improving: 2 };
+    const rows = D.EVENTS.filter((x) => (st.cat === 'All' || x.cat === st.cat) && x.score >= st.minScore).slice().sort((a, b) =>
+      st.sort === 'score' ? b.score - a.score : st.sort === 'tti' ? a.ttiMin - b.ttiMin : (order[a.traj] - order[b.traj]) || (b.score - a.score));
+
+    const eventList = D.EVENTS.slice().sort((a, b) => b.score - a.score).map((x) => {
+      const cur = st.sel === x.id && !isBoard;
+      return {
+        score: x.score, name: x.name, tti: x.tti, esc: x.esc,
+        trajStyle: this.trajStyle(x.traj), trajArrow: this.trajArrow(x.traj),
+        scoreBox: this.scoreBox(x.score, 15),
+        go: () => this.setState((s) => ({ sel: x.id, screen: s.screen === 'board' ? 'detail' : s.screen })),
+        style: 'padding: 12px 13px; cursor: pointer; border: 1px solid ' + (cur ? TEAL : this._T.line) + '; background: ' + (cur ? this._T.selBg : this._T.panel) + ';'
+      };
+    });
+
+    const lanes = D.ESC.map((L, i) => {
+      const list = rows.filter((x) => x.esc === i + 1);
+      const c = i === 3 ? CRIT : i === 2 ? HIGH : i === 1 ? MOD : LOW;
+      return { title: L.title, owner: L.trigger, count: list.length ? list.length + ' active' : 'none',
+        headStyle: 'padding: 13px 15px; border-bottom: 1px solid ' + this._T.line + '; border-top: 3px solid ' + c + '; background: ' + this._T.panel2 + ';',
+        events: list.map((x) => this.rowVals(x, D.DOMAINS)) };
+    });
+
+    const sop = D.SOPS[e.sopKey];
+    const gateColors = { Active: OK, Closed: this._T.faint, Pending: this._T.mute };
+    const typeColor = { Conditional: HIGH, Gate: TEAL, Standing: this._T.mute2 };
+    const retro = D.RETRO[e.id] || null;
+    let processDone = 0, processTotal = 0;
+
+    const phases = D.PHASES.map((p) => {
+      const steps = p.steps.map((text, i) => {
+        const key = e.id + ':' + p.num + ':' + i;
+        const on = !!st.done[key];
+        processTotal++; if (on) processDone++;
+        return { text: text, mark: on ? '\u2713' : '',
+          toggle: () => this.setState((s) => { const d = Object.assign({}, s.done); d[key] = !d[key]; return { done: d }; }),
+          boxStyle: MONO + 'font-size: 11px; width: 16px; height: 16px; display: grid; place-items: center; border: 1px solid ' + (on ? OK : this._T.edge) + '; color: ' + (on ? OK : 'transparent') + '; background: ' + (on ? 'rgba(49,196,141,0.12)' : 'transparent') + ';',
+          textStyle: 'font-size: 13.5px; line-height: 1.45; text-wrap: pretty; color: ' + (on ? this._T.faint : this._T.ink2) + '; text-decoration: ' + (on ? 'line-through' : 'none') + ';' };
+      });
+      return { num: p.num, title: p.title, owner: p.owner, window: p.window, steps: steps,
+        headStyle: 'padding: 13px 13px; border-bottom: 1px solid ' + this._T.line + '; background: ' + this._T.panel2 + ';' };
+    });
+
+    return Object.assign(base, {
+      rows: rows.map((x) => this.rowVals(x, D.DOMAINS)), rowCount: rows.length, lanes: lanes,
+      eventList: eventList, activeCount: D.EVENTS.length,
+      catFilters: CATS.map((c) => ({ label: c, go: () => this.setState({ cat: c }), style: this.pill(st.cat === c) })),
+      sortOpts: SORTS.map((s) => ({ label: s.label, go: () => this.setState({ sort: s.id }), style: this.pill(st.sort === s.id) })),
+      layoutOpts: LAYOUTS.map((l) => ({ label: l.label, go: () => this.setState({ layout: l.id }), style: this.pill(st.layout === l.id) })),
+      setMin: (evt) => this.setState({ minScore: Number(evt.target.value) }),
+      processDone: processDone, processTotal: processTotal, phases: phases,
+      ops: (() => {
+        const o = (D.OPS || {})[e.id];
+        if (!o) return { airports: [], airlines: [], airportCount: 0, airlineCount: 0, basis: '' };
+        const expColor = (v) => v >= 75 ? CRIT : v >= 55 ? HIGH : v >= 40 ? MOD : LOW;
+        const lvlColor = (l) => l === 'Critical' ? CRIT : l === 'High' ? HIGH : l === 'Moderate' ? MOD : LOW;
+        return {
+          basis: o.basis, airportCount: o.airports.length, airlineCount: o.airlines.length,
+          airports: o.airports.map((a) => ({
+            iata: a.iata, name: a.name, role: a.role, movements: a.movements, note: a.note, window: a.window,
+            level: a.exposure >= 75 ? 'Critical' : a.exposure >= 55 ? 'High' : a.exposure >= 40 ? 'Medium' : 'Low',
+            codeStyle: MONO + 'font-size: 14px; font-weight: 600; padding: 5px 0; text-align: center; color: ' + expColor(a.exposure) + '; border: 1px solid ' + expColor(a.exposure) + '; background: ' + expColor(a.exposure) + '1A;',
+            barStyle: this.bar(a.exposure, expColor(a.exposure)),
+            tagStyle: MONO + 'font-size: 11.5px; color: ' + expColor(a.exposure) + ';'
+          })),
+          airlines: o.airlines.map((c) => ({
+            name: c.name, code: c.code, daily: c.daily, netShare: c.netShare, airports: c.airports, note: c.note, exposure: c.exposure,
+            codeStyle: MONO + 'font-size: 13px; font-weight: 600; padding: 5px 0; text-align: center; color: ' + this._T.ink2 + '; border: 1px solid ' + this._T.edge + '; background: ' + this._T.panel2 + ';',
+            barStyle: this.bar(c.netShare, lvlColor(c.exposure)),
+            tagStyle: tag(lvlColor(c.exposure)) + ' display: inline-block;'
+          }))
+        };
+      })(),
+      escLevels: D.ESC.map((L, i) => {
+        const cur = e.esc === i + 1;
+        const c = i === 3 ? CRIT : i === 2 ? HIGH : i === 1 ? MOD : LOW;
+        return { code: L.code, badge: L.badge, title: L.title, desc: L.desc, trigger: L.trigger,
+          cardStyle: 'padding: 16px 18px; background: ' + (cur ? this._T.selBg : this._T.panel) + '; border-top: 3px solid ' + (cur ? c : 'transparent') + ';',
+          badgeStyle: tag(cur ? c : this._T.dim, cur ? c + '1A' : 'transparent') };
+      }),
+      sop: { title: sop.title, meta: sop.meta,
+        gates: sop.gates.map((g) => ({ name: g.name, window: g.window, state: g.state,
+          gateStyle: 'flex: 1; padding: 14px 16px; background: ' + (g.state === 'Active' ? this._T.selBg : this._T.panel) + '; border-top: 3px solid ' + (g.state === 'Active' ? OK : this._T.line2) + ';',
+          stateStyle: tag(gateColors[g.state]) })),
+        actions: sop.actions.map((a) => ({ gate: a.gate, timing: a.timing, text: a.text, desk: a.desk, type: a.type,
+          rowStyle: 'display: grid; grid-template-columns: 160px 130px 1fr 180px 130px; gap: 18px; padding: 13px 18px; border-bottom: 1px solid ' + this._T.hover + '; align-items: center;',
+          gateTagStyle: tag(this._T.mute), typeStyle: tag(typeColor[a.type]) })) },
+      retro: retro ? {
+        stats: retro.stats.map((s, i) => ({ k: s.k, v: s.v, note: s.note, style: MONO + 'font-size: 16px; font-weight: 600; color: ' + (i === 2 ? HIGH : this._T.ink) + ';' })),
+        rows: retro.rows.map((r) => ({ time: r.time, edps: r.edps, conf: r.conf, hasIntel: !!r.intelTitle, hasAction: !!r.actionTitle,
+          intelTitle: r.intelTitle, intelDetail: r.intelDetail, actionTitle: r.actionTitle, actionDetail: r.actionDetail, actionRole: r.actionRole,
+          dotStyle: 'width: 11px; height: 11px; border-radius: 50%; background: ' + (r.actionTitle ? HIGH : TEAL) + ';' })) }
+        : { stats: [{ k: 'RETROSPECTIVE', v: 'Not available', note: 'Event still developing', style: MONO + 'font-size: 16px; color: ' + this._T.mute + ';' }], rows: [] },
+      ev: {
+        score: e.score, name: e.name, ref: e.ref, cat: e.cat, where: e.where, detected: e.detected, summary: e.summary, evidenceCount: e.evidence.length,
+        bigScoreBox: MONO + 'text-align: center; padding: 18px 24px; color: ' + scoreColor(e.score) + '; border: 1px solid ' + scoreColor(e.score) + '; background: ' + scoreColor(e.score) + '14;',
+        headStats: [
+          { k: 'CONFIDENCE', v: confLabel(e.conf), style: MONO + 'font-size: 16px; font-weight: 600; color: ' + TEAL + ';' },
+          { k: 'TRAJECTORY', v: e.traj, style: MONO + 'font-size: 16px; font-weight: 600; ' + this.trajStyle(e.traj) },
+          { k: 'TIME TO IMPACT', v: e.tti, style: MONO + 'font-size: 16px; font-weight: 600; color: ' + this._T.ink + ';' },
+          { k: 'ESCALATION', v: 'L' + e.esc + ' · ' + D.ESC[e.esc - 1].badge, style: MONO + 'font-size: 16px; font-weight: 600; color: ' + (e.esc >= 4 ? CRIT : e.esc === 3 ? HIGH : this._T.ink) + ';' }
+        ],
+        factors: e.factors.map((f) => ({ label: f.label, readout: f.readout, why: f.why, barStyle: this.bar(f.val, scoreColor(f.val)) })),
+        domains: e.domains.map((d) => ({ name: d.name, level: d.v >= 70 ? 'High' : d.v >= 45 ? 'Medium' : d.v >= 25 ? 'Low' : 'Minimal',
+          barStyle: this.bar(d.v, d.v >= 70 ? CRIT : d.v >= 45 ? HIGH : d.v >= 25 ? LOW : this._T.dim),
+          tagStyle: MONO + 'font-size: 12px; color: ' + (d.v >= 70 ? CRIT : d.v >= 45 ? HIGH : this._T.mute2) + ';' })),
+        chain: e.chain.map((c) => ({ ord: c.ord, title: c.title, detail: c.detail, lik: c.lik, lead: c.lead,
+          ordStyle: tag(c.ord === 'First order' ? CRIT : c.ord === 'Second order' ? HIGH : LOW) + ' display: inline-block;' })),
+        evidence: e.evidence.map((s) => ({ time: s.time, source: s.source, cred: s.cred, role: s.role, text: s.text,
+          credStyle: tag(s.cred === 'Tier 1' ? OK : s.cred === 'Tier 2' ? MOD : this._T.mute2),
+          roleStyle: tag(s.role === 'Contradicts' ? CRIT : s.role === 'Origin' ? TEAL : this._T.mute2) })),
+        assumptions: e.assumptions, gaps: e.gaps
+      }
+    });
+  }
+}
+</script>
+</body>
+</html>

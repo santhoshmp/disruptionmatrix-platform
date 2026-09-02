@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<title>DisruptionMatrix — Global threat map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+<script src="./dm-data.js"></script>
+<style>
+  :root[data-theme="dark"] {
+    --bg: #0A0E13; --panel: #0C1118; --panel2: #0F1620; --sunken: #0B1017;
+    --line: #1B2531; --line2: #1F2A36; --edge: #22303E;
+    --ink: #E7ECF2; --ink2: #C6D0DB; --ink3: #A9B5C2; --mute: #8794A5; --mute2: #6C7A89; --faint: #4A5663;
+    --hover: #131C26; --tilefilter: invert(1) hue-rotate(185deg) brightness(.92) contrast(.88) saturate(.55);
+    --pinstroke: #05080B;
+  }
+  :root[data-theme="light"] {
+    --bg: #F2F5F8; --panel: #FFFFFF; --panel2: #F7F9FB; --sunken: #FFFFFF;
+    --line: #DCE3EA; --line2: #CFD8E1; --edge: #C3CDD8;
+    --ink: #121A22; --ink2: #22303E; --ink3: #3C4B5A; --mute: #5C6976; --mute2: #6C7A89; --faint: #8794A5;
+    --hover: #EDF2F7; --tilefilter: saturate(.72) contrast(.94) brightness(1.02);
+    --pinstroke: #FFFFFF;
+  }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: 'IBM Plex Sans', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: #2F8E9C; text-decoration: none; }
+  :root[data-theme="dark"] a { color: #4CC2CE; }
+  a:hover { opacity: .82; }
+  .mono { font-family: 'IBM Plex Mono', monospace; }
+  #app { display: flex; flex-direction: column; height: 100vh; }
+  .topbar { flex: 0 0 auto; display: flex; align-items: center; gap: 24px;
+    padding: 14px 26px; background: var(--panel); border-bottom: 1px solid var(--line); }
+  .brandmark { width: 30px; height: 30px; border: 2px solid #2F8E9C; display: grid;
+    grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; padding: 4px; gap: 3px; }
+  :root[data-theme="dark"] .brandmark { border-color: #4CC2CE; }
+  .stage { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 400px; }
+  .mapwrap { position: relative; min-width: 0; min-height: 0; background: var(--sunken); }
+  .sidecol { border-left: 1px solid var(--line); background: var(--sunken); display: flex; flex-direction: column; min-height: 0; }
+  .maptools { flex: 0 0 auto; padding: 11px 20px; background: var(--panel); border-bottom: 1px solid var(--line);
+    display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 8px 12px; }
+  .toolrow { display: flex; align-items: center; gap: 6px; min-width: 0; }
+  .toolrow .btn { flex: 1 1 0; text-align: center; padding: 7px 6px; }
+  select.sel { flex: 1 1 auto; min-width: 0; font-family: 'IBM Plex Mono', monospace; font-size: 12.5px;
+    padding: 7px 10px; cursor: pointer; border: 1px solid var(--edge); background: var(--panel2); color: var(--ink2);
+    appearance: none; background-image: none; }
+  #map { position: absolute; inset: 0; background: var(--sunken); }
+  .leaflet-tile-pane { filter: var(--tilefilter); }
+  .leaflet-container { background: var(--sunken); font-family: 'IBM Plex Sans', system-ui, sans-serif; }
+  .leaflet-control-attribution { background: var(--panel) !important; color: var(--mute) !important;
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; }
+  .leaflet-control-attribution a { color: var(--mute) !important; }
+  .kicker { font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: .14em; color: var(--faint); }
+  .btn { font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; padding: 7px 12px; cursor: pointer;
+    border: 1px solid var(--edge); background: var(--panel2); color: var(--mute); }
+  .btn:hover { color: var(--ink2); }
+  .btn.on { border-color: #2F8E9C; background: rgba(47,142,156,.14); color: #1C6B77; }
+  :root[data-theme="dark"] .btn.on { border-color: #4CC2CE; background: rgba(76,194,206,.12); color: #BFE9EE; }
+  .side { flex: 1; min-height: 0; overflow: auto; display: flex; flex-direction: column; }
+  .card { padding: 18px 20px; border-bottom: 1px solid var(--line); }
+  .cta { display: block; width: 100%; box-sizing: border-box; text-align: center; padding: 13px 16px;
+    font-size: 14.5px; font-weight: 600; border: 1px solid #2F8E9C; background: rgba(47,142,156,.14); color: #1C6B77; cursor: pointer; }
+  :root[data-theme="dark"] .cta { border-color: #4CC2CE; background: rgba(76,194,206,.12); color: #BFE9EE; }
+  .cta:hover { filter: brightness(1.08); }
+  .domicon { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 56px; }
+  .domicon svg { width: 20px; height: 20px; }
+  .domicon span { font-size: 9.5px; line-height: 1.2; text-align: center; color: var(--mute); }
+  .footer { flex: 0 0 auto; padding: 10px 26px; background: var(--panel); border-top: 1px solid var(--line);
+    display: flex; gap: 20px; font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--mute); }
+  .legend { position: absolute; z-index: 500; top: 12px; right: 12px; display: flex; gap: 7px; align-items: center;
+    padding: 8px 11px; border: 1px solid var(--line2); background: var(--panel); }
+  .legend i { width: 11px; height: 11px; display: inline-block; }
+  .legend span { font-size: 11.5px; color: var(--mute); }
+  .pinwrap { display: grid; place-items: center; }
+  .pinwrap b { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; color: #05080B; }
+  .pinhalo { position: absolute; inset: -13px; border-radius: 50%; animation: haloPulse 2.6s ease-out infinite; }
+  @keyframes haloPulse { 0% { opacity: .34; transform: scale(.62) } 70%,100% { opacity: 0; transform: scale(1.8) } }
+  .pinlabel { font-family: 'IBM Plex Mono', monospace; font-size: 11px; white-space: nowrap;
+    color: var(--mute); text-align: center; margin-top: 3px; text-shadow: 0 0 4px var(--bg); }
+  ::-webkit-scrollbar { width: 11px; height: 11px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--edge); border-radius: 6px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="brandmark">
+        <div style="background:#2F8E9C"></div><div style="background:var(--edge)"></div>
+        <div style="background:var(--edge)"></div><div style="background:#F59E2B"></div>
+      </div>
+      <div>
+        <div style="font-size:17px;font-weight:700;letter-spacing:-.2px">DisruptionMatrix</div>
+        <div class="mono" style="font-size:10px;color:var(--mute);letter-spacing:.1em">GLOBAL THREAT MAP</div>
+      </div>
+    </div>
+    <div style="min-width:0">
+      <div style="font-size:18px;font-weight:600;letter-spacing:-.2px">Geographic threat picture</div>
+      <div style="font-size:13px;color:var(--mute)">Correlated external events plotted by area of effect — click a marker for its disruption card</div>
+    </div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:18px">
+      <button class="btn" id="themeToggleBtn" title="Switch theme" style="display:grid;place-items:center;width:32px;height:32px;padding:0">
+        <svg id="iconSun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg id="iconMoon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path></svg>
+      </button>
+      <a class="btn" href="DisruptionMatrix.dc.html">Threat board</a>
+      <a class="btn" href="Namma Air Threat Map.html">Namma Air map</a>
+      <a class="btn" href="Home.dc.html">Home</a>
+      <div style="text-align:right" class="mono">
+        <div id="clock" style="font-size:18px;font-weight:600">18:42:07</div>
+        <div style="font-size:10px;color:var(--mute);letter-spacing:.12em">UTC · 11 FEB 2026</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="mapwrap">
+        <div id="map"></div>
+      <div class="legend mono">
+          <span class="kicker" style="margin-right:2px">EDPS</span>
+          <i style="background:#F04A52"></i><span>80+</span>
+          <i style="background:#F59E2B"></i><span>65–79</span>
+          <i style="background:#D9B93C"></i><span>45–64</span>
+          <i style="background:#4A82BC"></i><span>&lt;45</span>
+      </div>
+    </div>
+
+    <div class="sidecol">
+      <div class="maptools">
+        <span class="kicker">CATEGORY</span>
+        <div class="toolrow">
+          <select class="sel" id="catSelect">
+            <option value="All">All categories</option>
+            <option value="Weather">Weather</option>
+            <option value="Industrial action">Industrial action</option>
+            <option value="Geopolitical">Geopolitical</option>
+            <option value="Infrastructure">Infrastructure</option>
+            <option value="Regulatory">Regulatory</option>
+          </select>
+          <button class="btn on" id="toggleStations" style="flex:0 0 auto">Stations</button>
+        </div>
+        <span class="kicker">MAP VIEW</span>
+        <div class="toolrow">
+          <button class="btn on" data-extent="events">Region</button>
+          <button class="btn" data-extent="world">World</button>
+          <button class="btn" data-extent="selected">Selected</button>
+        </div>
+      </div>
+      <div class="side" id="side"></div>
+      <div id="sideAction" style="flex:0 0 auto"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>DisruptionMatrix advises and qualifies external threats. It does not decide. Areas of effect are external indications only — no airline schedule, crew, fleet or passenger data is used.</span>
+    <span style="margin-left:auto">Synthetic data · IATA workshop build 0.9.4</span>
+  </div>
+</div>
+
+<script>
+const CRIT='#F04A52', HIGH='#F59E2B', MOD='#D9B93C', LOW='#4A82BC', OK='#2FA97C', TEAL='#2F8E9C';
+const scoreColor = s => s>=80?CRIT : s>=65?HIGH : s>=45?MOD : LOW;
+const confLabel = c => c>=4?'High' : c>=3?'Moderate' : c>=2?'Low' : 'Very low';
+const V = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+// Area of effect per event: centre [lat, lon], radius, and affected stations
+const GEO = {
+  storm:    { centre: [56.0, 6.5],  radiusKm: 620, stations: [['AMS',52.31,4.76],['RTM',51.95,4.44],['CPH',55.62,12.65],['OSL',60.19,11.10],['EDI',55.95,-3.37],['ABZ',57.20,-2.20]] },
+  atc:      { centre: [46.6, 2.6],  radiusKm: 560, stations: [['CDG',49.01,2.55],['ORY',48.72,2.36],['LYS',45.73,5.08],['MRS',43.44,5.22],['BOD',44.83,-0.70],['TLS',43.63,1.36]] },
+  airspace: { centre: [34.3, 33.6], radiusKm: 400, stations: [['LCA',34.88,33.62],['TLV',32.01,34.89],['BEY',33.82,35.49]] },
+  zrh:      { centre: [47.46, 8.55], radiusKm: 90, stations: [['ZRH',47.46,8.55]] },
+  lis:      { centre: [39.2, -8.6], radiusKm: 300, stations: [['LIS',38.77,-9.14],['OPO',41.24,-8.68],['FAO',37.01,-7.97]] },
+  uknight:  { centre: [51.5, -0.35], radiusKm: 90, stations: [['LHR',51.47,-0.46],['LGW',51.15,-0.19],['STN',51.89,0.24]] }
+};
+
+const ICONS = {
+  'Flight schedule': '<path d="M2 13l20-7-7 20-2.6-8.4L2 13z"/>',
+  'Crew': '<circle cx="12" cy="7" r="3.4"/><path d="M4.5 21c0-4.1 3.4-6.6 7.5-6.6s7.5 2.5 7.5 6.6" fill="none" stroke-width="2"/>',
+  'Aircraft rotations': '<path d="M12 3a9 9 0 108.4 5.8" fill="none" stroke-width="2"/><path d="M21 3v6h-6" fill="none" stroke-width="2"/>',
+  'Airport operations': '<path d="M3 20h18" stroke-width="2" fill="none"/><path d="M12 4l7 11H5l7-11z"/>',
+  'Passengers': '<circle cx="8" cy="6.5" r="2.6"/><circle cx="16" cy="6.5" r="2.6"/><path d="M2.5 20c0-3.4 2.5-5.4 5.5-5.4s5.5 2 5.5 5.4" fill="none" stroke-width="1.8"/><path d="M11.5 20c0-3.4 2.4-5.4 5.4-5.4S22 16.6 22 20" fill="none" stroke-width="1.8"/>',
+  'Cargo': '<rect x="3" y="7" width="18" height="12" fill="none" stroke-width="2"/><path d="M3 11h18M12 7v12" stroke-width="1.6" fill="none"/>',
+  'Catering': '<path d="M6 3v8a3 3 0 006 0V3" fill="none" stroke-width="2"/><path d="M9 11v10" stroke-width="2" fill="none"/><path d="M17 3c2 2 2 5 0 7v11" fill="none" stroke-width="2"/>',
+  'Maintenance': '<path d="M14.5 3a5 5 0 00-4 8L3 18.5 5.5 21 13 13.5a5 5 0 001.5-10.5z" fill="none" stroke-width="2"/>',
+  'Regulatory': '<path d="M12 3l8 4v5c0 5-3.4 8-8 9-4.6-1-8-4-8-9V7l8-4z" fill="none" stroke-width="2"/>'
+};
+
+let ALL = [], cat = 'All', selected = 'storm', showStations = true, autoFit = true, map, layer;
+
+function ready() {
+  if (!window.DM_DATA) return setTimeout(ready, 100);
+  ALL = window.DM_DATA.EVENTS.filter(e => GEO[e.id]);
+  startClock();
+  buildMap();
+  wire();
+  draw();
+  renderCard(current());
+}
+function current() { return ALL.filter(e => e.id === selected)[0]; }
+function shown() { return ALL.filter(e => cat === 'All' || e.cat === cat); }
+
+function startClock() {
+  const t0 = Date.now(), base = Date.parse('2026-02-11T18:42:07Z'), p = n => String(n).padStart(2, '0');
+  setInterval(() => {
+    const d = new Date(base + (Date.now() - t0));
+    document.getElementById('clock').textContent = p(d.getUTCHours())+':'+p(d.getUTCMinutes())+':'+p(d.getUTCSeconds());
+  }, 1000);
+}
+
+function buildMap() {
+  map = L.map('map', { zoomControl: true, worldCopyJump: true, minZoom: 2, fadeAnimation: false });
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors', maxZoom: 18
+  }).addTo(map);
+  layer = L.layerGroup().addTo(map);
+  map.setView([49, 13], 3);
+  // Fit only once the pane size has been STABLE for two frames — a fit computed against a
+  // still-growing pane clamps to minZoom and leaves the world adrift in an oversized pane.
+  map.whenReady(() => {
+    let last = null, stable = 0, tries = 0;
+    const settle = () => {
+      map.invalidateSize({ animate: false });
+      const el = document.getElementById('map');
+      const key = el.clientWidth + 'x' + el.clientHeight;
+      if (el.clientWidth > 200 && el.clientHeight > 200 && key === last) stable++;
+      else stable = 0;
+      last = key;
+      if (stable < 2 && tries++ < 90) return requestAnimationFrame(settle);
+      fitTo('events');
+    };
+    requestAnimationFrame(settle);
+  });
+  // late layout (fonts, window load) can still change the pane: refit until the user takes over
+  window.addEventListener('load', () => setTimeout(() => { if (autoFit) { map.invalidateSize({ animate: false }); fitTo('events'); } }, 0));
+  map.on('dragstart zoomstart', () => { autoFit = false; });
+  // markers live in screen space, so recompute offsets after the view settles (rAF-guarded)
+  map.on('zoomend moveend', scheduleDraw);
+}
+
+// control rects are read once and cached: draw() must not mix layout reads with its DOM writes
+let obstacleCache = null;
+function obstacleRects() {
+  if (obstacleCache) return obstacleCache;
+  const paneBox = document.getElementById('map').getBoundingClientRect();
+  const out = [];
+  document.querySelectorAll('.leaflet-control-attribution, .leaflet-control-zoom, .legend').forEach(el => {
+    const r = el.getBoundingClientRect();
+    if (!r.width) return;
+    out.push({ x1: r.left - paneBox.left - 8, y1: r.top - paneBox.top - 8,
+               x2: r.right - paneBox.left + 8, y2: r.bottom - paneBox.top + 8 });
+  });
+  obstacleCache = out;
+  return out;
+}
+
+let drawQueued = false;
+function scheduleDraw() {
+  if (drawQueued) return;
+  drawQueued = true;
+  requestAnimationFrame(() => { drawQueued = false; draw(); });
+}
+
+function eventBounds(list) {
+  const pts = [];
+  (list || shown()).forEach(e => {
+    const g = GEO[e.id], dLat = g.radiusKm / 110.6, dLon = g.radiusKm / (110.6 * Math.cos(g.centre[0] * Math.PI / 180));
+    pts.push([g.centre[0] - dLat, g.centre[1] - dLon], [g.centre[0] + dLat, g.centre[1] + dLon]);
+    g.stations.forEach(s => pts.push([s[1], s[2]]));
+  });
+  return pts.length ? L.latLngBounds(pts) : null;
+}
+
+function fitTo(mode) {
+  if (mode === 'world') { map.setView([26, 8], 2); return; }
+  if (mode === 'selected') {
+    const b = eventBounds([current()]);
+    if (b) map.fitBounds(b, { padding: [56, 56], animate: false });
+    return;
+  }
+  const b = eventBounds();
+  if (b) map.fitBounds(b, { padding: [44, 44], animate: false });
+}
+
+const SLOTS = [[0,0],[0,-46],[40,-26],[40,26],[0,46],[-40,26],[-40,-26],[0,-82],[66,-46],[-66,-46],[66,46],[-66,46]];
+
+function draw() {
+  if (!map || !map._loaded) return;
+  layer.clearLayers();
+  const list = shown().slice().sort((a, b) => (a.id === selected ? 1 : 0) - (b.id === selected ? 1 : 0) || a.score - b.score);
+
+  // choose a free screen-space slot per marker: inside the pane, clear of other pins,
+  // and clear of the on-pane Leaflet controls (attribution, zoom) measured from the DOM
+  const size = map.getSize(), M = 42;
+  const obstacles = obstacleRects();
+  // marker box: 38px bubble centred on the slot, plus a ~20px label tail beneath it
+  const boxAt = (x, y) => ({ x1: x - 21, y1: y - 21, x2: x + 21, y2: y + 42 });
+  const hits = (a, b) => a.x1 < b.x2 && a.x2 > b.x1 && a.y1 < b.y2 && a.y2 > b.y1;
+  const clear = (x, y) => {
+    if (x < M || x > size.x - M || y < M || y > size.y - M) return false;
+    return !obstacles.some(o => hits(boxAt(x, y), o));
+  };
+
+  const taken = [], offset = {};
+  list.forEach(e => {
+    const p = map.latLngToContainerPoint(GEO[e.id].centre);
+    let pick = null, fallback = null;
+    for (const s of SLOTS) {
+      const x = p.x + s[0], y = p.y + s[1];
+      if (!clear(x, y)) continue;
+      if (!fallback) fallback = s;
+      if (!taken.some(q => hits(boxAt(x, y), q))) { pick = s; break; }
+    }
+    if (!pick) pick = fallback || [0, 0];
+    taken.push(boxAt(p.x + pick[0], p.y + pick[1]));
+    offset[e.id] = pick;
+  });
+
+  list.forEach(e => {
+    const g = GEO[e.id], c = scoreColor(e.score), on = e.id === selected;
+
+    L.circle([g.centre[0], g.centre[1]], {
+      radius: g.radiusKm * 1000, color: c, weight: on ? 2 : 1.2, dashArray: '5 4',
+      opacity: on ? .85 : .4, fillColor: c, fillOpacity: on ? .16 : .07, interactive: false
+    }).addTo(layer);
+
+    if (showStations) g.stations.forEach(s => {
+      L.circleMarker([s[1], s[2]], { radius: 3.5, color: c, weight: 1.5, fillColor: c, fillOpacity: .85, interactive: false })
+        .addTo(layer)
+        .bindTooltip(s[0], { permanent: false, direction: 'top', className: 'mono' });
+    });
+
+    const off = offset[e.id];
+    if (off[0] || off[1]) {
+      const p = map.latLngToContainerPoint(g.centre);
+      L.polyline([g.centre, map.containerPointToLatLng(L.point(p.x + off[0], p.y + off[1]))],
+        { color: c, weight: 1, opacity: .6, interactive: false }).addTo(layer);
+      L.circleMarker(g.centre, { radius: 2.5, color: c, weight: 0, fillColor: c, fillOpacity: 1, interactive: false }).addTo(layer);
+    }
+
+    const r = on ? 19 : 16;
+    const icon = L.divIcon({
+      className: '', iconSize: [r * 2, r * 2 + 18], iconAnchor: [r - off[0], r - off[1]],
+      html: `<div class="pinwrap" style="position:relative">
+        ${e.traj === 'Escalating' ? `<span class="pinhalo" style="background:${c}"></span>` : ''}
+        <span style="position:relative;display:grid;place-items:center;width:${r*2}px;height:${r*2}px;border-radius:50%;
+          background:${c};border:${on ? 3 : 2}px solid ${on ? V('--ink') : V('--pinstroke')};box-shadow:0 2px 8px rgba(0,0,0,.45)">
+          <b>${e.score}</b></span>
+        <span class="pinlabel" style="${on ? 'color:' + V('--ink') + ';font-weight:600' : ''}">${e.where.split(' · ')[0]}</span>
+      </div>`
+    });
+    L.marker([g.centre[0], g.centre[1]], { icon: icon, riseOnHover: true, zIndexOffset: on ? 1000 : 0 })
+      .addTo(layer)
+      .on('click', () => { selected = e.id; draw(); renderCard(e); });
+  });
+}
+
+function renderCard(e) {
+  const side = document.getElementById('side');
+  if (!e) { side.innerHTML = '<div class="card" style="color:var(--mute2);font-size:13.5px">No event selected.</div>'; return; }
+  const ESC = window.DM_DATA.ESC[e.esc - 1], c = scoreColor(e.score), g = GEO[e.id];
+  const top = e.domains.slice().sort((a, b) => b.v - a.v).filter(d => d.v >= 40).slice(0, 6);
+
+  side.innerHTML = `
+    <div class="card" style="border-top:3px solid ${c};padding:14px 20px">
+      <div style="display:flex;gap:13px;align-items:flex-start;margin-bottom:12px">
+        <div class="mono" style="flex:0 0 auto;text-align:center;padding:7px 9px;color:${c};border:1px solid ${c};background:${c}1F">
+          <div style="font-size:23px;font-weight:600;line-height:1">${e.score}</div>
+          <div style="font-size:8px;letter-spacing:.16em;opacity:.85;margin-top:2px">EDPS</div>
+        </div>
+        <div style="min-width:0">
+          <div class="mono" style="font-size:11px;color:${TEAL};letter-spacing:.08em;margin-bottom:3px">${e.ref} · ${e.cat}</div>
+          <div style="font-size:16px;font-weight:700;line-height:1.25;letter-spacing:-.2px;text-wrap:pretty">${e.name}</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line2);border:1px solid var(--line2)">
+        ${[['LEVEL', 'L' + e.esc, e.esc >= 4 ? CRIT : e.esc === 3 ? HIGH : 'var(--ink)'],
+           ['CONF', confLabel(e.conf), TEAL],
+           ['TRAJ', e.traj === 'Escalating' ? 'Rising' : e.traj, e.traj === 'Escalating' ? CRIT : e.traj === 'Improving' ? OK : 'var(--ink)'],
+           ['IMPACT IN', e.tti, 'var(--ink)']].map(([k, v, col]) => `
+          <div style="background:var(--panel2);padding:7px 9px">
+            <div class="kicker" style="font-size:8.5px;margin-bottom:3px">${k}</div>
+            <div class="mono" style="font-size:13px;font-weight:600;color:${col}">${v}</div>
+          </div>`).join('')}
+      </div>
+      <div class="mono" style="font-size:11px;color:var(--mute);margin-top:9px">${ESC.badge} · ${ESC.title}</div>
+    </div>
+
+    <div class="card" style="padding:13px 20px">
+      <div class="kicker" style="margin-bottom:10px">AREAS OF IMPACT</div>
+      <div style="display:flex;flex-wrap:wrap;gap:11px 8px">
+        ${top.map(d => {
+          const col = d.v >= 70 ? CRIT : d.v >= 45 ? HIGH : LOW;
+          return `<div class="domicon" title="${d.name} · implication ${d.v}">
+            <svg viewBox="0 0 24 24" fill="${col}" stroke="${col}" stroke-linejoin="round">${ICONS[d.name] || ICONS['Regulatory']}</svg>
+            <span>${d.name}</span></div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="kicker" style="margin-bottom:10px">AREA OF EFFECT</div>
+      <div style="font-size:13px;color:var(--ink3);line-height:1.55;margin-bottom:11px">${e.where}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:7px">
+        ${g.stations.map(s => `<span class="mono" style="font-size:11.5px;padding:4px 8px;border:1px solid var(--edge);color:var(--mute)">${s[0]}</span>`).join('')}
+        <span class="mono" style="font-size:11.5px;padding:4px 8px;color:var(--mute)">radius ≈ ${g.radiusKm} km</span>
+      </div>
+    </div>
+
+    <div style="flex:1;min-height:0;overflow:auto" class="card">
+      <div class="kicker" style="margin-bottom:10px">LEAD FINDING</div>
+      <div style="font-size:13px;color:var(--mute);line-height:1.6;text-wrap:pretty">${e.summary}</div>
+    </div>
+
+    <div style="height:8px"></div>`;
+
+  document.getElementById('sideAction').innerHTML = `
+    <div style="padding:12px 20px;border-top:1px solid var(--line);background:var(--panel)">
+      <a class="cta" href="DisruptionMatrix.dc.html?event=${e.id}">Open threat detail →</a>
+    </div>`;
+}
+
+function wire() {
+  document.getElementById('catSelect').addEventListener('change', ev => {
+    cat = ev.target.value;
+    const list = shown();
+    if (!list.some(e => e.id === selected) && list.length) selected = list[0].id;
+    draw(); renderCard(current()); fitTo('events');
+  });
+
+  document.querySelectorAll('[data-extent]').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('[data-extent]').forEach(x => x.classList.toggle('on', x === b));
+    autoFit = b.dataset.extent === 'events';
+    fitTo(b.dataset.extent);
+  }));
+  // layout writes are deferred out of the resize-notification frame
+  let lastSize = map.getSize(), resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      const el = document.getElementById('map');
+      if (el.clientWidth === lastSize.x && el.clientHeight === lastSize.y) return;
+      map.invalidateSize({ animate: false });
+      lastSize = map.getSize();
+      obstacleCache = null;
+      if (autoFit) fitTo('events');
+      draw();
+    }, 120);
+  });
+
+  document.getElementById('toggleStations').addEventListener('click', e => {
+    showStations = !showStations;
+    e.target.classList.toggle('on', showStations);
+    e.target.textContent = 'Stations';
+    draw();
+  });
+
+  function syncThemeIcon() {
+    const light = document.documentElement.getAttribute('data-theme') === 'light';
+    document.getElementById('iconSun').style.display = light ? 'none' : 'block';
+    document.getElementById('iconMoon').style.display = light ? 'block' : 'none';
+  }
+  document.getElementById('themeToggleBtn').addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('dm-app-theme', next);
+    syncThemeIcon();
+    draw();
+  });
+
+  const saved = localStorage.getItem('dm-app-theme');
+  if (saved) { document.documentElement.setAttribute('data-theme', saved); draw(); }
+  syncThemeIcon();
+}
+
+ready();
+</script>
+</body>
+</html>

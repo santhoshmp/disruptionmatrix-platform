@@ -1,0 +1,178 @@
+{
+  "THREATS": [
+    { "id": "delfog", "name": "Delhi Winter Fog — CAT III Demand", "cat": "Weather", "code": "WX", "region": "Delhi (DEL)", "edps": 85, "ica": 88, "traj": "Escalating", "tti": "6h",
+      "summary": "Dense fog advisory for DEL with visibility below 150m expected overnight through morning. CAT IIIB approach required; IndiConnect's ATR 72 fleet is not CAT IIIB capable — all ATR operations suspended until visibility improves." },
+    { "id": "bommonsoon", "name": "Mumbai Monsoon Thunderstorms", "cat": "Weather", "code": "WX", "region": "Mumbai (BOM)", "edps": 79, "ica": 82, "traj": "Escalating", "tti": "3h",
+      "summary": "Severe monsoon thunderstorms forecast over BOM through the afternoon. Heavy rain, low-level wind shear, and temporary runway closures possible. Departure bank delays of 45–90 minutes expected." },
+    { "id": "blrstorms", "name": "Bengaluru Thunderstorm Activity", "cat": "Weather", "code": "WX", "region": "Bengaluru (BLR)", "edps": 66, "ica": 64, "traj": "Stable", "tti": "5h",
+      "summary": "Convective activity forecast over BLR through late afternoon. Arrival rate reductions and go-around risk for inbound flights during the peak arrival window." },
+    { "id": "dxbacongest", "name": "Dubai Airspace Congestion — Peak Hour", "cat": "ATC / Airspace", "code": "ATC", "region": "Dubai (DXB)", "edps": 61, "ica": 58, "traj": "Stable", "tti": "8h",
+      "summary": "DXB approach congestion during evening peak. Flow control likely on IndiConnect's 3 daily DXB rotations — delays of 20–40 minutes expected." },
+    { "id": "delatc", "name": "Delhi ATC Sector Capacity Reduction", "cat": "ATC / Airspace", "code": "ATC", "region": "Delhi FIR (VIDP)", "edps": 57, "ica": 61, "traj": "Stable", "tti": "4h",
+      "summary": "Reduced sector capacity in Delhi FIR following an equipment fault. Flow control affects northbound departures from BOM and BLR." },
+    { "id": "cokmonsoon", "name": "Kochi Monsoon Flooding — Airport Access", "cat": "Weather", "code": "WX", "region": "Kochi (COK)", "edps": 49, "ica": 52, "traj": "Improving", "tti": "12h",
+      "summary": "Localised flooding on access roads to COK. Ground transport delays for crew and passengers. No runway impact but check-in closures possible if flooding worsens." }
+  ],
+  "EXPOSURE": {
+    "delfog": {
+      "tier0": { "label": "Schedule / fleet exposure", "banks": ["Bank 1 (Morning departure)", "ATR regional"], "routeCount": 28, "note": "28 DEL movements inside the fog window, including all 8 ATR 72 regional departures which are suspended below CAT I minima." },
+      "tier1": { "label": "Tail / rotation chains at risk", "tails": ["VT-ICA", "VT-ICB", "VT-ICC", "VT-ICD", "VT-ICE"], "count": 5, "note": "5 A320neo rotations affected — 3 diverted to alternate airports, 2 held at origin. ATR fleet grounded at DEL." },
+      "tier2": { "label": "Crew pairings near duty limits", "pairings": ["DEL-1101", "DEL-1108", "DEL-1115"], "count": 3, "note": "3 crew pairings within 35 minutes of FDP limits if fog persists beyond 09:00 local." },
+      "tier3": { "label": "Connecting pax / cargo exposure", "pax": 1850, "cargo": 24, "note": "~1,850 connecting passengers at DEL during the fog window, including 142 EuroVista interline passengers from VIE. 24t of transfer cargo." },
+      "tier4": { "label": "Station dependency & escalation", "esc": 4, "note": "DEL is the primary hub — no alternate gateway for north Indian operations. VP escalation threshold crossed at 03:45 local." }
+    },
+    "bommonsoon": {
+      "tier0": { "label": "Schedule / fleet exposure", "banks": ["Bank 2 (Afternoon departure)", "Bank 3 (Evening)"], "routeCount": 24, "note": "24 BOM departures scheduled during the thunderstorm window, concentrated in the afternoon and evening banks." },
+      "tier1": { "label": "Tail / rotation chains at risk", "tails": ["VT-ICF", "VT-ICG", "VT-ICH", "VT-ICI", "VT-ICJ"], "count": 5, "note": "5 A320neo rotations likely to absorb 45–90 min weather delays, cascading into evening connections." },
+      "tier2": { "label": "Crew pairings near duty limits", "pairings": ["BOM-2201", "BOM-2215"], "count": 2, "note": "2 crew pairings within 40 minutes of FDP limits if runway closures exceed 30 minutes." },
+      "tier3": { "label": "Connecting pax / cargo exposure", "pax": 1320, "cargo": 18, "note": "~1,320 connecting passengers routed through BOM during the affected window; 18t of transfer cargo." },
+      "tier4": { "label": "Station dependency & escalation", "esc": 4, "note": "BOM is the secondary hub — cascading impact on DEL operations if aircraft are out of position. VP escalation threshold crossed." }
+    },
+    "blrstorms": {
+      "tier0": { "label": "Schedule / fleet exposure", "banks": ["Bank 2 (Afternoon)"], "routeCount": 12, "note": "12 BLR movements inside the convective weather window." },
+      "tier1": { "label": "Tail / rotation chains at risk", "tails": ["VT-ICK", "VT-ICL"], "count": 2, "note": "2 A320neo rotations likely to absorb go-around and arrival rate delay." },
+      "tier2": { "label": "Crew pairings near duty limits", "pairings": ["BLR-3301"], "count": 1, "note": "1 pairing at risk if arrival delays exceed 45 minutes." },
+      "tier3": { "label": "Connecting pax / cargo exposure", "pax": 380, "cargo": 4, "note": "380 connecting passengers with onward connections at BLR." },
+      "tier4": { "label": "Station dependency & escalation", "esc": 2, "note": "Desk-level watch — convective activity is forecast to clear by evening." }
+    },
+    "dxbacongest": {
+      "tier0": { "label": "Schedule / fleet exposure", "banks": ["Bank 3 (Evening)"], "routeCount": 3, "note": "3 DXB rotations subject to flow control during the evening peak." },
+      "tier1": { "label": "Tail / rotation chains at risk", "tails": ["VT-IXA"], "count": 1, "note": "1 A321neo rotation likely to absorb 20–40 min flow control delay." },
+      "tier2": { "label": "Crew pairings near duty limits", "pairings": [], "count": 0, "note": "No pairings currently within margin." },
+      "tier3": { "label": "Connecting pax / cargo exposure", "pax": 280, "cargo": 3, "note": "280 passengers on the affected DXB sectors." },
+      "tier4": { "label": "Station dependency & escalation", "esc": 1, "note": "Desk-level watch — congestion is time-boxed to the peak window." }
+    },
+    "delatc": {
+      "tier0": { "label": "Schedule / fleet exposure", "banks": ["Bank 2 (Afternoon)"], "routeCount": 10, "note": "10 northbound departures from BOM and BLR subject to Delhi FIR flow control." },
+      "tier1": { "label": "Tail / rotation chains at risk", "tails": ["VT-ICF", "VT-ICK"], "count": 2, "note": "2 rotations likely to absorb ATFM delay ahead of the afternoon bank." },
+      "tier2": { "label": "Crew pairings near duty limits", "pairings": [], "count": 0, "note": "No pairings currently within margin." },
+      "tier3": { "label": "Connecting pax / cargo exposure", "pax": 340, "cargo": 5, "note": "340 passengers with same-bank onward connections at DEL." },
+      "tier4": { "label": "Station dependency & escalation", "esc": 2, "note": "Desk-level watch — reduction is time-boxed to the equipment fault window." }
+    },
+    "cokmonsoon": {
+      "tier0": { "label": "Schedule / fleet exposure", "banks": ["ATR regional"], "routeCount": 4, "note": "4 COK rotations affected by ground access delays." },
+      "tier1": { "label": "Tail / rotation chains at risk", "tails": ["VT-ITA"], "count": 1, "note": "1 ATR 72 rotation may see extended turnaround due to crew access delays." },
+      "tier2": { "label": "Crew pairings near duty limits", "pairings": [], "count": 0, "note": "No duty-margin impact identified." },
+      "tier3": { "label": "Connecting pax / cargo exposure", "pax": 95, "cargo": 0.5, "note": "95 passengers on the most exposed COK rotation." },
+      "tier4": { "label": "Station dependency & escalation", "esc": 1, "note": "Desk-level watch — flooding is receding per latest reports." }
+    }
+  },
+  "FLIGHTS": [
+    { "flt": "IC234", "route": "DEL–BLR", "tail": "VT-ICA", "type": "A320neo", "bank": "Bank 1", "threat": "delfog", "pax": 178, "connectPax": 92, "cargo": 5.8 },
+    { "flt": "IC452", "route": "DEL–BOM", "tail": "VT-ICB", "type": "A320neo", "bank": "Bank 1", "threat": "delfog", "pax": 182, "connectPax": 108, "cargo": 7.2 },
+    { "flt": "IC101", "route": "DEL–HYD", "tail": "VT-ICC", "type": "A320neo", "bank": "Bank 1", "threat": "delfog", "pax": 165, "connectPax": 48, "cargo": 3.4 },
+    { "flt": "IC102", "route": "DEL–MAA", "tail": "VT-ICD", "type": "A320neo", "bank": "Bank 1", "threat": "delfog", "pax": 171, "connectPax": 52, "cargo": 3.8 },
+    { "flt": "IC103", "route": "DEL–AMD", "tail": "VT-ICE", "type": "A320neo", "bank": "Bank 1", "threat": "delfog", "pax": 158, "connectPax": 22, "cargo": 2.1 },
+    { "flt": "IC201", "route": "BOM–DEL", "tail": "VT-ICF", "type": "A320neo", "bank": "Bank 2", "threat": "bommonsoon", "pax": 180, "connectPax": 115, "cargo": 6.8 },
+    { "flt": "IC202", "route": "BOM–BLR", "tail": "VT-ICG", "type": "A320neo", "bank": "Bank 2", "threat": "bommonsoon", "pax": 172, "connectPax": 64, "cargo": 4.2 },
+    { "flt": "IC203", "route": "BOM–HYD", "tail": "VT-ICH", "type": "A320neo", "bank": "Bank 2", "threat": "bommonsoon", "pax": 161, "connectPax": 38, "cargo": 2.8 },
+    { "flt": "IC204", "route": "BOM–COK", "tail": "VT-ICI", "type": "A320neo", "bank": "Bank 2", "threat": "bommonsoon", "pax": 155, "connectPax": 28, "cargo": 2.4 },
+    { "flt": "IC205", "route": "BOM–GOI", "tail": "VT-ICJ", "type": "A320neo", "bank": "Bank 2", "threat": "bommonsoon", "pax": 148, "connectPax": 18, "cargo": 1.6 },
+    { "flt": "IC301", "route": "BLR–DEL", "tail": "VT-ICK", "type": "A320neo", "bank": "Bank 2", "threat": "blrstorms", "pax": 176, "connectPax": 88, "cargo": 5.1 },
+    { "flt": "IC302", "route": "BLR–BOM", "tail": "VT-ICL", "type": "A320neo", "bank": "Bank 2", "threat": "blrstorms", "pax": 168, "connectPax": 54, "cargo": 3.6 },
+    { "flt": "IC501", "route": "DEL–DXB", "tail": "VT-IXA", "type": "A321neo", "bank": "Bank 3", "threat": "dxbacongest", "pax": 198, "connectPax": 112, "cargo": 8.5 },
+    { "flt": "IC502", "route": "DEL–SIN", "tail": "VT-IXB", "type": "A321neo", "bank": "Bank 3", "threat": "dxbacongest", "pax": 192, "connectPax": 86, "cargo": 7.1 },
+    { "flt": "IC503", "route": "DEL–VIE", "tail": "VT-IXC", "type": "A321neo", "bank": "Bank 3", "threat": "delatc", "pax": 186, "connectPax": 134, "cargo": 9.2 },
+    { "flt": "IC504", "route": "DEL–BKK", "tail": "VT-IXD", "type": "A321neo", "bank": "Bank 3", "threat": "delatc", "pax": 189, "connectPax": 72, "cargo": 6.4 },
+    { "flt": "IC601", "route": "BOM–DXB", "tail": "VT-ICF", "type": "A320neo", "bank": "Bank 3", "threat": "bommonsoon", "pax": 174, "connectPax": 96, "cargo": 5.8 },
+    { "flt": "IC701", "route": "DEL–JAI", "tail": "VT-ITA", "type": "ATR 72", "bank": "ATR regional", "threat": "delfog", "pax": 68, "connectPax": 14, "cargo": 0.8 },
+    { "flt": "IC702", "route": "DEL–LKO", "tail": "VT-ITB", "type": "ATR 72", "bank": "ATR regional", "threat": "delfog", "pax": 62, "connectPax": 11, "cargo": 0.6 },
+    { "flt": "IC703", "route": "BOM–COK", "tail": "VT-ITC", "type": "ATR 72", "bank": "ATR regional", "threat": "cokmonsoon", "pax": 64, "connectPax": 8, "cargo": 0.5 },
+    { "flt": "IC704", "route": "BOM–GOI", "tail": "VT-ITD", "type": "ATR 72", "bank": "ATR regional", "threat": "cokmonsoon", "pax": 58, "connectPax": 6, "cargo": 0.4 }
+  ],
+  "PAIRINGS": [
+    { "id": "DEL-1101", "base": "DEL", "route": "DEL–BLR–DEL–DXB", "margin": 32, "status": "Red", "threat": "delfog" },
+    { "id": "DEL-1108", "base": "DEL", "route": "DEL–BOM–DEL–VIE", "margin": 38, "status": "Red", "threat": "delfog" },
+    { "id": "DEL-1115", "base": "DEL", "route": "DEL–HYD–DEL–SIN", "margin": 45, "status": "Amber", "threat": "delfog" },
+    { "id": "BOM-2201", "base": "BOM", "route": "BOM–DEL–BOM–DXB", "margin": 36, "status": "Red", "threat": "bommonsoon" },
+    { "id": "BOM-2215", "base": "BOM", "route": "BOM–BLR–BOM–COK", "margin": 48, "status": "Amber", "threat": "bommonsoon" },
+    { "id": "BLR-3301", "base": "BLR", "route": "BLR–DEL–BLR", "margin": 58, "status": "Amber", "threat": "blrstorms" },
+    { "id": "DEL-4401", "base": "DEL", "route": "DEL–JAI–DEL–LKO", "margin": 85, "status": "Green", "threat": "delfog" },
+    { "id": "BOM-5501", "base": "BOM", "route": "BOM–COK–BOM–GOI", "margin": 92, "status": "Green", "threat": "cokmonsoon" }
+  ],
+  "BANKS": [
+    { "id": "b1", "label": "Bank 1", "sub": "Morning departure — domestic + regional", "window": "05:30–09:00", "kind": "A320neo + ATR", "severity": 4 },
+    { "id": "b2", "label": "Bank 2", "sub": "Afternoon wave — trunk domestic", "window": "11:00–15:00", "kind": "A320neo domestic", "severity": 3 },
+    { "id": "b3", "label": "Bank 3", "sub": "Evening — international departures", "window": "18:00–22:00", "kind": "A321neo international", "severity": 4 },
+    { "id": "atr", "label": "ATR", "sub": "Regional turboprop operations", "window": "All-day", "kind": "ATR 72 regional", "severity": 3 },
+    { "id": "intl", "label": "BOM Intl", "sub": "Mumbai international focus", "window": "Evening", "kind": "A320neo + A321neo", "severity": 2 }
+  ],
+  "VULNERABILITIES": [
+    { "title": "DEL hub fog exposure", "detail": "DEL is the primary hub and highly fog-prone Dec–Feb. ATR 72 fleet is not CAT IIIB capable, creating a hard suspension of regional operations during fog events." },
+    { "title": "BOM monsoon fragility", "detail": "Mumbai's single-runway operation is highly sensitive to monsoon thunderstorms — even brief closures cascade across the domestic network." },
+    { "title": "Interline dependency on EuroVista", "detail": "The DEL–VIE codeshare means EuroVista disruptions propagate into IndiConnect's network via missed connections at DEL." },
+    { "title": "ATR fleet weather limitation", "detail": "8 ATR 72 aircraft operate regional routes with limited alternate airports — weather diversions are more disruptive than for jet operations." }
+  ],
+  "SNAPSHOT": {
+    "otp": { "label": "On-time performance", "value": 76, "unit": "%", "trend": [86, 85.5, 86, 85, 84.4, 84.8, 84, 83.2, 83.6, 82.8, 82.2, 82.6, 81.8, 81.4, 81.9, 81.1, 80.6, 81, 80.4, 80.8, 80.2, 79.9, 78.3, 76], "tone": "amber" },
+    "delays": { "label": "Active delays", "value": 22, "unit": "", "trend": [8, 9, 8.5, 9.5, 10, 9.6, 10.4, 11, 10.6, 11.4, 11.8, 11.2, 12, 12.6, 13.2, 14, 13.8, 14.4, 15.1, 15.8, 16.5, 18.2, 20.1, 22], "tone": "red" },
+    "aog": { "label": "AOG count", "value": 2, "unit": "", "trend": [0, 0.2, 0, 0.4, 0.2, 0.5, 0.3, 0.6, 0.4, 0.7, 0.5, 0.8, 0.6, 0.9, 0.7, 1, 0.8, 1.1, 0.9, 1.2, 1, 1.5, 1.8, 2], "tone": "red" },
+    "crewAlerts": { "label": "Crew legality alerts", "value": 6, "unit": "", "trend": [2, 2.2, 2.1, 2.4, 2.3, 2.6, 2.5, 2.8, 2.7, 3, 2.9, 3.2, 3.1, 3.4, 3.3, 3.6, 3.5, 3.8, 4.1, 4.5, 4.8, 5.2, 5.6, 6], "tone": "red" },
+    "escalations": { "label": "Active escalations", "value": 2, "unit": "", "trend": [0, 0, 0.2, 0.1, 0.3, 0.2, 0.4, 0.3, 0.5, 0.4, 0.6, 0.5, 0.7, 0.6, 0.8, 0.7, 0.9, 1, 1.2, 1.4, 1.6, 1.8, 2, 2], "tone": "red" },
+    "fog": { "label": "Fog status", "value": "Active", "unit": "", "note": "DEL CAT III in use", "tone": "red" },
+    "interline": { "label": "Interline alerts", "value": 3, "unit": "", "note": "EuroVista connections", "tone": "amber" }
+  },
+  "FLEET": [
+    { "tail": "VT-ICA", "type": "A320neo", "base": "DEL", "catIIIB": true, "status": "In service" },
+    { "tail": "VT-ICB", "type": "A320neo", "base": "DEL", "catIIIB": true, "status": "In service" },
+    { "tail": "VT-ICC", "type": "A320neo", "base": "DEL", "catIIIB": false, "status": "In service" },
+    { "tail": "VT-ICD", "type": "A320neo", "base": "DEL", "catIIIB": true, "status": "In service" },
+    { "tail": "VT-ICE", "type": "A320neo", "base": "DEL", "catIIIB": false, "status": "In service" },
+    { "tail": "VT-ICF", "type": "A320neo", "base": "BOM", "catIIIB": true, "status": "In service" },
+    { "tail": "VT-ICG", "type": "A320neo", "base": "BOM", "catIIIB": false, "status": "In service" },
+    { "tail": "VT-ICH", "type": "A320neo", "base": "BOM", "catIIIB": true, "status": "In service" },
+    { "tail": "VT-ICI", "type": "A320neo", "base": "BOM", "catIIIB": false, "status": "In service" },
+    { "tail": "VT-ICJ", "type": "A320neo", "base": "BOM", "catIIIB": false, "status": "In service" },
+    { "tail": "VT-ICK", "type": "A320neo", "base": "BLR", "catIIIB": true, "status": "In service" },
+    { "tail": "VT-ICL", "type": "A320neo", "base": "BLR", "catIIIB": false, "status": "In service" },
+    { "tail": "VT-IXA", "type": "A321neo", "base": "DEL", "catIIIB": true, "status": "In service" },
+    { "tail": "VT-IXB", "type": "A321neo", "base": "DEL", "catIIIB": true, "status": "In service" },
+    { "tail": "VT-IXC", "type": "A321neo", "base": "DEL", "catIIIB": true, "status": "In service" },
+    { "tail": "VT-IXD", "type": "A321neo", "base": "DEL", "catIIIB": false, "status": "In service" },
+    { "tail": "VT-IXE", "type": "A321neo", "base": "DEL", "catIIIB": true, "status": "AOG" },
+    { "tail": "VT-IXF", "type": "A321neo", "base": "BOM", "catIIIB": false, "status": "In service" },
+    { "tail": "VT-ITA", "type": "ATR 72", "base": "DEL", "catIIIB": false, "status": "In service" },
+    { "tail": "VT-ITB", "type": "ATR 72", "base": "DEL", "catIIIB": false, "status": "In service" },
+    { "tail": "VT-ITC", "type": "ATR 72", "base": "BOM", "catIIIB": false, "status": "In service" },
+    { "tail": "VT-ITD", "type": "ATR 72", "base": "BOM", "catIIIB": false, "status": "Scheduled maintenance" }
+  ],
+  "CREW": [
+    { "id": "C-1001", "name": "Capt. R. Sharma", "rank": "Captain", "base": "DEL", "status": "On duty", "dutyRemaining": 0.52, "pairing": "DEL-1101" },
+    { "id": "C-1002", "name": "F/O A. Gupta", "rank": "First Officer", "base": "DEL", "status": "On duty", "dutyRemaining": 0.52, "pairing": "DEL-1101" },
+    { "id": "C-1015", "name": "Capt. S. Patel", "rank": "Captain", "base": "DEL", "status": "On duty", "dutyRemaining": 0.65, "pairing": "DEL-1108" },
+    { "id": "C-1016", "name": "F/O M. Singh", "rank": "First Officer", "base": "DEL", "status": "On duty", "dutyRemaining": 0.65, "pairing": "DEL-1108" },
+    { "id": "C-1028", "name": "Capt. V. Reddy", "rank": "Captain", "base": "DEL", "status": "On duty", "dutyRemaining": 0.78, "pairing": "DEL-1115" },
+    { "id": "C-1029", "name": "F/O K. Nair", "rank": "First Officer", "base": "DEL", "status": "On duty", "dutyRemaining": 0.78, "pairing": "DEL-1115" },
+    { "id": "C-2001", "name": "Capt. D. Joshi", "rank": "Captain", "base": "BOM", "status": "On duty", "dutyRemaining": 0.58, "pairing": "BOM-2201" },
+    { "id": "C-2002", "name": "F/O P. Deshmukh", "rank": "First Officer", "base": "BOM", "status": "On duty", "dutyRemaining": 0.58, "pairing": "BOM-2201" },
+    { "id": "C-2015", "name": "Capt. N. Iyer", "rank": "Captain", "base": "BOM", "status": "On duty", "dutyRemaining": 0.72, "pairing": "BOM-2215" },
+    { "id": "C-2016", "name": "F/O T. Kumar", "rank": "First Officer", "base": "BOM", "status": "On duty", "dutyRemaining": 0.72, "pairing": "BOM-2215" },
+    { "id": "C-3001", "name": "Capt. A. Menon", "rank": "Captain", "base": "BLR", "status": "Standby", "dutyRemaining": 1.0, "pairing": "BLR-3301" },
+    { "id": "C-3002", "name": "F/O S. Krishnan", "rank": "First Officer", "base": "BLR", "status": "Standby", "dutyRemaining": 1.0, "pairing": "BLR-3301" },
+    { "id": "C-4001", "name": "Capt. H. Verma", "rank": "Captain", "base": "DEL", "status": "Rest", "dutyRemaining": 1.0, "pairing": "DEL-4401" },
+    { "id": "C-4002", "name": "Sr. Cabin Crew J. Pillai", "rank": "Cabin Crew", "base": "DEL", "status": "On duty", "dutyRemaining": 0.60, "pairing": "DEL-4401" }
+  ],
+  "SCHEDULE": {
+    "IC234": { "dep": 6, "dur": 165 },
+    "IC452": { "dep": 6.25, "dur": 140 },
+    "IC101": { "dep": 6.5, "dur": 130 },
+    "IC102": { "dep": 6.75, "dur": 180 },
+    "IC103": { "dep": 7, "dur": 95 },
+    "IC201": { "dep": 12, "dur": 140 },
+    "IC202": { "dep": 12.25, "dur": 90 },
+    "IC203": { "dep": 12.5, "dur": 80 },
+    "IC204": { "dep": 13, "dur": 110 },
+    "IC205": { "dep": 13.25, "dur": 65 },
+    "IC301": { "dep": 13.5, "dur": 165 },
+    "IC302": { "dep": 14, "dur": 90 },
+    "IC501": { "dep": 19, "dur": 220 },
+    "IC502": { "dep": 19.5, "dur": 280 },
+    "IC503": { "dep": 20, "dur": 420 },
+    "IC504": { "dep": 20.5, "dur": 260 },
+    "IC601": { "dep": 19.25, "dur": 180 },
+    "IC701": { "dep": 8, "dur": 55 },
+    "IC702": { "dep": 8.5, "dur": 65 },
+    "IC703": { "dep": 14.5, "dur": 85 },
+    "IC704": { "dep": 15, "dur": 60 }
+  }
+}
