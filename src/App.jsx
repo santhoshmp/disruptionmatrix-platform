@@ -9,6 +9,7 @@ import Radar from './pages/Radar.jsx';
 import AirlineMap from './pages/AirlineMap.jsx';
 import DataExplorer from './pages/DataExplorer.jsx';
 import Chat from './pages/Chat.jsx';
+import GlobalSearch from './components/GlobalSearch.jsx';
 import DM from './data/dm-data.json';
 import { AIRLINES } from './airlines.js';
 import { isAuthenticated, logout } from './auth.js';
@@ -110,6 +111,7 @@ function HomeLayout({ theme, onToggleTheme }) {
           </div>
         </Link>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
+          <GlobalSearch />
           <ThemeBtn theme={theme} onToggle={onToggleTheme} />
           <LogoutBtn />
         </div>
@@ -233,6 +235,7 @@ function GlobalLayout({ theme, onToggleTheme, children }) {
             ← Home
           </NavLink>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
+            <GlobalSearch />
             <ThemeBtn theme={theme} onToggle={onToggleTheme} />
             <LogoutBtn />
             <Clock />
