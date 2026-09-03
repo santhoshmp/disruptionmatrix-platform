@@ -102,37 +102,37 @@ Each airline calculates its own exposure score per threat (e.g., `namma`, `eva`,
 ```
 DisruptionMatrix/
 ├── README.md                   # This file
-├── .gitignore                  # Root gitignore
-├── app/                        # React application
-│   ├── public/
-│   │   └── hero.png            # Login page hero image
-│   ├── src/
-│   │   ├── data/
-│   │   │   ├── dm-data.json    # Global events, OPS, SOPs, escalation model
-│   │   │   ├── namma-data.json # Namma Air threats, exposure, flights, fleet, crew
-│   │   │   ├── eurovista-data.json  # EuroVista Airways data
-│   │   │   ├── indiconnect-data.json # IndiConnect Airways data
-│   │   │   └── geo.json        # Airport coordinates, stations, event geo data
-│   │   ├── pages/
-│   │   │   ├── Login.jsx       # Split-screen authentication
-│   │   │   ├── Home.jsx        # Airline selector dashboard
-│   │   │   ├── ThreatBoard.jsx # Global ranked threat board
-│   │   │   ├── EventDetail.jsx # Event deep-dive with tabs
-│   │   │   ├── WorldMap.jsx    # Leaflet world threat map
-│   │   │   ├── Radar.jsx       # Airline five-tier exposure radar
-│   │   │   ├── AirlineMap.jsx  # Airline network map
-│   │   │   └── DataExplorer.jsx # Schedule Gantt + recovery solver
-│   │   ├── airlines.js         # Airline configuration registry
-│   │   ├── auth.js             # Session-based authentication
-│   │   ├── theme.js            # Color system, score/severity helpers
-│   │   ├── styles.css          # CSS variables for dark/light themes
-│   │   ├── App.jsx             # Routing, layouts, auth gating
-│   │   └── main.jsx            # Entry point
-│   ├── .env.example            # Environment variable template
-│   ├── .gitignore              # App-specific gitignore
-│   ├── index.html              # Vite entry HTML
-│   ├── vite.config.js          # Vite configuration
-│   └── package.json            # Dependencies & scripts
+├── .gitignore                  # Git ignore rules
+├── vercel.json                 # Vercel deployment config
+├── index.html                  # Vite entry HTML
+├── vite.config.js              # Vite configuration
+├── package.json                # Dependencies & scripts
+├── package-lock.json           # Lockfile
+├── .env.example                # Environment variable template
+├── public/
+│   └── hero.png                # Login page hero image
+├── src/
+│   ├── data/
+│   │   ├── dm-data.json        # Global events, OPS, SOPs, escalation model
+│   │   ├── namma-data.json     # Namma Air threats, exposure, flights, fleet, crew
+│   │   ├── eurovista-data.json # EuroVista Airways data
+│   │   ├── indiconnect-data.json # IndiConnect Airways data
+│   │   └── geo.json            # Airport coordinates, stations, event geo data
+│   ├── pages/
+│   │   ├── Login.jsx           # Split-screen authentication
+│   │   ├── Home.jsx            # Airline selector dashboard
+│   │   ├── ThreatBoard.jsx     # Global ranked threat board
+│   │   ├── EventDetail.jsx     # Event deep-dive with tabs
+│   │   ├── WorldMap.jsx        # Leaflet world threat map
+│   │   ├── Radar.jsx           # Airline five-tier exposure radar
+│   │   ├── AirlineMap.jsx      # Airline network map
+│   │   └── DataExplorer.jsx    # Schedule Gantt + recovery solver
+│   ├── airlines.js             # Airline configuration registry
+│   ├── auth.js                 # Session-based authentication
+│   ├── theme.js                # Color system, score/severity helpers
+│   ├── styles.css              # CSS variables for dark/light themes
+│   ├── App.jsx                 # Routing, layouts, auth gating
+│   └── main.jsx                # Entry point
 ├── data/                       # Legacy JS data files (pre-JSON)
 ├── docs/                       # Design docs & airline profiles
 └── design/                     # Original HTML mockups
@@ -165,7 +165,6 @@ DisruptionMatrix/
 ### Installation
 
 ```bash
-cd app
 npm install
 ```
 
