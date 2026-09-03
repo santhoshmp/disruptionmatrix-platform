@@ -8,6 +8,7 @@ import WorldMap from './pages/WorldMap.jsx';
 import Radar from './pages/Radar.jsx';
 import AirlineMap from './pages/AirlineMap.jsx';
 import DataExplorer from './pages/DataExplorer.jsx';
+import Chat from './pages/Chat.jsx';
 import DM from './data/dm-data.json';
 import { AIRLINES } from './airlines.js';
 import { isAuthenticated, logout } from './auth.js';
@@ -85,7 +86,7 @@ function LogoutBtn() {
   );
 }
 
-const GLOBAL_ROUTES = ['/board', '/map', '/event'];
+const GLOBAL_ROUTES = ['/board', '/map', '/event', '/chat'];
 const NAMMA_ROUTES = ['/radar', '/airline-map', '/explorer'];
 
 function airlineFromPath(pathname) {
@@ -217,17 +218,13 @@ function GlobalLayout({ theme, onToggleTheme, children }) {
           <NavLink to="/map" style={({ isActive }) => topNavBtn(isActive)}>
             <span>World map</span>
           </NavLink>
+          <NavLink to="/chat" style={({ isActive }) => topNavBtn(isActive)}>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+            </svg>
+            <span>AI Assistant</span>
+          </NavLink>
           <span style={{ width: 1, height: 22, background: 'var(--line)', margin: '0 4px' }} />
-          {Object.values(AIRLINES).map((a) => (
-            <NavLink key={a.key} to={`${a.routePrefix}/radar`} style={({ isActive }) => topNavBtn(isActive, a.accent)}>
-              <div style={{
-                width: 18, height: 18, borderRadius: '50%', flexShrink: 0,
-                border: `1.5px solid ${a.accent}`, display: 'grid', placeItems: 'center',
-                ...MONO, fontSize: 8, fontWeight: 700, color: a.accent
-              }}>{a.code}</div>
-              <span>{a.shortName}</span>
-            </NavLink>
-          ))}
           <NavLink to="/" style={{
             display: 'flex', alignItems: 'center', gap: 6,
             padding: '7px 12px', ...MONO, fontSize: 12,
@@ -329,6 +326,7 @@ export default function App() {
       <Route path="/board" element={<ThreatBoard />} />
       <Route path="/event/:id" element={<EventDetail />} />
       <Route path="/map" element={<WorldMap />} />
+      <Route path="/chat" element={<Chat />} />
       <Route path="/radar" element={<Radar airline={AIRLINES.namma} />} />
       <Route path="/airline-map" element={<AirlineMap airline={AIRLINES.namma} />} />
       <Route path="/explorer" element={<DataExplorer airline={AIRLINES.namma} />} />
