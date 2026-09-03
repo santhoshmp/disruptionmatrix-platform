@@ -111,7 +111,6 @@ function HomeLayout({ theme, onToggleTheme }) {
           </div>
         </Link>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
-          <GlobalSearch />
           <ThemeBtn theme={theme} onToggle={onToggleTheme} />
           <LogoutBtn />
         </div>
