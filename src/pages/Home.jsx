@@ -85,19 +85,40 @@ export default function Home() {
       </div>
 
       <div style={{ maxWidth: 920, width: '100%', margin: '0 auto', padding: '28px 24px 40px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
-          <Card
-            logo={<GlobalLogo />}
-            label="GLOBAL VIEW"
-            labelColor={TEAL}
-            title="DisruptionMatrix"
-            description="External intelligence, correlated and scored. Weather, industrial action, geopolitical incidents, infrastructure and regulatory events ranked by disruption potential."
-            to="/board"
-            accent={TEAL}
-          />
+        {/* Platform card — full width */}
+        <div style={{
+          padding: 28, border: '1px solid var(--line2)', background: 'var(--panel)',
+          borderTop: `3px solid ${TEAL}`, marginBottom: 28, display: 'flex', alignItems: 'center', gap: 20
+        }}>
+          <GlobalLogo size={56} />
+          <div style={{ flex: 1 }}>
+            <div style={{ ...MONO, fontSize: 10, letterSpacing: '0.12em', color: TEAL, marginBottom: 4 }}>PLATFORM</div>
+            <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.3px', marginBottom: 6 }}>DisruptionMatrix</div>
+            <div style={{ fontSize: 13, color: 'var(--mute2)', lineHeight: 1.55 }}>
+              External threat intelligence, correlated and scored. Weather, ATC, industrial action, geopolitical incidents, infrastructure and regulatory events — ranked by disruption potential across all connected airlines.
+            </div>
+          </div>
+          <Link to="/board" style={{
+            display: 'flex', alignItems: 'center', gap: 8, padding: '12px 20px', fontSize: 14, fontWeight: 600,
+            border: `1px solid ${TEAL}`, background: TEAL + '1F', color: 'var(--ink)', whiteSpace: 'nowrap',
+            flexShrink: 0
+          }}>
+            Open threat board →
+          </Link>
+        </div>
+
+        {/* Airline views — grouped section */}
+        <div style={{
+          ...MONO, fontSize: 11, letterSpacing: '0.12em', color: 'var(--mute)', marginBottom: 14,
+          display: 'flex', alignItems: 'center', gap: 10
+        }}>
+          <span>AIRLINE VIEWS</span>
+          <div style={{ flex: 1, height: 1, background: 'var(--line2)' }} />
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
           <Card
             logo={<AirlineLogo airline={AIRLINES.namma} />}
-            label="AIRLINE VIEW"
+            label="AIRLINE"
             labelColor={CYAN}
             title="Namma Air"
             description="Bengaluru-based carrier with A320neo/A350 fleet. Monsoon, fuel, and fog exposure across the BLR hub and DEL network."
@@ -106,7 +127,7 @@ export default function Home() {
           />
           <Card
             logo={<AirlineLogo airline={AIRLINES.eva} />}
-            label="AIRLINE VIEW"
+            label="AIRLINE"
             labelColor={AIRLINES.eva.accent}
             title="EuroVista Airways"
             description="Vienna-based European carrier with E195/A320neo/A321neo fleet. Convective weather, ATFM regulations, and winter ops across the FRA–MUC–VIE corridor."
@@ -115,7 +136,7 @@ export default function Home() {
           />
           <Card
             logo={<AirlineLogo airline={AIRLINES.ica} />}
-            label="AIRLINE VIEW"
+            label="AIRLINE"
             labelColor={AIRLINES.ica.accent}
             title="IndiConnect Airways"
             description="Delhi-based Indian carrier with A320neo/A321neo/ATR 72 fleet. Fog, monsoon, and ATC disruptions across the DEL–BOM–BLR network."

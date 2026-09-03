@@ -104,8 +104,8 @@ function HomeLayout({ theme, onToggleTheme }) {
         <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 16, color: 'var(--ink)', cursor: 'pointer' }}>
           <MatrixLogo size={26} />
           <div>
-            <div style={{ fontSize: 16, fontWeight: 700, letterSpacing: '-0.2px' }}>Threat Intelligence Platform</div>
-            <div style={{ ...MONO, fontSize: 10, color: 'var(--faint)', letterSpacing: '0.1em' }}>DisruptionMatrix · Multi-Airline Platform</div>
+            <div style={{ fontSize: 16, fontWeight: 700, letterSpacing: '-0.2px' }}>DisruptionMatrix</div>
+            <div style={{ ...MONO, fontSize: 10, color: 'var(--faint)', letterSpacing: '0.1em' }}>THREAT INTELLIGENCE PLATFORM</div>
           </div>
         </Link>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
