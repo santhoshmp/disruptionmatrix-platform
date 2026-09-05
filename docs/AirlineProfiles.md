@@ -1,14 +1,276 @@
-# Fictional Airline Profiles — Disruption Scenarios PoC
+# Fictional Airline Profiles — DisruptionMatrix PoC
 
-*Business document — unrestricted. Intended for business use and distribution to intended recipients only.*
+*All names, codes, routes and figures are fictional and created for demonstration purposes only. Airline codes shown are not allocated references.*
 
-This document profiles four fictional airlines considered for the disruption-management PoC, plus the recommended two-airline scenario (EuroVista Airways and IndiConnect Airways) with their interconnection model and four candidate disruption scenarios.
+This document profiles the fictional airlines used in the DisruptionMatrix proof-of-concept, their fleet, network, crew, operational parameters, and interconnection model.
 
 ---
 
-## 1. Alpine Connect Airways (ACA)
+## Table of Contents
 
-### Company Overview
+1. [Namma Air](#1-namma-air)
+2. [EuroVista Airways](#2-eurovista-airways)
+3. [IndiConnect Airways](#3-indiconnect-airways)
+4. [Alpine Connect Airways](#4-alpine-connect-airways)
+5. [Western India Airways](#5-western-india-airways)
+6. [Interconnection Model](#6-interconnection-model)
+7. [Fictional Airline Ecosystem](#7-fictional-airline-ecosystem)
+
+---
+
+## 1. Namma Air
+
+### 1.1 Airline Profile
+
+| Attribute | Value |
+|---|---|
+| Name | Namma Air (synthetic) |
+| Codes | IATA **N7** · ICAO **NMA** · Callsign **NAMMA** (fictional) |
+| Home base / hub | Bengaluru Kempegowda International (BLR) |
+| Secondary station | Delhi (DEL) — crew sub-base and overnight line maintenance |
+| Business model | Full-service hub carrier: domestic feed at BLR connecting to international departures |
+| Fleet | 30 aircraft — 24 × A320neo family, 6 × A350-900 |
+| Daily departures | ~152 (144 narrowbody sectors, ~8 widebody sectors) |
+| Employees (ops-relevant) | ~380 pilots, ~940 cabin crew, OCC of 42 staff at BLR |
+
+### 1.2 Fleet
+
+| Sub-fleet | Count | Seats | Capability notes relevant to threat assessment |
+|---|---|---|---|
+| A320neo | 20 | 174 (8J/166Y) | 14 aircraft CAT IIIB capable, 6 CAT I only — matters for DEL winter fog |
+| A321neo | 4 | 218 (12J/206Y) | Used on trunk domestic + Gulf; gauge-swap reserve for heavy loads |
+| A350-900 | 6 | 316 (36J/280Y) | Long-haul; ETOPS 370; all CAT IIIB; 2 crews per ultra-long-haul rotation |
+
+Spare capacity policy: one A320neo held as operational spare at BLR from 06:00–22:00; no widebody spare (A350 recovery depends on schedule padding and crew re-pairing — a deliberate vulnerability that makes demo scenarios interesting).
+
+### 1.3 Network
+
+**Domestic (18 destinations, A320 family):** DEL, BOM, HYD, MAA, CCU, GOX, COK, TRV, PNQ, AMD, JAI, LKO, IXC, GAU, VTZ, IXE, HBX, VNS.
+Trunk frequencies: BLR–DEL 6×/day, BLR–BOM 5×/day, BLR–HYD 4×/day, BLR–MAA 4×/day.
+
+**International narrowbody (8 destinations):** DXB (2×/day), AUH, MCT, SIN (2×/day), KUL, BKK, CMB, DAC.
+
+**International widebody (A350):** LHR (daily), FRA (daily), SFO (3×/week, 2-crew ULR), SIN (daily, widebody on peak rotation).
+
+**BLR bank structure (the airline's disruption-sensitive skeleton):**
+
+| Bank | Local time | Content |
+|---|---|---|
+| Bank 1 | 05:30–08:30 | Domestic wave out; overnight long-haul arrivals (LHR/FRA) feed morning domestic |
+| Bank 2 | 11:00–14:00 | Domestic rotation midday wave; Gulf departures |
+| Bank 3 | 18:00–21:30 | Domestic wave in — feeds international departures |
+| Bank 4 | 22:30–02:00 | Long-haul departures (LHR, FRA, SFO) + SIN red-eye |
+
+The airline's principal fragility: Bank 3 → Bank 4 connectivity. Evening domestic delays cascade directly into long-haul misconnections, and there is no widebody spare.
+
+**Overflight footprint (why remote events reach Namma Air):** westbound long-haul routes cross the Arabian Sea, Gulf, Iraqi/Turkish or Saudi/Egyptian corridors, and European airspace including French UIRs on LHR routings. Gulf airspace events, European ATC strikes and Middle East security NOTAMs all touch the airline without any Indian event occurring.
+
+### 1.4 Dependencies (supplier & infrastructure map)
+
+| Dependency | Detail | Threat relevance |
+|---|---|---|
+| Ground handling | Self-handled at BLR; third-party handlers at all outstations (single-handler exposure at LHR, FRA, DXB) | Handler industrial action maps only to airlines using that handler |
+| Fuel | Single fuel farm at BLR (airport infrastructure) | Airport infrastructure incidents |
+| Catering | One caterer at BLR for all departures | Local strike/food-safety event grounds long-haul catering |
+| Line maintenance | BLR (full) + DEL (overnight A320 only); A350 checks only at BLR | A350 tech issue away from base = long recovery |
+| De-icing | Not applicable in network except LHR/FRA winter | European winter storms |
+| ATC/weather exposure | DEL winter fog (Dec–Jan), BOM monsoon (Jun–Sep), MAA/CCU cyclone season (Oct–Dec), BLR morning fog (rare) | Seasonal watchlist configuration |
+
+### 1.5 Escalation & policy parameters (airline risk appetite)
+
+| Parameter | Demo value |
+|---|---|
+| Escalation to VP NCC | ≥6 projected cancellations, or any hub-bank threat at BLR, or any multi-day event, or est. cost > ₹2.5 crore |
+| Recovery priority order | 1. Long-haul departures · 2. Bank connectivity · 3. Trunk domestic OTP · 4. Point-to-point |
+| Pre-cancellation doctrine | Thin domestic point-to-point first; protect BLR–DEL/BOM trunk; never pre-cancel long-haul without VP sign-off |
+| Curfew constraints | SFO slot pair, LHR night quota, FRA night ban 23:00–05:00 local |
+| Cost parameters (synthetic) | Delay ₹75,000/hr narrowbody · ₹2.6 lakh/hr widebody; cancellation ₹18 lakh domestic / ₹1.4 crore long-haul; DGCA + EU261 compensation regimes by route |
+
+---
+
+## 2. EuroVista Airways
+
+*"Connecting Europe Intelligently"*
+
+A medium-sized European airline based in Central Europe, operating a hub-and-spoke network with strong intra-European connectivity.
+
+### 2.1 Airline Profile
+
+| Field | Value |
+|---|---|
+| Airline Name | EuroVista Airways |
+| IATA Code | EV (fictional PoC code) |
+| ICAO Code | EVA (fictional) |
+| Callsign | EUROVISTA |
+| Headquarters | Vienna, Austria |
+| Primary Hub | Vienna International Airport (VIE) |
+| Secondary Bases | Munich (MUC), Zurich (ZRH), Prague (PRG) |
+| Business Model | Hybrid full-service / network carrier |
+
+The airline operates: European point-to-point services, hub-and-spoke connectivity, selected medium-haul routes, codeshare/interline services, and limited long-haul connectivity through partner airlines.
+
+### 2.2 Fleet
+
+A realistic fleet of approximately **38 aircraft**.
+
+| Segment | Fleet | Typical Routes / Use |
+|---|---|---|
+| Narrow-body | 12 × Airbus A320neo | Vienna–Frankfurt, Vienna–Paris, Vienna–Amsterdam, Vienna–Rome, Vienna–Madrid |
+| Regional | 18 × Embraer E190/E195 | Prague, Zurich, Geneva, Brussels, Copenhagen, Warsaw, Budapest, Milan |
+| Longer-range / medium-haul | 8 × Airbus A321neo / A321LR | Istanbul, Dubai, selected Middle East destinations, high-density European routes |
+
+### 2.3 Network
+
+**Primary European network**
+
+```
+                COPENHAGEN
+                    │
+                    │
+AMSTERDAM ─── FRANKFURT ─── WARSAW
+    │                           │
+    │                           │
+  PARIS ─── ZURICH ─── VIENNA ─── BUDAPEST
+    │                           │
+    │                           │
+  GENEVA                      PRAGUE
+                    │
+                    │
+                  ROME
+```
+
+**Medium-haul connectivity**
+
+```
+                EUROPE
+                  │
+        ┌─────────┼─────────┐
+        ▼         ▼         ▼
+      DUBAI    ISTANBUL    DELHI
+```
+
+*The Delhi connection is important — it creates the interconnection with the Indian airline.*
+
+### 2.4 Operational Profile
+
+| Metric | Value |
+|---|---|
+| Flights per day | ~160 |
+| Passengers annually | ~8 million |
+| Average load factor | ~82% |
+
+**Primary operating model**
+
+```
+European Feeder Flights
+        │
+        ▼
+    Vienna Hub
+        │
+        ▼
+European / Medium-haul Connections
+```
+
+### 2.5 Key Disruption-Sensitive Airports
+
+| Airport | Sensitivity |
+|---|---|
+| VIE | Hub concentration |
+| FRA | ATFM congestion |
+| MUC | Weather and capacity |
+| AMS | ATFM/network congestion |
+| ZRH | Weather |
+| GVA | Weather |
+| CDG | Network congestion |
+
+*This makes EuroVista well suited to the EUROCONTROL scenario.*
+
+---
+
+## 3. IndiConnect Airways
+
+*"Connecting India to the World"*
+
+A fictional medium-sized Indian hybrid/network carrier — enough complexity to demonstrate disruption propagation while remaining manageable for a PoC.
+
+### 3.1 Airline Profile
+
+| Field | Value |
+|---|---|
+| Airline Name | IndiConnect Airways |
+| IATA Code | IC (fictional PoC code) |
+| ICAO Code | INC (fictional) |
+| Callsign | INDICONNECT |
+| Headquarters | New Delhi |
+| Primary Hub | Delhi — Indira Gandhi International Airport (DEL) |
+| Secondary Hubs | Mumbai (BOM), Bengaluru (BLR) |
+| Focus Cities | Hyderabad (HYD), Chennai (MAA), Kochi (COK) |
+
+### 3.2 Fleet
+
+Approximately **42 aircraft**.
+
+| Segment | Fleet | Typical Use |
+|---|---|---|
+| Domestic narrow-body | 28 × Airbus A320neo | DEL–BOM, DEL–BLR, DEL–HYD, DEL–MAA, BOM–BLR, BOM–COK |
+| Regional | 8 × ATR 72 | Jaipur, Lucknow, Chandigarh, Ahmedabad, Goa, smaller regional airports |
+| International | 6 × Airbus A321neo / A321XLR | Dubai, Abu Dhabi, Singapore, Bangkok, Vienna, Istanbul |
+
+### 3.3 Network
+
+**Domestic network**
+
+```
+                DELHI
+              /   |   \
+             /    |    \
+       MUMBAI    BLR   LUCKNOW
+          │        │
+          │        │
+         HYD ───── CHENNAI
+                     │
+                     │
+                   KOCHI
+```
+
+**International connectivity**
+
+```
+                DELHI
+                  │
+        ┌─────────┼─────────┐
+        ▼         ▼         ▼
+      DUBAI    VIENNA    SINGAPORE
+        │         │
+        │         │
+   ABU DHABI   EuroVista
+```
+
+### 3.4 Operational Profile
+
+| Metric | Value |
+|---|---|
+| Flights per day | ~210 |
+| Passengers annually | ~11 million |
+
+**Primary disruption-sensitive airports**
+
+| Airport | Sensitivity |
+|---|---|
+| DEL | Fog and severe weather |
+| BOM | Monsoon disruption |
+| BLR | Thunderstorms |
+| HYD | Thunderstorms |
+| COK | Monsoon |
+| DXB | Network congestion/weather |
+
+*This gives a disruption environment that is completely different from the European carrier.*
+
+---
+
+## 4. Alpine Connect Airways
+
+### 4.1 Company Overview
 
 | Field | Value |
 |---|---|
@@ -23,7 +285,7 @@ This document profiles four fictional airlines considered for the disruption-man
 | Operating Certificate | European AOC (fictional) |
 | Ownership | Private |
 
-### Fleet
+### 4.2 Fleet
 
 | Aircraft Type | Quantity | Seats |
 |---|---|---|
@@ -33,7 +295,7 @@ This document profiles four fictional airlines considered for the disruption-man
 
 **Average fleet age:** 8 years
 
-### Route Network — Daily Scheduled Destinations
+### 4.3 Route Network — Daily Scheduled Destinations
 
 | From | To | Flights per Day |
 |---|---|---|
@@ -52,7 +314,7 @@ This document profiles four fictional airlines considered for the disruption-man
 - Average flight duration: 2.2 hours
 - Aircraft utilization: 10–11 block hours/day
 
-### Crew Population
+### 4.4 Crew Population
 
 **Flight crew**
 
@@ -72,7 +334,7 @@ This document profiles four fictional airlines considered for the disruption-man
 
 **Crew per flight** — each A320 flight requires: 1 Captain, 1 First Officer, 4 Cabin Crew
 
-### Operations Department
+### 4.5 Operations Department
 
 | Role | Headcount |
 |---|---|
@@ -83,7 +345,7 @@ This document profiles four fictional airlines considered for the disruption-man
 | Crew Schedulers | 6 |
 | **Total OCC Staff** | **33** |
 
-### Crew Scheduling Rules
+### 4.6 Crew Scheduling Rules
 
 **Pilot constraints**
 - Maximum duty period: 13 hours
@@ -95,13 +357,13 @@ This document profiles four fictional airlines considered for the disruption-man
 - Minimum rest: 12 hours
 - Maximum 6 consecutive working days
 
-### Training Requirements
+### 4.7 Training Requirements
 
 **Pilots:** A320 Type Rating · Annual Simulator Check · Recurrent Training Every 6 Months · Dangerous Goods Certification · CRM Training
 
 **Cabin crew:** Annual Safety Training · First Aid Certification · Emergency Evacuation Training · CRM Training
 
-### Example Monthly Activity
+### 4.8 Example Monthly Activity
 
 | Metric | Value |
 |---|---|
@@ -111,12 +373,12 @@ This document profiles four fictional airlines considered for the disruption-man
 | On-Time Performance | 87% |
 | Schedule Completion | 99% |
 
-### Crew Bases
+### 4.9 Crew Bases
 
 **Geneva Base:** 60 Pilots, 85 Cabin Crew
 **Zurich Base:** 30 Pilots, 45 Cabin Crew
 
-### Example Software Landscape
+### 4.10 Example Software Landscape
 
 | Function | Software |
 |---|---|
@@ -127,7 +389,7 @@ This document profiles four fictional airlines considered for the disruption-man
 | Maintenance | AMOS |
 | HR/Payroll | SAP SuccessFactors |
 
-### Typical Challenges
+### 4.11 Typical Challenges
 - Last-minute pilot sickness
 - Weather disruptions in winter
 - Crew legality management
@@ -139,9 +401,9 @@ This document profiles four fictional airlines considered for the disruption-man
 
 ---
 
-## 2. Western India Airways (WIA)
+## 5. Western India Airways
 
-### Company Overview
+### 5.1 Company Overview
 
 | Field | Value |
 |---|---|
@@ -158,7 +420,7 @@ This document profiles four fictional airlines considered for the disruption-man
 | Alliance Status | Independent (codeshare partnerships) |
 | AOC | Indian Scheduled Air Operator Certificate |
 
-### Fleet
+### 5.2 Fleet
 
 **Narrowbody**
 
@@ -180,7 +442,7 @@ This document profiles four fictional airlines considered for the disruption-man
 - A320neo: VT-WIA, VT-WIB, VT-WIC, VT-WID, VT-WIE, VT-WIF, VT-WIG, VT-WIH, VT-WII, VT-WIJ, VT-WIK, VT-WIL
 - A350-900: VT-WMA, VT-WMB, VT-WMC, VT-WMD, VT-WME, VT-WMF, VT-WMG, VT-WMH
 
-### Route Network
+### 5.3 Route Network
 
 **Domestic network**
 
@@ -254,7 +516,7 @@ This document profiles four fictional airlines considered for the disruption-man
 | Delhi – Melbourne | Daily | A350 |
 | Mumbai – Perth | 5 Weekly | A350 |
 
-### Operations
+### 5.4 Operations
 
 **Daily activity**
 
@@ -275,7 +537,7 @@ This document profiles four fictional airlines considered for the disruption-man
 | On-Time Performance | 87% |
 | Schedule Completion | 99.2% |
 
-### Flight Crew
+### 5.5 Flight Crew
 
 **A320 fleet:** 120 Captains, 120 First Officers
 **A350 fleet:** 80 Captains, 80 First Officers
@@ -283,13 +545,13 @@ This document profiles four fictional airlines considered for the disruption-man
 
 **Cabin crew:** 650 Cabin Crew, 90 Pursers/Senior Cabin Crew — **Total 740**
 
-### Crew Bases
+### 5.6 Crew Bases
 
 - **Mumbai (Primary):** 250 Pilots, 450 Cabin Crew
 - **Delhi:** 110 Pilots, 190 Cabin Crew
 - **Bengaluru:** 40 Pilots, 50 Cabin Crew
 
-### Operations Control Center (Mumbai HQ)
+### 5.7 Operations Control Center (Mumbai HQ)
 
 | Function | Staff |
 |---|---|
@@ -300,7 +562,7 @@ This document profiles four fictional airlines considered for the disruption-man
 | OCC Managers | 5 |
 | **Total OCC Staff** | **85** |
 
-### Typical Crew Complement
+### 5.8 Typical Crew Complement
 
 | Flight Type | Flight Deck | Cabin | Total |
 |---|---|---|---|
@@ -308,7 +570,7 @@ This document profiles four fictional airlines considered for the disruption-man
 | Long-Haul A350 (Europe) | 2 Pilots | 10 Cabin Crew | 12 |
 | Ultra Long-Haul (North America) | 4 Pilots (incl. relief crew) | 12 Cabin Crew | 16 |
 
-### Maintenance Organization
+### 5.9 Maintenance Organization
 
 **Main maintenance base:** Mumbai (BOM) — Line Maintenance, A Checks, C Checks, Engine Change, Landing Gear Change, Composite Repairs, Cabin Modifications
 
@@ -316,7 +578,7 @@ This document profiles four fictional airlines considered for the disruption-man
 
 **Overseas line stations:** London Heathrow, Dubai, Singapore, New York JFK, Toronto, Sydney
 
-### Technology Landscape
+### 5.10 Technology Landscape
 
 | Function | System |
 |---|---|
@@ -329,7 +591,7 @@ This document profiles four fictional airlines considered for the disruption-man
 | Passenger Service System | Amadeus Altéa |
 | HR & Payroll | SAP SuccessFactors |
 
-### Typical Operational Challenges
+### 5.11 Typical Operational Challenges
 - Mumbai monsoon disruptions
 - Long-haul crew fatigue management
 - ETOPS compliance for transoceanic operations
@@ -340,213 +602,13 @@ This document profiles four fictional airlines considered for the disruption-man
 - Widebody maintenance planning
 - International visa and crew documentation requirements
 
-### Airline Snapshot
-
 > Western India Airways (WIA) is a fictional Mumbai-based full-service international airline operating 20 aircraft (12 A320neos and 8 A350-900s) serving over 40 destinations across India, the Middle East, Asia, Europe, North America, and Australia. The airline carries approximately 9.5 million passengers annually and employs around 1,140 crew members, making it comparable in scale to a mid-sized international carrier.
 
 ---
 
-## 3. Recommended PoC Airlines
+## 6. Interconnection Model
 
-For the PoC, the recommendation is **two fictional but operationally realistic airlines** — sized deliberately below a Lufthansa/Air India scale — with enough network complexity to demonstrate:
-
-- Weather disruption
-- ATFM / EUROCONTROL flow restrictions
-- NOTAM impacts
-- Airport capacity constraints
-- Flight-level correlation
-- Aircraft rotation disruption
-- Passenger and connection impacts
-- Inter-airline connectivity
-- Cross-region disruption propagation
-
-The sweet spot: **a medium-sized European regional/network carrier** and **a small-to-medium Indian full-service/hybrid carrier**.
-
----
-
-## 4. Airline 1 — EuroVista Airways (EVA)
-
-*"Connecting Europe Intelligently"*
-
-A medium-sized European airline based in Central Europe, operating a hub-and-spoke network with strong intra-European connectivity.
-
-### Airline Profile
-
-| Field | Value |
-|---|---|
-| Airline Name | EuroVista Airways |
-| IATA Code | EV (fictional PoC code) |
-| ICAO Code | EVA (fictional) |
-| Callsign | EUROVISTA |
-| Headquarters | Vienna, Austria |
-| Primary Hub | Vienna International Airport (VIE) |
-| Secondary Bases | Munich (MUC), Zurich (ZRH), Prague (PRG) |
-| Business Model | Hybrid full-service / network carrier |
-
-The airline operates: European point-to-point services, hub-and-spoke connectivity, selected medium-haul routes, codeshare/interline services, and limited long-haul connectivity through partner airlines.
-
-### Fleet
-
-A realistic fleet of approximately **38 aircraft**.
-
-| Segment | Fleet | Typical Routes / Use |
-|---|---|---|
-| Narrow-body | 12 × Airbus A320neo | Vienna–Frankfurt, Vienna–Paris, Vienna–Amsterdam, Vienna–Rome, Vienna–Madrid |
-| Regional | 18 × Embraer E190/E195 | Prague, Zurich, Geneva, Brussels, Copenhagen, Warsaw, Budapest, Milan |
-| Longer-range / medium-haul | 8 × Airbus A321neo / A321LR | Istanbul, Dubai, selected Middle East destinations, high-density European routes |
-
-### Network
-
-**Primary European network**
-
-```
-                COPENHAGEN
-                    │
-                    │
-AMSTERDAM ─── FRANKFURT ─── WARSAW
-    │                           │
-    │                           │
-  PARIS ─── ZURICH ─── VIENNA ─── BUDAPEST
-    │                           │
-    │                           │
-  GENEVA                      PRAGUE
-                    │
-                    │
-                  ROME
-```
-
-**Medium-haul connectivity**
-
-```
-                EUROPE
-                  │
-        ┌─────────┼─────────┐
-        ▼         ▼         ▼
-      DUBAI    ISTANBUL    DELHI
-```
-
-*The Delhi connection is important — it creates the interconnection with the Indian airline.*
-
-### Operational Profile
-
-| Metric | Value |
-|---|---|
-| Flights per day | ~160 |
-| Passengers annually | ~8 million |
-| Average load factor | ~82% |
-
-**Primary operating model**
-
-```
-European Feeder Flights
-        │
-        ▼
-    Vienna Hub
-        │
-        ▼
-European / Medium-haul Connections
-```
-
-### Key Disruption-Sensitive Airports
-
-| Airport | Sensitivity |
-|---|---|
-| VIE | Hub concentration |
-| FRA | ATFM congestion |
-| MUC | Weather and capacity |
-| AMS | ATFM/network congestion |
-| ZRH | Weather |
-| GVA | Weather |
-| CDG | Network congestion |
-
-*This makes EuroVista well suited to the EUROCONTROL scenario.*
-
----
-
-## 5. Airline 2 — IndiConnect Airways (ICA)
-
-*"Connecting India to the World"*
-
-A fictional medium-sized Indian hybrid/network carrier — enough complexity to demonstrate disruption propagation while remaining manageable for a PoC.
-
-### Airline Profile
-
-| Field | Value |
-|---|---|
-| Airline Name | IndiConnect Airways |
-| IATA Code | IC (fictional PoC code) |
-| ICAO Code | INC (fictional) |
-| Callsign | INDICONNECT |
-| Headquarters | New Delhi |
-| Primary Hub | Delhi — Indira Gandhi International Airport (DEL) |
-| Secondary Hubs | Mumbai (BOM), Bengaluru (BLR) |
-| Focus Cities | Hyderabad (HYD), Chennai (MAA), Kochi (COK) |
-
-### Fleet
-
-Approximately **42 aircraft**.
-
-| Segment | Fleet | Typical Use |
-|---|---|---|
-| Domestic narrow-body | 28 × Airbus A320neo | DEL–BOM, DEL–BLR, DEL–HYD, DEL–MAA, BOM–BLR, BOM–COK |
-| Regional | 8 × ATR 72 | Jaipur, Lucknow, Chandigarh, Ahmedabad, Goa, smaller regional airports |
-| International | 6 × Airbus A321neo / A321XLR | Dubai, Abu Dhabi, Singapore, Bangkok, Vienna, Istanbul |
-
-### Network
-
-**Domestic network**
-
-```
-                DELHI
-              /   |   \
-             /    |    \
-       MUMBAI    BLR   LUCKNOW
-          │        │
-          │        │
-         HYD ───── CHENNAI
-                     │
-                     │
-                   KOCHI
-```
-
-**International connectivity**
-
-```
-                DELHI
-                  │
-        ┌─────────┼─────────┐
-        ▼         ▼         ▼
-      DUBAI    VIENNA    SINGAPORE
-        │         │
-        │         │
-   ABU DHABI   EuroVista
-```
-
-### Operational Profile
-
-| Metric | Value |
-|---|---|
-| Flights per day | ~210 |
-| Passengers annually | ~11 million |
-
-**Primary disruption-sensitive airports**
-
-| Airport | Sensitivity |
-|---|---|
-| DEL | Fog and severe weather |
-| BOM | Monsoon disruption |
-| BLR | Thunderstorms |
-| HYD | Thunderstorms |
-| COK | Monsoon |
-| DXB | Network congestion/weather |
-
-*This gives a disruption environment that is completely different from the European carrier.*
-
----
-
-## 6. Interconnection Between the Two Airlines
-
-The two airlines should not exist independently — they need realistic operational and commercial interconnections, at three levels.
+The PoC airlines should not exist independently — they need realistic operational and commercial interconnections, at three levels.
 
 ### 6.1 Interline Agreement
 
@@ -592,7 +654,7 @@ For the PoC, a simulated **Disruption Data Sharing Agreement** is created. Both 
 - Missed connection risks
 - Airport disruptions
 
-### The Joint Network
+### 6.4 The Joint Network
 
 ```
 EUROPE
@@ -613,7 +675,7 @@ AMS ─ FRA ─ MUC ─ VIE ─ ZRH
         INDICONNECT NETWORK
 ```
 
-### Why These Two Airlines Work Well for the PoC
+### 6.5 Why These Two Airlines Work Well for the PoC
 
 **EuroVista provides — European disruption complexity:**
 - EUROCONTROL / ATFM regulations
@@ -633,154 +695,39 @@ AMS ─ FRA ─ MUC ─ VIE ─ ZRH
 
 ---
 
-## 7. Four Candidate PoC Scenarios
+## 7. Fictional Airline Ecosystem
 
-### Scenario 1 — European Convective Weather
+Rather than standalone airline profiles, the PoC defines a small ecosystem:
 
-**Event:** Severe CB (thunderstorm) activity forecast around Frankfurt, Munich, and Vienna.
+- **Namma Air** — Indian full-service hub carrier based at Bengaluru (BLR)
+- **EuroVista Airways** — European network carrier based at Vienna (VIE)
+- **IndiConnect Airways** — Indian hybrid network carrier based at Delhi (DEL)
+- **AeroLink Alliance** — a fictional commercial/interline partnership between EuroVista and IndiConnect
 
-**Data sources:** Weather Intelligence + EUROCONTROL ATFM + NOTAMs + EuroVista Flight Schedule
+This gives the PoC a richer storyline: a disruption originating in European airspace is detected through weather + ATFM + NOTAM intelligence, correlated to EuroVista's flights, and its downstream impact is propagated across interline connections into the IndiConnect network in India — an end-to-end demonstration.
 
-**AI determines:** Which EuroVista flights will be affected, then which connecting passengers will miss their onward flights — including Vienna → Delhi → Bengaluru connections.
+### Naming Rationale
 
-### Scenario 2 — Frankfurt ATFM Regulation
-
-**Event:** EUROCONTROL Network Manager identifies the FRA airspace sector is becoming overloaded.
-
-```
-EUROCONTROL
-      │
-Active ATFM Regulation
-      │
-      ▼
-EuroVista Flights Delayed
-      │
-      ▼
-Vienna Hub Connection Risk
-      │
-      ▼
-Delhi Flight Departs Late
-      │
-      ▼
-IndiConnect Connections Impacted
-```
-
-*An excellent cascading disruption scenario.*
-
-### Scenario 3 — Delhi Winter Fog
-
-**Event:** Dense fog predicted at DEL.
-
-```
-TAF / METAR
-     +
-  Forecast
-     +
-Airport Capacity
-     ↓
-Reduced Landing Rate
-     ↓
-IndiConnect Delays
-```
-
-**The impact engine identifies:** incoming aircraft, outbound rotations, European connections, and EuroVista passengers — demonstrating cross-airline disruption propagation.
-
-### Scenario 4 — Indian Monsoon + European Connection
-
-**Event:** Severe monsoon thunderstorms at Mumbai.
-
-```
-Weather Hazard
-     +
-Airport Capacity
-     +
-   NOTAM
-     ↓
-Flight Cancellation Risk
-```
-
-**The system determines:** IndiConnect IC452 (DEL → BOM) is likely to be cancelled. 34 EuroVista passengers arriving into Delhi have onward bookings to Mumbai.
-
-**The AI recommends:** rebook affected passengers, protect connections, notify partner airline, update downstream systems.
-
----
-
-## 8. Suggested PoC Data Model
-
-For each airline, realistic datasets should be created across the following entities.
-
-### Airline Master
-- Airline
-- IATA / ICAO
-- Fleet
-- Hubs
-- Bases
-- Network
-- Operating Rules
-
-### Flight Schedule
-- Flight Number
-- Origin
-- Destination
-- STD (Scheduled Time of Departure)
-- STA (Scheduled Time of Arrival)
-- Aircraft
-- Rotation
-- Codeshare Partner
-- Connection Group
-
-### Aircraft Rotation
-- Aircraft ID
-- Flight Sequence
-- Airport
-- Scheduled Arrival
-- Scheduled Departure
-- Turnaround Time
-
-### Passenger Connection Data
-*No actual PII — anonymised data only:*
-- Passenger Group ID
-- Inbound Flight
-- Outbound Flight
-- Connection Time
-- Risk Score
-- Partner Airline
-
-### Example Flight Data
-
-**EuroVista**
-
-| Flight | Route | Aircraft | Connection Role |
-|---|---|---|---|
-| EV412 | GVA → VIE | E195 | European feeder |
-| EV901 | VIE → DEL | A321LR | Intercontinental |
-| EV234 | FRA → VIE | A320neo | Hub feeder |
-| EV567 | ZRH → VIE | E195 | Hub feeder |
-
-**IndiConnect**
-
-| Flight | Route | Aircraft | Connection Role |
-|---|---|---|---|
-| IC234 | DEL → BLR | A320neo | EuroVista connection |
-| IC452 | DEL → BOM | A320neo | Hub feeder |
-| IC782 | BOM → COK | A320neo | Domestic connection |
-| IC901 | DEL → VIE | A321XLR | Partner route |
-
----
-
-## 9. Naming Rationale
-
+- **Namma Air** — "Namma" means "our" in Kannada, the language of Bengaluru; immediately communicates local identity.
 - **EuroVista Airways** — sounds realistic but clearly fictional.
 - **IndiConnect Airways** — immediately communicates its network role and is easy to understand in an international workshop.
 
-## 10. Further Recommendation — A Fictional Airline Ecosystem
+### PoC Airline Selection Rationale
 
-Rather than two standalone airline profiles, define a small ecosystem:
+For the PoC, the airlines are sized deliberately below a Lufthansa/Air India scale — with enough network complexity to demonstrate:
 
-- **EuroVista Airways** — European network carrier
-- **IndiConnect Airways** — Indian hybrid network carrier
-- **AeroLink Alliance** — a fictional commercial/interline partnership between them
+- Weather disruption
+- ATFM / EUROCONTROL flow restrictions
+- NOTAM impacts
+- Airport capacity constraints
+- Flight-level correlation
+- Aircraft rotation disruption
+- Passenger and connection impacts
+- Inter-airline connectivity
+- Cross-region disruption propagation
 
-This gives the PoC a richer storyline: a disruption originating in European airspace is detected through weather + ATFM + NOTAM intelligence, correlated to EuroVista's flights, and its downstream impact is propagated across interline connections into the IndiConnect network in India — an end-to-end demonstration for the IATA WDS audience.
+The sweet spot: **a medium-sized European regional/network carrier** (EuroVista), **a small-to-medium Indian full-service carrier** (Namma Air), and **a medium Indian hybrid carrier** (IndiConnect).
 
-**Suggested next step:** build a complete synthetic operational dataset specification for EuroVista and IndiConnect — including fleet registration numbers, 50–100 flights, aircraft rotations, schedules, airport connections, and disruption scenarios — to serve as the data foundation for the PoC.
+---
+
+*This document profiles fictional airlines for demonstration purposes only. All names, codes, routes, and figures are synthetic.*
