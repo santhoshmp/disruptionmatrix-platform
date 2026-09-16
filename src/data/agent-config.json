@@ -1,0 +1,1526 @@
+{
+  "version": "1.0",
+  "description": "DisruptionMatrix intelligence agent configuration. Defines regions, agent types, agent instances, data sources, and output contracts. All airline names and codes are fictional.",
+  "regions": [
+    {
+      "id": "R1",
+      "name": "Indian Subcontinent",
+      "priority": "critical",
+      "subRegions": [
+        {
+          "id": "southIndia",
+          "name": "South India",
+          "airports": [
+            "BLR",
+            "MAA",
+            "COK",
+            "HYD",
+            "GOI",
+            "PNQ",
+            "VTZ"
+          ],
+          "airspace": [
+            "Chennai FIR",
+            "Bangalore FIR",
+            "Mumbai FIR (south)"
+          ],
+          "bbox": {
+            "minLat": 8,
+            "maxLat": 18,
+            "minLon": 72,
+            "maxLon": 85
+          },
+          "seasonalWatchlist": [
+            "BLR morning fog (rare)",
+            "MAA/CCU cyclone season (Oct-Dec)"
+          ]
+        },
+        {
+          "id": "northIndia",
+          "name": "North India",
+          "airports": [
+            "DEL",
+            "LKO",
+            "JAI",
+            "AMD",
+            "IXC",
+            "GAU"
+          ],
+          "airspace": [
+            "Delhi FIR",
+            "Kolkata FIR (north)"
+          ],
+          "bbox": {
+            "minLat": 23,
+            "maxLat": 32,
+            "minLon": 73,
+            "maxLon": 90
+          },
+          "seasonalWatchlist": [
+            "DEL winter fog (Dec-Jan)"
+          ]
+        },
+        {
+          "id": "westIndia",
+          "name": "West India",
+          "airports": [
+            "BOM",
+            "GOI",
+            "PNQ"
+          ],
+          "airspace": [
+            "Mumbai FIR (north)"
+          ],
+          "bbox": {
+            "minLat": 15,
+            "maxLat": 24,
+            "minLon": 70,
+            "maxLon": 76
+          },
+          "seasonalWatchlist": [
+            "BOM monsoon (Jun-Sep)"
+          ]
+        },
+        {
+          "id": "eastIndia",
+          "name": "East India",
+          "airports": [
+            "CCU",
+            "GAU"
+          ],
+          "airspace": [
+            "Kolkata FIR (south)"
+          ],
+          "bbox": {
+            "minLat": 18,
+            "maxLat": 28,
+            "minLon": 85,
+            "maxLon": 93
+          }
+        },
+        {
+          "id": "bayOfBengal",
+          "name": "Bay of Bengal",
+          "airports": [],
+          "airspace": [
+            "Bay of Bengal airspace",
+            "Chennai FIR (maritime)"
+          ],
+          "bbox": {
+            "minLat": 5,
+            "maxLat": 22,
+            "minLon": 80,
+            "maxLon": 92
+          }
+        },
+        {
+          "id": "arabianSea",
+          "name": "Arabian Sea",
+          "airports": [],
+          "airspace": [
+            "Arabian Sea airspace",
+            "Mumbai FIR (maritime)"
+          ],
+          "bbox": {
+            "minLat": 5,
+            "maxLat": 25,
+            "minLon": 65,
+            "maxLon": 75
+          }
+        }
+      ]
+    },
+    {
+      "id": "R2",
+      "name": "Europe",
+      "priority": "critical",
+      "subRegions": [
+        {
+          "id": "centralEurope",
+          "name": "Central Europe",
+          "airports": [
+            "VIE",
+            "MUC",
+            "PRG",
+            "BUD"
+          ],
+          "airspace": [
+            "Vienna FIR",
+            "Munich FIR",
+            "Prague FIR"
+          ],
+          "bbox": {
+            "minLat": 45,
+            "maxLat": 52,
+            "minLon": 10,
+            "maxLon": 20
+          }
+        },
+        {
+          "id": "westernEurope",
+          "name": "Western Europe",
+          "airports": [
+            "FRA",
+            "AMS",
+            "CDG",
+            "BRU",
+            "ZRH",
+            "GVA"
+          ],
+          "airspace": [
+            "Frankfurt FIR",
+            "Amsterdam FIR",
+            "Paris FIR",
+            "Swiss FIR"
+          ],
+          "bbox": {
+            "minLat": 45,
+            "maxLat": 53,
+            "minLon": -2,
+            "maxLon": 10
+          },
+          "overflightNote": "French UIR critical for LHR routings - no French destination needed for exposure"
+        },
+        {
+          "id": "northernEurope",
+          "name": "Northern Europe",
+          "airports": [
+            "CPH",
+            "OSL",
+            "EDI",
+            "ABZ",
+            "RTM"
+          ],
+          "airspace": [
+            "Copenhagen FIR",
+            "Oslo FIR",
+            "Scottish FIR"
+          ],
+          "bbox": {
+            "minLat": 55,
+            "maxLat": 62,
+            "minLon": -5,
+            "maxLon": 15
+          }
+        },
+        {
+          "id": "southernEurope",
+          "name": "Southern Europe",
+          "airports": [
+            "FCO",
+            "MAD",
+            "IST",
+            "LIS",
+            "ATH"
+          ],
+          "airspace": [
+            "Rome FIR",
+            "Madrid FIR",
+            "Istanbul FIR"
+          ],
+          "bbox": {
+            "minLat": 36,
+            "maxLat": 42,
+            "minLon": -10,
+            "maxLon": 30
+          }
+        }
+      ]
+    },
+    {
+      "id": "R3",
+      "name": "Middle East / Gulf",
+      "priority": "high",
+      "subRegions": [
+        {
+          "id": "gulfStates",
+          "name": "Gulf States",
+          "airports": [
+            "DXB",
+            "AUH",
+            "MCT",
+            "DOH",
+            "BAH"
+          ],
+          "airspace": [
+            "Dubai FIR",
+            "Muscat FIR",
+            "Bahrain FIR"
+          ],
+          "bbox": {
+            "minLat": 22,
+            "maxLat": 28,
+            "minLon": 50,
+            "maxLon": 58
+          }
+        },
+        {
+          "id": "overflight",
+          "name": "Overflight Corridor",
+          "airports": [],
+          "airspace": [
+            "Gulf corridor",
+            "Iraqi/Turkish UIR",
+            "Saudi/Egyptian corridors"
+          ],
+          "bbox": {
+            "minLat": 20,
+            "maxLat": 35,
+            "minLon": 40,
+            "maxLon": 55
+          },
+          "note": "Invisible exposure corridor - westbound long-haul overflights"
+        }
+      ]
+    },
+    {
+      "id": "R4",
+      "name": "Southeast Asia",
+      "priority": "medium",
+      "subRegions": [
+        {
+          "id": "mainlandSEA",
+          "name": "Mainland SEA",
+          "airports": [
+            "BKK",
+            "KUL",
+            "SIN",
+            "CGK"
+          ],
+          "airspace": [
+            "Singapore FIR",
+            "Bangkok FIR"
+          ],
+          "bbox": {
+            "minLat": -2,
+            "maxLat": 15,
+            "minLon": 95,
+            "maxLon": 110
+          }
+        }
+      ]
+    },
+    {
+      "id": "R5",
+      "name": "North Atlantic / North America",
+      "priority": "medium",
+      "subRegions": [
+        {
+          "id": "britishIsles",
+          "name": "British Isles",
+          "airports": [
+            "LHR",
+            "LGW",
+            "STN"
+          ],
+          "airspace": [
+            "London FIR",
+            "Scottish FIR"
+          ],
+          "bbox": {
+            "minLat": 50,
+            "maxLat": 55,
+            "minLon": -6,
+            "maxLon": 2
+          }
+        },
+        {
+          "id": "northAmerica",
+          "name": "North America",
+          "airports": [
+            "JFK",
+            "YYZ",
+            "ORD",
+            "SFO"
+          ],
+          "airspace": [
+            "New York FIR",
+            "Toronto FIR"
+          ],
+          "bbox": {
+            "minLat": 35,
+            "maxLat": 50,
+            "minLon": -125,
+            "maxLon": -70
+          }
+        },
+        {
+          "id": "northAtlantic",
+          "name": "North Atlantic",
+          "airports": [],
+          "airspace": [
+            "NAT Tracks",
+            "Shanwick FIR",
+            "Gander FIR"
+          ],
+          "bbox": {
+            "minLat": 40,
+            "maxLat": 65,
+            "minLon": -70,
+            "maxLon": -10
+          }
+        }
+      ]
+    },
+    {
+      "id": "R6",
+      "name": "East Asia",
+      "priority": "low",
+      "subRegions": [
+        {
+          "id": "eastAsia",
+          "name": "East Asia",
+          "airports": [
+            "HKG",
+            "NRT",
+            "ICN"
+          ],
+          "airspace": [
+            "Hong Kong FIR",
+            "Tokyo FIR",
+            "Seoul FIR"
+          ],
+          "bbox": {
+            "minLat": 30,
+            "maxLat": 45,
+            "minLon": 115,
+            "maxLon": 145
+          }
+        }
+      ]
+    },
+    {
+      "id": "R7",
+      "name": "Africa",
+      "priority": "low",
+      "subRegions": [
+        {
+          "id": "eastAfrica",
+          "name": "East Africa",
+          "airports": [
+            "NBO"
+          ],
+          "airspace": [
+            "Nairobi FIR"
+          ],
+          "bbox": {
+            "minLat": -5,
+            "maxLat": 5,
+            "minLon": 35,
+            "maxLon": 42
+          }
+        },
+        {
+          "id": "southernAfrica",
+          "name": "Southern Africa",
+          "airports": [
+            "JNB"
+          ],
+          "airspace": [
+            "Johannesburg FIR"
+          ],
+          "bbox": {
+            "minLat": -30,
+            "maxLat": -20,
+            "minLon": 25,
+            "maxLon": 32
+          }
+        }
+      ]
+    }
+  ],
+  "agentTypes": [
+    {
+      "type": "weather",
+      "category": "Weather",
+      "mission": "Detect developing meteorological hazards (storms, fog, monsoon, cyclones, snow, low visibility) that reduce airport capacity or close airspace.",
+      "pollIntervalMinutes": 5,
+      "dataSources": [
+        {
+          "name": "NOAA/NWS Aviation Weather Center (METAR/TAF/SIGMET)",
+          "tier": 1,
+          "scope": "airports",
+          "mode": "real",
+          "url": "https://aviationweather.gov/api/data"
+        },
+        {
+          "name": "Open-Meteo (ECMWF/GFS forecasts)",
+          "tier": 1,
+          "scope": "bbox",
+          "mode": "real",
+          "url": "https://api.open-meteo.com/v1/forecast"
+        },
+        {
+          "name": "NASA EONET (natural events)",
+          "tier": 1,
+          "scope": "global",
+          "mode": "real",
+          "url": "https://eonet.gsfc.nasa.gov/api/v3/events"
+        },
+        {
+          "name": "Tropical cyclone advisories (JTWC, RSMC)",
+          "tier": 1,
+          "scope": "maritime",
+          "mode": "planned"
+        },
+        {
+          "name": "Lightning detection networks",
+          "tier": 2,
+          "scope": "bbox",
+          "mode": "planned"
+        },
+        {
+          "name": "Mock weather data (fallback)",
+          "tier": 2,
+          "scope": "all",
+          "mode": "mock",
+          "url": "server/connectors/mock-weather.js"
+        }
+      ],
+      "factorMapping": {
+        "probability": "Model agreement (ECMWF/GFS spread), number of met services converging",
+        "severity": "Gust speeds vs. crosswind limits, visibility vs. CAT minima, rainfall intensity",
+        "geographicReach": "Wind field / fog extent radius, airports within bbox",
+        "expectedDuration": "Forecast window + recovery time",
+        "timeToImpact": "Forecast onset time minus now",
+        "escalationRate": "Score delta across last 3 model cycles",
+        "sourceCredibility": "Tier rating of met services corroborating",
+        "predictionConfidence": "Ensemble spread agreement"
+      },
+      "hazardTypes": [
+        "storm",
+        "fog",
+        "monsoon",
+        "cyclone",
+        "snow",
+        "low_visibility",
+        "wind_shear",
+        "thunderstorm"
+      ],
+      "dataSourceMode": "real"
+    },
+    {
+      "type": "atc",
+      "category": "ATC / Airspace",
+      "mission": "Detect ATFM regulations, sector overloads, flow restrictions, and capacity reductions that will delay flights.",
+      "pollIntervalMinutes": 2,
+      "dataSources": [
+        {
+          "name": "FAA Airport Status Web Service (ASWS)",
+          "tier": 1,
+          "scope": "US airports",
+          "mode": "real",
+          "url": "https://external-api.faa.gov/asws/api/airport/delays"
+        },
+        {
+          "name": "EUROCONTROL NM B2B / NOP",
+          "tier": 1,
+          "scope": "R2",
+          "mode": "planned"
+        },
+        {
+          "name": "AAI ATFM portal",
+          "tier": 1,
+          "scope": "R1",
+          "mode": "planned"
+        },
+        {
+          "name": "CAAS / GCC ATFM feeds",
+          "tier": 1,
+          "scope": "R3",
+          "mode": "planned"
+        },
+        {
+          "name": "Mock ATC scenario data (fallback)",
+          "tier": 2,
+          "scope": "all",
+          "mode": "mock",
+          "url": "server/connectors/mock-atc.js"
+        }
+      ],
+      "factorMapping": {
+        "probability": "Regulation published status (draft vs. active)",
+        "severity": "Delay minutes published, sector capacity reduction %",
+        "geographicReach": "Number of FIRs / airports in regulation scope",
+        "expectedDuration": "Regulation start/end times",
+        "timeToImpact": "Regulation start minus now",
+        "escalationRate": "Trend in delay minutes over recent cycles",
+        "sourceCredibility": "NM/FAA official = tier 1",
+        "predictionConfidence": "High for published; lower for predicted overload"
+      },
+      "hazardTypes": [
+        "atfm_regulation",
+        "sector_overload",
+        "flow_restriction",
+        "capacity_reduction",
+        "ground_stop",
+        "airport_delay"
+      ],
+      "dataSourceMode": "real"
+    },
+    {
+      "type": "industrial",
+      "category": "Industrial action",
+      "mission": "Detect strike ballots, go-slow notices, union action announcements, and ground handler industrial action that reduce airport throughput or crew availability.",
+      "pollIntervalMinutes": 30,
+      "dataSources": [
+        {
+          "name": "GDELT Project (global news events)",
+          "tier": 2,
+          "scope": "all",
+          "mode": "real",
+          "url": "https://api.gdeltproject.org/api/v2/doc/doc"
+        },
+        {
+          "name": "Official union notices (employer filings)",
+          "tier": 1,
+          "scope": "country",
+          "mode": "planned"
+        },
+        {
+          "name": "EUROCONTROL industrial action bulletins",
+          "tier": 1,
+          "scope": "R2",
+          "mode": "planned"
+        },
+        {
+          "name": "Government labor dispute registries",
+          "tier": 1,
+          "scope": "country",
+          "mode": "planned"
+        },
+        {
+          "name": "Mock industrial action data (fallback)",
+          "tier": 2,
+          "scope": "all",
+          "mode": "mock",
+          "url": "server/connectors/mock-industrial.js"
+        }
+      ],
+      "factorMapping": {
+        "probability": "Ballot result vs. announced action date",
+        "severity": "% of workforce affected, airport closure vs. reduced rate",
+        "geographicReach": "Airports / bases affected",
+        "expectedDuration": "Announced strike window",
+        "timeToImpact": "Action start minus now",
+        "escalationRate": "Ballot progression (notice -> ballot -> result -> action)",
+        "sourceCredibility": "Official notice = tier 1; news = tier 2",
+        "predictionConfidence": "High if action date announced; medium if ballot pending"
+      },
+      "hazardTypes": [
+        "strike",
+        "go_slow",
+        "work_to_rule",
+        "ground_handler_action",
+        "crew_action"
+      ],
+      "dataSourceMode": "real"
+    },
+    {
+      "type": "geopolitical",
+      "category": "Geopolitical",
+      "mission": "Detect airspace restrictions, security NOTAMs, border closures, and overflight corridor changes that affect route access.",
+      "pollIntervalMinutes": 10,
+      "dataSources": [
+        {
+          "name": "SafeAirspace.net (OPSGROUP)",
+          "tier": 1,
+          "scope": "global",
+          "mode": "real",
+          "url": "https://safeairspace.net/"
+        },
+        {
+          "name": "FAA Temporary Flight Restrictions (TFR)",
+          "tier": 1,
+          "scope": "US airspace",
+          "mode": "real",
+          "url": "https://tfr.faa.gov/tfrapi/exportTfrList"
+        },
+        {
+          "name": "GDELT Project (geopolitical news)",
+          "tier": 2,
+          "scope": "all",
+          "mode": "real",
+          "url": "https://api.gdeltproject.org/api/v2/doc/doc"
+        },
+        {
+          "name": "ICAO Annex 15 (PIB)",
+          "tier": 1,
+          "scope": "all",
+          "mode": "planned"
+        },
+        {
+          "name": "FAA / EASA prohibitions lists",
+          "tier": 1,
+          "scope": "global",
+          "mode": "planned"
+        },
+        {
+          "name": "Mock geopolitical data (fallback)",
+          "tier": 2,
+          "scope": "all",
+          "mode": "mock",
+          "url": "server/connectors/mock-geopolitical.js"
+        }
+      ],
+      "factorMapping": {
+        "probability": "NOTAM published vs. draft; advisory vs. mandatory",
+        "severity": "Corridor closure vs. narrowing; reroute distance added",
+        "geographicReach": "Number of FIRs / corridors affected",
+        "expectedDuration": "NOTAM validity period",
+        "timeToImpact": "NOTAM effective time minus now",
+        "escalationRate": "Progression: advisory -> warning -> restriction -> closure",
+        "sourceCredibility": "State NOTAM = tier 1; OSINT = tier 2-3",
+        "predictionConfidence": "High for published NOTAMs; lower for anticipated closures"
+      },
+      "hazardTypes": [
+        "airspace_restriction",
+        "overflight_closure",
+        "border_closure",
+        "security_notam",
+        "corridor_narrowing"
+      ],
+      "dataSourceMode": "real"
+    },
+    {
+      "type": "infrastructure",
+      "category": "Infrastructure",
+      "mission": "Detect airport infrastructure failures (fuel supply, runway, ILS, power, ground systems, baggage, terminal) that reduce throughput.",
+      "pollIntervalMinutes": 10,
+      "dataSources": [
+        {
+          "name": "GDELT Project (infrastructure news)",
+          "tier": 2,
+          "scope": "all",
+          "mode": "real",
+          "url": "https://api.gdeltproject.org/api/v2/doc/doc"
+        },
+        {
+          "name": "USGS Earthquake Hazards Program",
+          "tier": 1,
+          "scope": "global",
+          "mode": "real",
+          "url": "https://earthquake.usgs.gov/fdsnws/event/1/query"
+        },
+        {
+          "name": "Airport NOTAMs (infrastructure)",
+          "tier": 1,
+          "scope": "airports",
+          "mode": "planned"
+        },
+        {
+          "name": "Airport operator bulletins",
+          "tier": 1,
+          "scope": "hub",
+          "mode": "planned"
+        },
+        {
+          "name": "Fuel supplier notices",
+          "tier": 1,
+          "scope": "hub",
+          "mode": "planned"
+        },
+        {
+          "name": "Mock infrastructure data (fallback)",
+          "tier": 2,
+          "scope": "all",
+          "mode": "mock",
+          "url": "server/connectors/mock-infrastructure.js"
+        }
+      ],
+      "factorMapping": {
+        "probability": "Confirmed failure vs. reported issue",
+        "severity": "Capacity reduction % (fuel halved, runway closed, etc.)",
+        "geographicReach": "Single airport vs. multi-airport (fuel pipeline)",
+        "expectedDuration": "ETR from operator / supplier",
+        "timeToImpact": "Immediate for active failures; scheduled for maintenance",
+        "escalationRate": "Issue -> failure -> cascade progression",
+        "sourceCredibility": "Operator = tier 1; news = tier 2",
+        "predictionConfidence": "High for confirmed failures"
+      },
+      "hazardTypes": [
+        "fuel_supply",
+        "runway_closure",
+        "ils_outage",
+        "power_failure",
+        "ground_system",
+        "baggage_system",
+        "terminal"
+      ],
+      "dataSourceMode": "real"
+    },
+    {
+      "type": "regulatory",
+      "category": "Regulatory",
+      "mission": "Detect regulatory directives (fog directives, ETOPS changes, ops spec changes, curfew changes) that alter operating rules.",
+      "pollIntervalMinutes": 60,
+      "dataSources": [
+        {
+          "name": "GDELT Project (regulatory news)",
+          "tier": 2,
+          "scope": "all",
+          "mode": "real",
+          "url": "https://api.gdeltproject.org/api/v2/doc/doc"
+        },
+        {
+          "name": "DGCA / EASA / FAA directives",
+          "tier": 1,
+          "scope": "authority",
+          "mode": "planned"
+        },
+        {
+          "name": "ICAO State letters",
+          "tier": 1,
+          "scope": "global",
+          "mode": "planned"
+        },
+        {
+          "name": "Aeronautical information circulars (AIC)",
+          "tier": 1,
+          "scope": "country",
+          "mode": "planned"
+        },
+        {
+          "name": "Mock regulatory data (fallback)",
+          "tier": 2,
+          "scope": "all",
+          "mode": "mock",
+          "url": "server/connectors/mock-regulatory.js"
+        }
+      ],
+      "factorMapping": {
+        "probability": "Directive published vs. proposed",
+        "severity": "Compliance cost (fleet grounding, crew retraining)",
+        "geographicReach": "Authority jurisdiction scope",
+        "expectedDuration": "Directive effective period",
+        "timeToImpact": "Compliance deadline minus now",
+        "escalationRate": "Notice -> consultation -> directive -> enforcement",
+        "sourceCredibility": "Authority = tier 1",
+        "predictionConfidence": "High for published directives"
+      },
+      "hazardTypes": [
+        "fog_directive",
+        "etops_change",
+        "ops_spec_change",
+        "curfew_change",
+        "certification_requirement"
+      ],
+      "dataSourceMode": "real"
+    },
+    {
+      "type": "impact-assessment",
+      "category": "Impact",
+      "mission": "Event-driven agent that receives scored events, pulls published flight schedules for affected airports, and computes per-airport and per-airline operational exposure (the OPS object). Uses public schedule data only \u2014 does not access confidential airline operational data.",
+      "triggerModel": "event-driven",
+      "triggers": [
+        {
+          "event": "event.created",
+          "condition": "EDPS >= 30",
+          "action": "compute OPS for new event"
+        },
+        {
+          "event": "event.updated",
+          "condition": "EDPS delta >= 5 or geo/time window changed",
+          "action": "recompute OPS"
+        },
+        {
+          "event": "event.escalated",
+          "condition": "score band boundary crossed",
+          "action": "recompute OPS + flag for airline solver re-intersection"
+        },
+        {
+          "event": "schedule.updated",
+          "condition": "published schedule changes for airport with active event",
+          "action": "recompute OPS for affected events"
+        }
+      ],
+      "dataSources": [
+        {
+          "name": "OAG / airline published timetables",
+          "tier": 1,
+          "scope": "airports",
+          "provides": "scheduled flights per airport per day (flight no, origin, dest, dep/arr times, aircraft type, airline)"
+        },
+        {
+          "name": "Flight tracking APIs (FlightAware, Flightradar24)",
+          "tier": 1,
+          "scope": "airports",
+          "provides": "real-time scheduled vs. actual times, cancellations, diversions"
+        },
+        {
+          "name": "Airport slot coordinator data",
+          "tier": 1,
+          "scope": "hub",
+          "provides": "slot allocations per airline per airport"
+        },
+        {
+          "name": "Airline registry (internal config)",
+          "tier": 1,
+          "scope": "global",
+          "provides": "airline metadata: hub, secondary hub, fleet, daily departures, network share per airport, bank structure, fleet capabilities"
+        },
+        {
+          "name": "IATA/ICAO airport directory",
+          "tier": 1,
+          "scope": "global",
+          "provides": "airport coordinates, runway capabilities (CAT IIIB status), capacity"
+        },
+        {
+          "name": "Seasonal schedule (SSIM)",
+          "tier": 1,
+          "scope": "global",
+          "provides": "seasonal schedule variations, bank structure patterns"
+        }
+      ],
+      "exposureModel": {
+        "airlineExposureFormula": "airlineExposure = edps * (0.35 * hubFactor + 0.25 * movementShareFactor + 0.20 * fleetCapabilityFactor + 0.10 * bankOverlapFactor + 0.10 * overflightFactor)",
+        "factors": [
+          {
+            "name": "hubFactor",
+            "range": "0.5-1.5",
+            "description": "1.5 if affected airport is airline primary hub; 1.2 if secondary hub; 0.8 if focus city; 0.5 if outstation"
+          },
+          {
+            "name": "movementShareFactor",
+            "range": "0.3-1.2",
+            "description": "Normalized airline movement share at affected airport (netShare / 100 * 1.2, capped at 1.2)"
+          },
+          {
+            "name": "fleetCapabilityFactor",
+            "range": "0.5-1.3",
+            "description": "1.3 if airline fleet lacks capability for hazard (e.g. no CAT IIIB for fog); 1.0 if neutral; 0.5 if specifically equipped"
+          },
+          {
+            "name": "bankOverlapFactor",
+            "range": "0.5-1.2",
+            "description": "1.2 if event window overlaps airline most sensitive bank; 1.0 if any bank; 0.5 if off-peak"
+          },
+          {
+            "name": "overflightFactor",
+            "range": "0.5-1.3",
+            "description": "1.3 if airline overflies affected airspace with no destination there (invisible exposure); 1.0 if serves affected airport; 0.5 if no route overlap"
+          }
+        ],
+        "exposureLevels": [
+          {
+            "min": 80,
+            "max": 100,
+            "level": "Critical"
+          },
+          {
+            "min": 65,
+            "max": 79,
+            "level": "High"
+          },
+          {
+            "min": 45,
+            "max": 64,
+            "level": "Moderate"
+          },
+          {
+            "min": 0,
+            "max": 44,
+            "level": "Low"
+          }
+        ]
+      },
+      "airlineRegistry": [
+        {
+          "key": "namma",
+          "name": "Namma Air",
+          "code": "N7",
+          "hub": "BLR",
+          "secondaryHub": "DEL",
+          "hubs": [
+            "BLR",
+            "DEL"
+          ],
+          "dailyDepartures": 180,
+          "fleet": [
+            "A320neo",
+            "A321neo",
+            "A350-900"
+          ],
+          "networkShare": {
+            "BLR": 50,
+            "DEL": 15,
+            "MAA": 12,
+            "BOM": 8
+          },
+          "bankStructure": [
+            {
+              "id": "b1",
+              "window": "05:30-08:30",
+              "sensitivity": "low"
+            },
+            {
+              "id": "b2",
+              "window": "11:00-14:00",
+              "sensitivity": "medium"
+            },
+            {
+              "id": "b3",
+              "window": "17:00-20:00",
+              "sensitivity": "critical"
+            },
+            {
+              "id": "b4",
+              "window": "22:00-01:00",
+              "sensitivity": "high"
+            }
+          ],
+          "fleetCapabilities": {
+            "cat3Count": 14,
+            "cat3Total": 20,
+            "etops": true
+          }
+        },
+        {
+          "key": "eva",
+          "name": "EuroVista Airways",
+          "code": "EV",
+          "hub": "VIE",
+          "secondaryHub": "MUC",
+          "hubs": [
+            "VIE",
+            "MUC"
+          ],
+          "dailyDepartures": 142,
+          "fleet": [
+            "A320neo",
+            "E195",
+            "A321neo"
+          ],
+          "networkShare": {
+            "VIE": 45,
+            "MUC": 20,
+            "FRA": 15,
+            "AMS": 10
+          },
+          "bankStructure": [
+            {
+              "id": "b1",
+              "window": "06:00-09:00",
+              "sensitivity": "medium"
+            },
+            {
+              "id": "b2",
+              "window": "12:00-15:00",
+              "sensitivity": "high"
+            },
+            {
+              "id": "b3",
+              "window": "17:00-20:00",
+              "sensitivity": "critical"
+            },
+            {
+              "id": "b4",
+              "window": "21:00-23:30",
+              "sensitivity": "medium"
+            }
+          ],
+          "fleetCapabilities": {
+            "cat3Count": 12,
+            "cat3Total": 12,
+            "etops": false
+          }
+        },
+        {
+          "key": "ica",
+          "name": "IndiConnect Airways",
+          "code": "IC",
+          "hub": "DEL",
+          "secondaryHub": "BOM",
+          "hubs": [
+            "DEL",
+            "BOM"
+          ],
+          "dailyDepartures": 210,
+          "fleet": [
+            "A320neo",
+            "A321neo",
+            "ATR 72"
+          ],
+          "networkShare": {
+            "DEL": 40,
+            "BOM": 25,
+            "BLR": 15,
+            "MAA": 10
+          },
+          "bankStructure": [
+            {
+              "id": "b1",
+              "window": "05:00-08:30",
+              "sensitivity": "high"
+            },
+            {
+              "id": "b2",
+              "window": "11:00-14:00",
+              "sensitivity": "medium"
+            },
+            {
+              "id": "b3",
+              "window": "17:00-20:30",
+              "sensitivity": "critical"
+            },
+            {
+              "id": "b4",
+              "window": "21:00-23:30",
+              "sensitivity": "medium"
+            }
+          ],
+          "fleetCapabilities": {
+            "cat3Count": 28,
+            "cat3Total": 28,
+            "etops": false
+          }
+        }
+      ],
+      "dataSourceMode": "computed"
+    }
+  ],
+  "agents": [
+    {
+      "id": "weather-R1-southIndia",
+      "type": "weather",
+      "region": "R1",
+      "subRegion": "southIndia",
+      "priority": "critical"
+    },
+    {
+      "id": "weather-R1-northIndia",
+      "type": "weather",
+      "region": "R1",
+      "subRegion": "northIndia",
+      "priority": "critical"
+    },
+    {
+      "id": "weather-R1-westIndia",
+      "type": "weather",
+      "region": "R1",
+      "subRegion": "westIndia",
+      "priority": "critical"
+    },
+    {
+      "id": "weather-R1-eastIndia",
+      "type": "weather",
+      "region": "R1",
+      "subRegion": "eastIndia",
+      "priority": "high"
+    },
+    {
+      "id": "weather-R1-bayOfBengal",
+      "type": "weather",
+      "region": "R1",
+      "subRegion": "bayOfBengal",
+      "priority": "high"
+    },
+    {
+      "id": "weather-R2-centralEurope",
+      "type": "weather",
+      "region": "R2",
+      "subRegion": "centralEurope",
+      "priority": "critical"
+    },
+    {
+      "id": "weather-R2-westernEurope",
+      "type": "weather",
+      "region": "R2",
+      "subRegion": "westernEurope",
+      "priority": "critical"
+    },
+    {
+      "id": "weather-R2-northernEurope",
+      "type": "weather",
+      "region": "R2",
+      "subRegion": "northernEurope",
+      "priority": "high"
+    },
+    {
+      "id": "weather-R3-gulfStates",
+      "type": "weather",
+      "region": "R3",
+      "subRegion": "gulfStates",
+      "priority": "high"
+    },
+    {
+      "id": "atc-R1-southIndia",
+      "type": "atc",
+      "region": "R1",
+      "subRegion": "southIndia",
+      "priority": "critical"
+    },
+    {
+      "id": "atc-R1-northIndia",
+      "type": "atc",
+      "region": "R1",
+      "subRegion": "northIndia",
+      "priority": "critical"
+    },
+    {
+      "id": "atc-R2-centralEurope",
+      "type": "atc",
+      "region": "R2",
+      "subRegion": "centralEurope",
+      "priority": "critical"
+    },
+    {
+      "id": "atc-R2-westernEurope",
+      "type": "atc",
+      "region": "R2",
+      "subRegion": "westernEurope",
+      "priority": "critical"
+    },
+    {
+      "id": "atc-R3-gulfStates",
+      "type": "atc",
+      "region": "R3",
+      "subRegion": "gulfStates",
+      "priority": "high"
+    },
+    {
+      "id": "atc-R5-britishIsles",
+      "type": "atc",
+      "region": "R5",
+      "subRegion": "britishIsles",
+      "priority": "high"
+    },
+    {
+      "id": "industrial-R1-northIndia",
+      "type": "industrial",
+      "region": "R1",
+      "subRegion": "northIndia",
+      "priority": "high"
+    },
+    {
+      "id": "industrial-R2-centralEurope",
+      "type": "industrial",
+      "region": "R2",
+      "subRegion": "centralEurope",
+      "priority": "critical"
+    },
+    {
+      "id": "industrial-R2-westernEurope",
+      "type": "industrial",
+      "region": "R2",
+      "subRegion": "westernEurope",
+      "priority": "high"
+    },
+    {
+      "id": "geopolitical-R3-overflight",
+      "type": "geopolitical",
+      "region": "R3",
+      "subRegion": "overflight",
+      "priority": "critical"
+    },
+    {
+      "id": "geopolitical-R2-westernEurope",
+      "type": "geopolitical",
+      "region": "R2",
+      "subRegion": "westernEurope",
+      "priority": "high"
+    },
+    {
+      "id": "geopolitical-R1-southIndia",
+      "type": "geopolitical",
+      "region": "R1",
+      "subRegion": "southIndia",
+      "priority": "standard"
+    },
+    {
+      "id": "infrastructure-R1-southIndia",
+      "type": "infrastructure",
+      "region": "R1",
+      "subRegion": "southIndia",
+      "priority": "critical"
+    },
+    {
+      "id": "infrastructure-R2-centralEurope",
+      "type": "infrastructure",
+      "region": "R2",
+      "subRegion": "centralEurope",
+      "priority": "high"
+    },
+    {
+      "id": "infrastructure-R2-westernEurope",
+      "type": "infrastructure",
+      "region": "R2",
+      "subRegion": "westernEurope",
+      "priority": "high"
+    },
+    {
+      "id": "regulatory-R1-northIndia",
+      "type": "regulatory",
+      "region": "R1",
+      "subRegion": "northIndia",
+      "priority": "high"
+    },
+    {
+      "id": "regulatory-R2-centralEurope",
+      "type": "regulatory",
+      "region": "R2",
+      "subRegion": "centralEurope",
+      "priority": "high"
+    },
+    {
+      "id": "regulatory-R3-gulfStates",
+      "type": "regulatory",
+      "region": "R3",
+      "subRegion": "gulfStates",
+      "priority": "standard"
+    },
+    {
+      "id": "regulatory-R5-britishIsles",
+      "type": "regulatory",
+      "region": "R5",
+      "subRegion": "britishIsles",
+      "priority": "standard"
+    },
+    {
+      "id": "impact-assessment",
+      "type": "impact-assessment",
+      "region": "global",
+      "subRegion": "global",
+      "priority": "critical",
+      "triggerModel": "event-driven"
+    }
+  ],
+  "outputContract": {
+    "description": "Each agent emits signals matching this schema. The Correlation & Scoring Engine consumes these and produces EVENTS[] entities.",
+    "fields": {
+      "agentId": "string - agent instance identifier",
+      "agentType": "string - one of: weather, atc, industrial, geopolitical, infrastructure, regulatory",
+      "region": "string - region ID (R1-R7)",
+      "subRegion": "string - sub-region ID",
+      "signalId": "string - unique signal identifier",
+      "detected": "ISO 8601 timestamp - when the signal was detected",
+      "name": "string - human-readable event name",
+      "hazardType": "string - specific hazard subtype (see agentTypes[].hazardTypes)",
+      "geo": {
+        "lat": "number",
+        "lon": "number",
+        "radiusKm": "number"
+      },
+      "airports": "string[] - IATA codes of affected airports",
+      "airspace": "string[] - FIR/UIR names affected",
+      "summary": "string - plain-language summary",
+      "factorHints": {
+        "probability": "number 0-100",
+        "severity": "number 0-100",
+        "geographicReach": "number 0-100",
+        "expectedDuration": "number 0-100",
+        "timeToImpact": "number 0-100",
+        "escalationRate": "number 0-100",
+        "sourceCredibility": "number 0-100",
+        "predictionConfidence": "number 0-100"
+      },
+      "domains": "string[] - affected operational domains (subset of the 9 domains)",
+      "preliminaryEffects": [
+        {
+          "ord": "number",
+          "title": "string",
+          "lead": "string"
+        }
+      ],
+      "evidence": [
+        {
+          "source": "string",
+          "tier": "number 1-3",
+          "role": "string",
+          "timestamp": "ISO 8601",
+          "excerpt": "string"
+        }
+      ],
+      "rawRefs": "string[] - references to raw source data for audit"
+    }
+  },
+  "impactOutputContract": {
+    "description": "The ImpactAssessmentAgent produces OPS[eventId] objects matching this schema. These attach to EVENTS[] and provide per-airport and per-airline operational exposure.",
+    "fields": {
+      "agentId": "string - always 'impact-assessment'",
+      "eventId": "string - links to EVENTS[].id",
+      "computedAt": "ISO 8601 timestamp - when OPS was computed",
+      "basis": "string - methodology note",
+      "airports": [
+        {
+          "iata": "string - IATA code",
+          "name": "string - airport name",
+          "role": "string - 'Affected' or 'Overflight'",
+          "movements": "number - scheduled arrivals + departures in time window",
+          "window": "string - event time window duration (human-readable)",
+          "exposure": "number 0-100 - airport-level exposure score",
+          "note": "string - airport-specific impact detail"
+        }
+      ],
+      "airlines": [
+        {
+          "name": "string - airline name",
+          "code": "string - IATA code",
+          "hub": "string - airline primary hub IATA code",
+          "daily": "number - airline daily departures",
+          "netShare": "number - airline movement share at affected airport (%)",
+          "airports": "string - affected airports where airline operates (joined with ' . ')",
+          "exposure": "string - Critical / High / Moderate / Low",
+          "exposureScore": "number 0-100 - computed airline exposure score",
+          "note": "string - exposure drivers explanation",
+          "drivers": {
+            "hubFactor": "number 0.5-1.5",
+            "movementShareFactor": "number 0.3-1.2",
+            "fleetCapabilityFactor": "number 0.5-1.3",
+            "bankOverlapFactor": "number 0.5-1.2",
+            "overflightFactor": "number 0.5-1.3"
+          }
+        }
+      ],
+      "airlineScores": "object - preliminary per-airline exposure scores keyed by airline key (namma, eva, ica)",
+      "overflightExposure": [
+        {
+          "airline": "string",
+          "code": "string",
+          "route": "string - affected route (e.g. 'BLR-LHR')",
+          "airspace": "string - affected airspace",
+          "impact": "string - impact description"
+        }
+      ]
+    }
+  },
+  "edpsFactors": [
+    {
+      "label": "Probability of occurrence",
+      "weight": 0.18
+    },
+    {
+      "label": "Severity if realised",
+      "weight": 0.18
+    },
+    {
+      "label": "Geographic reach",
+      "weight": 0.12
+    },
+    {
+      "label": "Expected duration",
+      "weight": 0.12
+    },
+    {
+      "label": "Time to impact",
+      "weight": 0.14
+    },
+    {
+      "label": "Escalation rate",
+      "weight": 0.1
+    },
+    {
+      "label": "Source credibility",
+      "weight": 0.1
+    },
+    {
+      "label": "Prediction confidence",
+      "weight": 0.06
+    }
+  ],
+  "operationalDomains": [
+    "Flight schedule",
+    "Crew",
+    "Aircraft rotations",
+    "Airport operations",
+    "Passengers",
+    "Cargo",
+    "Catering",
+    "Maintenance",
+    "Regulatory"
+  ],
+  "scoreBands": [
+    {
+      "min": 80,
+      "max": 100,
+      "band": "Critical",
+      "color": "#F0495A",
+      "escalation": "L4"
+    },
+    {
+      "min": 65,
+      "max": 79,
+      "band": "High",
+      "color": "#F5A623",
+      "escalation": "L3"
+    },
+    {
+      "min": 45,
+      "max": 64,
+      "band": "Moderate",
+      "color": "#E8C34A",
+      "escalation": "L2"
+    },
+    {
+      "min": 0,
+      "max": 44,
+      "band": "Low",
+      "color": "#5B92C9",
+      "escalation": "L1"
+    }
+  ],
+  "sourceTiers": [
+    {
+      "tier": 1,
+      "definition": "Official / authoritative source",
+      "examples": "Met service, ATC authority, airport operator, regulator"
+    },
+    {
+      "tier": 2,
+      "definition": "Corroborating professional source",
+      "examples": "News wire, industry monitoring service"
+    },
+    {
+      "tier": 3,
+      "definition": "Supplementary / unverified",
+      "examples": "Social media, spotter reports"
+    }
+  ],
+  "pipeline": [
+    {
+      "step": 1,
+      "name": "Collection",
+      "description": "Agents poll their data sources at configured intervals"
+    },
+    {
+      "step": 2,
+      "name": "Normalization",
+      "description": "Geocode, timestamp (UTC), source-tier, category tag"
+    },
+    {
+      "step": 3,
+      "name": "Correlation",
+      "description": "Dedup (geo+time+category), merge corroborating sources, group signals into candidate events"
+    },
+    {
+      "step": 4,
+      "name": "Scoring (EDPS)",
+      "description": "EDPS = sum(factor.val * factor.weight) for 8 factors; derive conf, traj, tti, esc"
+    },
+    {
+      "step": 5,
+      "name": "Domain Impact",
+      "description": "Compute 9-domain vector (0-100 per domain) from agent domain tags + category heuristics"
+    },
+    {
+      "step": 6,
+      "name": "Causal Chain",
+      "description": "Expand preliminaryEffects into 1st/2nd/3rd order chain with likelihood + lead time"
+    },
+    {
+      "step": 7,
+      "name": "Evidence Assembly",
+      "description": "Attach evidence[] trail with tier + role; assign ref (DM-YYYY-NNNN)"
+    },
+    {
+      "step": 8,
+      "name": "Impact Assessment",
+      "description": "ImpactAssessmentAgent pulls published schedules for affected airports, computes per-airport + per-airline exposure (OPS[eventId])"
+    },
+    {
+      "step": 9,
+      "name": "Event Store",
+      "description": "Publish to EVENTS[] + OPS[] (time-series); trigger airline solver intersection"
+    }
+  ]
+}

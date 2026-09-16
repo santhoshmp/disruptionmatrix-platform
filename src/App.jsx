@@ -9,6 +9,9 @@ import Radar from './pages/Radar.jsx';
 import AirlineMap from './pages/AirlineMap.jsx';
 import DataExplorer from './pages/DataExplorer.jsx';
 import Chat from './pages/Chat.jsx';
+import AgentDashboard from './pages/AgentDashboard.jsx';
+import RegionSettings from './pages/RegionSettings.jsx';
+import AdminSettings from './pages/AdminSettings.jsx';
 import GlobalSearch from './components/GlobalSearch.jsx';
 import DM from './data/dm-data.json';
 import { AIRLINES } from './airlines.js';
@@ -87,7 +90,7 @@ function LogoutBtn() {
   );
 }
 
-const GLOBAL_ROUTES = ['/board', '/map', '/event', '/chat'];
+const GLOBAL_ROUTES = ['/board', '/map', '/event', '/chat', '/agents', '/regions', '/admin'];
 const NAMMA_ROUTES = ['/radar', '/airline-map', '/explorer'];
 
 function airlineFromPath(pathname) {
@@ -225,6 +228,27 @@ function GlobalLayout({ theme, onToggleTheme, children }) {
             </svg>
             <span>AI Assistant</span>
           </NavLink>
+          <NavLink to="/agents" style={({ isActive }) => topNavBtn(isActive)}>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z" />
+            </svg>
+            <span>Agent Engine</span>
+          </NavLink>
+          <NavLink to="/regions" style={({ isActive }) => topNavBtn(isActive)}>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+            </svg>
+            <span>Regions</span>
+          </NavLink>
+          <NavLink to="/admin" style={({ isActive }) => topNavBtn(isActive)}>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
+              <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z" />
+            </svg>
+            <span>Admin</span>
+          </NavLink>
           <span style={{ width: 1, height: 22, background: 'var(--line)', margin: '0 4px' }} />
           <NavLink to="/" style={{
             display: 'flex', alignItems: 'center', gap: 6,
@@ -329,6 +353,9 @@ export default function App() {
       <Route path="/event/:id" element={<EventDetail />} />
       <Route path="/map" element={<WorldMap />} />
       <Route path="/chat" element={<Chat />} />
+      <Route path="/agents" element={<AgentDashboard />} />
+      <Route path="/regions" element={<RegionSettings />} />
+      <Route path="/admin" element={<AdminSettings />} />
       <Route path="/radar" element={<Radar airline={AIRLINES.namma} />} />
       <Route path="/airline-map" element={<AirlineMap airline={AIRLINES.namma} />} />
       <Route path="/explorer" element={<DataExplorer airline={AIRLINES.namma} />} />
