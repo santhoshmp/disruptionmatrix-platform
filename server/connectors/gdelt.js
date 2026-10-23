@@ -15,40 +15,51 @@
 // 20: Mass violence
 
 import { fetchWithTimeout } from './http-utils.js';
+import * as refLoader from '../data/reference-loader.js';
 
 const GDELT_EVENTS_URL = 'https://api.gdeltproject.org/api/v2/events';
 const GDELT_DOC_URL = 'https://api.gdeltproject.org/api/v2/doc/doc';
-const TIMEOUT_MS = 15000;
-const CACHE_TTL_MS = 60 * 60 * 1000; // 60 min cache (GDELT rate-limits aggressively)
-const MIN_REQUEST_INTERVAL = 6000; // 6s between requests (GDELT asks for 5s+)
+// Phase 7: read from DB-backed ref_connectors via loader
+const _timeout = () => refLoader.getConnectorConfig('gdelt', 'timeout_ms', 15000);
+const _cacheTtl = () => refLoader.getConnectorConfig('gdelt', 'cache_ttl_ms', 3600000);
+const _minInterval = () => refLoader.getConnectorConfig('gdelt', 'min_request_interval', 6000);
 
 const cache = new Map(); // key: query → { data, time }
 let lastRequestTime = 0; // global rate limit across all GDELT requests
 
 // Aviation-relevant keywords for each disruption category
+// Phase 7: read from DB-backed ref_gdelt_queries via loader
 const CATEGORY_QUERIES = {
   industrial: '(airline strike OR airport strike OR ATC strike OR ground handler strike OR pilot strike OR cabin crew strike OR aviation walkout OR aviation industrial action)',
   geopolitical: '(airspace closure OR flight ban OR aviation sanctions OR airspace restriction OR no-fly zone OR conflict zone aviation)',
   infrastructure: '(airport runway closure OR airport power outage OR airport fuel shortage OR ILS outage OR airport infrastructure failure)',
   regulatory: '(aviation regulation OR airworthiness directive OR DGCA directive OR EASA regulation OR FAA directive OR aviation safety order)',
+  flight: '(flight cancellations OR mass flight delays OR airport ground stop OR airline grounding OR fleet grounding OR ATC system outage OR mass diversions)',
 };
 
+function _getQuery(category) {
+  const fromDb = refLoader.getGdeltQuery(category);
+  if (fromDb) return fromDb;
+  return CATEGORY_QUERIES[category] || null;
+}
+
 export async function fetchEvents(category, options = {}) {
-  const query = CATEGORY_QUERIES[category];
+  const query = _getQuery(category);
   if (!query) return [];
 
   const { maxRecords = 25, days = 7 } = options;
   const cacheKey = `${category}:${days}`;
 
   const cached = cache.get(cacheKey);
-  if (cached && Date.now() - cached.time < CACHE_TTL_MS) {
+  if (cached && Date.now() - cached.time < _cacheTtl()) {
     return cached.data;
   }
 
   // Global rate limiting — GDELT asks for max 1 request per 5 seconds
   const elapsed = Date.now() - lastRequestTime;
-  if (elapsed < MIN_REQUEST_INTERVAL) {
-    const wait = MIN_REQUEST_INTERVAL - elapsed;
+  const minInterval = _minInterval();
+  if (elapsed < minInterval) {
+    const wait = minInterval - elapsed;
     console.log(`[gdelt] Rate limiting: waiting ${Math.round(wait / 1000)}s...`);
     await new Promise((r) => setTimeout(r, wait));
   }
@@ -69,7 +80,7 @@ export async function fetchEvents(category, options = {}) {
       startdatetime: startDate,
     });
 
-    const res = await fetchWithTimeout(`${GDELT_DOC_URL}?${params}`, {}, TIMEOUT_MS);
+    const res = await fetchWithTimeout(`${GDELT_DOC_URL}?${params}`, {}, _timeout());
     if (res.ok) {
       const text = await res.text();
       // GDELT sometimes returns a rate-limit message instead of JSON

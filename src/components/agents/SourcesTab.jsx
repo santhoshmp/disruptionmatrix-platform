@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { api } from '../../api/client.js';
 import { MONO, TEAL, CRIT, HIGH, MOD, LOW } from '../../theme.js';
 import InfoIcon from './InfoIcon.jsx';
+import { computeSourceMode, sourceModeSummary } from './sourceMode.jsx';
 
 const MODE_COLORS = {
   real: '#34D399',
@@ -180,6 +181,101 @@ const SOURCE_REGISTRY = [
     rateLimit: '1 req per 6s (rate-limited)',
     notes: 'Monitors global news for aviation-relevant events. Used by 4 agent types: industrial (airline strikes, ATC walkouts), geopolitical (airspace closures, sanctions), infrastructure (airport failures), regulatory (directives, ADs). News-based signals have lower confidence than official sources — best used as early indicators with LLM enrichment.',
     agentsUsing: 'industrial-*, geopolitical-*, infrastructure-*, regulatory-*',
+  },
+  {
+    id: 'airlabs',
+    category: 'Flight Tracking',
+    name: 'AirLabs Flight Data API',
+    type: 'REST API',
+    url: 'https://airlabs.co/api/v9',
+    method: 'REST API — schedules, delays, cancellations per airport',
+    scope: 'Airport-level (IATA codes)',
+    tier: 2,
+    mode: 'real',
+    auth: 'API key (free tier ~1,000 req/month) — AIRLABS_KEY',
+    updateFreq: 'Every 2 min (cached 15 min)',
+    license: 'Commercial (AirLabs)',
+    coverage: 'Global (scheduled vs actual)',
+    dataTypes: ['Schedules', 'Delays', 'Cancellations', 'Flight status'],
+    rateLimit: 'Rate-limited to ~33 req/day (quota-safe)',
+    notes: 'Primary provider for scheduled-vs-actual comparison — the only free-tier path to real delay/cancellation detection. Preferred over AviationStack when AIRLABS_KEY is set.',
+    agentsUsing: 'flight-* (delay/cancel events)',
+  },
+  {
+    id: 'adsblol',
+    category: 'Flight Tracking',
+    name: 'adsb.lol Community ADS-B',
+    type: 'REST API',
+    url: 'https://api.adsb.lol/v2',
+    method: 'REST API — point-radius aircraft query per airport',
+    scope: 'Lat/lon radius (25nm around airports)',
+    tier: 1,
+    mode: 'real',
+    auth: 'None (free, community feeder network)',
+    updateFreq: 'Every 2 min (cached 5 min)',
+    license: 'Open (community)',
+    coverage: 'Global — often denser than OpenSky in Gulf/Asia',
+    dataTypes: ['Live positions', 'Ground activity counts', 'Emergency squawks 7700/7600/7500'],
+    rateLimit: '~1 req/sec fair use (rate-limited to 0.5/s)',
+    notes: 'No key required. Provides ground-activity corroboration signals and real-time emergency squawk detection — a squawk 7700 near a monitored airport generates a threat event. Requires a descriptive User-Agent (blocks Node default).',
+    agentsUsing: 'flight-* (ground activity + emergency squawks)',
+  },
+  {
+    id: 'opensky',
+    category: 'Flight Tracking',
+    name: 'OpenSky Network',
+    type: 'REST API (OAuth2)',
+    url: 'https://opensky-network.org/api',
+    method: 'OAuth2 token → /states/all (global positions), /flights/* (actual dep/arr)',
+    scope: 'Global states; airport-level flight windows',
+    tier: 2,
+    mode: 'real',
+    auth: 'OAuth2 client credentials — OPENSKY_CLIENT_ID/SECRET (anonymous works with lower quota)',
+    updateFreq: 'Every 2 min (states cached 90s, flights cached per-hour window)',
+    license: 'Open (OpenSky Network)',
+    coverage: 'Global',
+    dataTypes: ['Live positions', 'Flight arrivals/departures', 'Ground activity'],
+    rateLimit: '~4,000 credits/day authenticated; /flights/* is a separate daily bucket',
+    notes: 'Single shared /states/all call feeds all flight agents (90s cache). /flights/all gives global actual times in one call per 10 min — failures back off 30 min to protect quota. Cannot see cancellations (a cancelled flight simply does not appear).',
+    agentsUsing: 'flight-* (live positions + actual times)',
+  },
+  {
+    id: 'aviationstack',
+    category: 'Flight Tracking',
+    name: 'AviationStack',
+    type: 'REST API',
+    url: 'https://api.aviationstack.com/v1',
+    method: 'REST API — schedules, delays, cancellations per airport',
+    scope: 'Airport-level (IATA codes)',
+    tier: 2,
+    mode: 'real',
+    auth: 'API key (paid tiers ~$50/mo) — AVIATIONSTACK_KEY',
+    updateFreq: 'Every 2 min (cached 15 min)',
+    license: 'Commercial (AviationStack)',
+    coverage: 'Global (scheduled vs actual)',
+    dataTypes: ['Schedules', 'Delays', 'Cancellations', 'Flight status'],
+    rateLimit: 'Rate-limited to ~3 req/day (100 req/month free tier)',
+    notes: 'Fallback schedule provider — only used when AIRLABS_KEY is not set but AVIATIONSTACK_KEY is. Free tier too small for 60 airports; AirLabs is preferred.',
+    agentsUsing: 'flight-* (fallback schedule source)',
+  },
+  {
+    id: 'reddit',
+    category: 'Social',
+    name: 'Reddit API',
+    type: 'REST API (OAuth2)',
+    url: 'https://www.reddit.com',
+    method: 'OAuth2 app auth → subreddit post fetch (r/aviation, r/flights, regional subs)',
+    scope: 'Subreddit-level',
+    tier: 2,
+    mode: 'real',
+    auth: 'OAuth2 app credentials — REDDIT_CLIENT_ID/SECRET (free: reddit.com/prefs/apps, "script" type)',
+    updateFreq: 'Every 5 min',
+    license: 'Reddit API terms',
+    coverage: 'Aviation + regional subreddits',
+    dataTypes: ['Passenger reports', 'Delay/cancel complaints', 'Incident sightings', 'Strike chatter'],
+    rateLimit: '60 req/min (OAuth)',
+    notes: 'Provides social-corroboration signals — passenger-visible disruption (queues, cancellations) often appears on Reddit before official channels.',
+    agentsUsing: 'social-* (17 agents)',
   },
   {
     id: 'mock-weather',
@@ -381,8 +477,11 @@ export default function SourcesTab() {
         const res = await api.getAgents();
         const types = {};
         for (const a of res.agents || []) {
-          if (!types[a.type]) types[a.type] = { type: a.type, mode: a.dataSourceMode, count: 0 };
+          if (!types[a.type]) types[a.type] = { type: a.type, mode: a.dataSourceMode, count: 0, dataSources: a.config?.dataSources || [] };
           types[a.type].count++;
+          if (a.config?.dataSources) {
+            types[a.type].dataSources = a.config.dataSources;
+          }
         }
         setAgentTypes(Object.values(types));
       } catch (e) { /* ignore */ }
@@ -488,8 +587,10 @@ export default function SourcesTab() {
                 body: '',
                 list: [
                   'REAL (green): Live data from an external API or dataset',
-                  'MOCK (orange): Synthetic scenario data, ready to swap for real APIs',
+                  'MOCK (orange): Synthetic scenario data, used as fallback when real APIs return no data',
+                  'MIXED (purple): Agent uses a combination of real APIs and mock fallbacks — signals may be a mix of live and synthetic data',
                   'COMPUTED (cyan): Derived internally from other data',
+                  'PLANNED (blue): Source is configured but not yet connected to a real API',
                 ],
               },
               {
@@ -516,22 +617,31 @@ export default function SourcesTab() {
         <div style={{ marginBottom: 16, padding: '10px 12px', border: '1px solid var(--edge)', background: 'var(--panel2)', borderRadius: 4 }}>
           <div className="kicker" style={{ marginBottom: 8 }}>AGENT SOURCE MODES</div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {agentTypes.map((t) => (
-              <div key={t.type} style={{
-                display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px',
-                border: '1px solid var(--edge)', borderRadius: 3, background: 'var(--panel)',
-              }}>
-                <span style={{ ...MONO, fontSize: 10, fontWeight: 600 }}>{t.type}</span>
-                <span style={{ ...MONO, fontSize: 9, color: 'var(--faint)' }}>×{t.count}</span>
-                <span style={{
-                  ...MONO, fontSize: 9, padding: '1px 6px', borderRadius: 2, fontWeight: 700,
-                  border: `1px solid ${MODE_COLORS[t.mode] || LOW}`,
-                  color: MODE_COLORS[t.mode] || LOW,
+            {agentTypes.map((t) => {
+              const computedMode = computeSourceMode(t.dataSources, t.mode);
+              const modeColor = MODE_COLORS[computedMode] || LOW;
+              return (
+                <div key={t.type} style={{
+                  display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px',
+                  border: `1px solid ${modeColor}40`, borderRadius: 3, background: 'var(--panel)',
                 }}>
-                  {t.mode?.toUpperCase()}
-                </span>
-              </div>
-            ))}
+                  <span style={{ ...MONO, fontSize: 10, fontWeight: 600 }}>{t.type}</span>
+                  <span style={{ ...MONO, fontSize: 9, color: 'var(--faint)' }}>×{t.count}</span>
+                  <span style={{
+                    ...MONO, fontSize: 9, padding: '1px 6px', borderRadius: 2, fontWeight: 700,
+                    border: `1px solid ${modeColor}`, color: modeColor,
+                    background: modeColor + '10',
+                  }}>
+                    {computedMode.toUpperCase()}
+                  </span>
+                  {t.dataSources?.length > 0 && (
+                    <span style={{ ...MONO, fontSize: 8, color: 'var(--faint)' }}>
+                      ({sourceModeSummary(t.dataSources)})
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

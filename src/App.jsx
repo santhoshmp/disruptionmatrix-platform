@@ -3,6 +3,8 @@ import { Routes, Route, NavLink, Link, useLocation, useNavigate } from 'react-ro
 import Home from './pages/Home.jsx';
 import Login from './pages/Login.jsx';
 import ThreatBoard from './pages/ThreatBoard.jsx';
+import ThreatOverview from './pages/ThreatOverview.jsx';
+import ThreatProfiling from './pages/ThreatProfiling.jsx';
 import EventDetail from './pages/EventDetail.jsx';
 import WorldMap from './pages/WorldMap.jsx';
 import Radar from './pages/Radar.jsx';
@@ -12,11 +14,17 @@ import Chat from './pages/Chat.jsx';
 import AgentDashboard from './pages/AgentDashboard.jsx';
 import RegionSettings from './pages/RegionSettings.jsx';
 import AdminSettings from './pages/AdminSettings.jsx';
+import MasterData from './pages/MasterData.jsx';
+import Sources from './pages/Sources.jsx';
+import Documentation from './pages/Documentation.jsx';
+import Archive from './pages/Archive.jsx';
 import GlobalSearch from './components/GlobalSearch.jsx';
 import DM from './data/dm-data.json';
 import { AIRLINES } from './airlines.js';
 import { isAuthenticated, logout } from './auth.js';
 import { MONO, TEAL, CYAN, scoreColor, trajColor, trajArrow } from './theme.js';
+
+// ── Shared UI atoms ──────────────────────────────────────────────────
 
 function ThemeBtn({ theme, onToggle }) {
   return (
@@ -51,17 +59,17 @@ function Clock() {
   const p = (n) => String(n).padStart(2, '0');
   return (
     <div style={{ textAlign: 'right', ...MONO }}>
-      <div style={{ fontSize: 16, fontWeight: 600 }}>
+      <div style={{ fontSize: 14, fontWeight: 600 }}>
         {p(now.getUTCHours())}:{p(now.getUTCMinutes())}:{p(now.getUTCSeconds())}
       </div>
-      <div style={{ fontSize: 9.5, color: 'var(--mute)', letterSpacing: '0.1em' }}>UTC · LIVE PROTOTYPE</div>
+      <div style={{ fontSize: 9, color: 'var(--faint)', letterSpacing: '0.1em' }}>UTC</div>
     </div>
   );
 }
 
-function MatrixLogo({ size = 30 }) {
+function MatrixLogo({ size = 28 }) {
   return (
-    <div style={{ width: size, height: size, border: `2px solid ${TEAL}`, display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', padding: 4, gap: 3 }}>
+    <div style={{ width: size, height: size, border: `2px solid ${TEAL}`, display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '1fr 1fr', padding: 3, gap: 2, flexShrink: 0 }}>
       <div style={{ background: TEAL }} />
       <div style={{ background: 'var(--edge)' }} />
       <div style={{ background: 'var(--edge)' }} />
@@ -90,7 +98,212 @@ function LogoutBtn() {
   );
 }
 
-const GLOBAL_ROUTES = ['/board', '/map', '/event', '/chat', '/agents', '/regions', '/admin'];
+// ── Navigation items ─────────────────────────────────────────────────
+
+const NAV_ITEMS = [
+  { to: '/overview', label: 'Overview', icon: (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+      <rect x="14" y="14" width="7" height="7" rx="1" />
+    </svg>
+  )},
+  { to: '/board', label: 'Threat Board', icon: (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="9" rx="1" />
+      <rect x="14" y="3" width="7" height="5" rx="1" />
+      <rect x="14" y="12" width="7" height="9" rx="1" />
+      <rect x="3" y="16" width="7" height="5" rx="1" />
+    </svg>
+  )},
+  { to: '/profiling', label: 'Threat Profiling', icon: (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2L2 7l10 5 10-5-10-5z" />
+      <path d="M2 17l10 5 10-5" />
+      <path d="M2 12l10 5 10-5" />
+    </svg>
+  )},
+  { to: '/map', label: 'World Map', icon: (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
+    </svg>
+  )},
+  { to: '/archive', label: 'Archive', icon: (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="21 8 21 21 3 21 3 8" />
+      <rect x="1" y="3" width="22" height="5" rx="1" />
+      <line x1="10" y1="12" x2="14" y2="12" />
+    </svg>
+  )},
+  { to: '/chat', label: 'AI Assistant', icon: (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+    </svg>
+  )},
+  { to: '/agents', label: 'Agent Engine', icon: (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z" />
+    </svg>
+  )},
+  { to: '/regions', label: 'Regions', icon: (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  )},
+  { to: '/sources', label: 'Sources', icon: (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 17l6-6-6-6" />
+      <path d="M12 19h8" />
+    </svg>
+  )},
+  { to: '/admin', label: 'Admin', icon: (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z" />
+    </svg>
+  )},
+  { to: '/master-data', label: 'Master Data', icon: (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <ellipse cx="12" cy="5" rx="9" ry="3" />
+      <path d="M3 5v14a9 3 0 0018 0V5" />
+      <path d="M3 12a9 3 0 0018 0" />
+    </svg>
+  )},
+  { to: '/guide', label: 'How It Works', icon: (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+    </svg>
+  )},
+];
+
+// ── Collapsible icon rail sidebar ────────────────────────────────────
+
+function Sidebar({ expanded, setExpanded }) {
+  const loc = useLocation();
+
+  return (
+    <div style={{
+      width: expanded ? 200 : 52,
+      flexShrink: 0,
+      background: 'var(--sunken)',
+      borderRight: '1px solid var(--line)',
+      display: 'flex',
+      flexDirection: 'column',
+      transition: 'width 0.15s ease',
+      overflow: 'hidden',
+    }}>
+      {/* Logo / collapse toggle */}
+      <div
+        onClick={() => setExpanded(!expanded)}
+        style={{
+          padding: expanded ? '14px 16px' : '14px 10px',
+          borderBottom: '1px solid var(--line)',
+          display: 'flex', alignItems: 'center', gap: expanded ? 10 : 0,
+          justifyContent: expanded ? 'flex-start' : 'center',
+          cursor: 'pointer', transition: 'all 0.15s ease',
+        }}
+        title={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
+      >
+        <MatrixLogo size={expanded ? 24 : 24} />
+        {expanded && (
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: '-0.2px', whiteSpace: 'nowrap' }}>DisruptionMatrix</div>
+            <div style={{ ...MONO, fontSize: 8.5, color: 'var(--faint)', letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>THREAT INTEL</div>
+          </div>
+        )}
+      </div>
+
+      {/* Nav items */}
+      <div style={{ flex: 1, padding: '8px 0', display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {NAV_ITEMS.map((item) => {
+          const isActive = loc.pathname === item.to || loc.pathname.startsWith(item.to + '/');
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              title={item.label}
+              style={{
+                display: 'flex', alignItems: 'center', gap: expanded ? 10 : 0,
+                padding: expanded ? '9px 16px' : '9px 0',
+                justifyContent: expanded ? 'flex-start' : 'center',
+                color: isActive ? TEAL : 'var(--ink3)',
+                background: isActive ? TEAL + '12' : 'transparent',
+                borderLeft: expanded ? `2px solid ${isActive ? TEAL : 'transparent'}` : 'none',
+                borderRight: !expanded ? `2px solid ${isActive ? TEAL : 'transparent'}` : 'none',
+                fontSize: 13, fontWeight: isActive ? 600 : 500,
+                whiteSpace: 'nowrap', transition: 'all 0.12s ease',
+                textDecoration: 'none',
+              }}
+            >
+              {item.icon}
+              {expanded && <span>{item.label}</span>}
+            </NavLink>
+          );
+        })}
+      </div>
+
+      {/* Home link */}
+      <div style={{ padding: '4px 0', borderTop: '1px solid var(--line)' }}>
+        <NavLink
+          to="/"
+          title="Home"
+          style={{
+            display: 'flex', alignItems: 'center', gap: expanded ? 10 : 0,
+            padding: expanded ? '9px 16px' : '9px 0',
+            justifyContent: expanded ? 'flex-start' : 'center',
+            color: 'var(--faint)', fontSize: 13, fontWeight: 500,
+            whiteSpace: 'nowrap', textDecoration: 'none',
+          }}
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+          </svg>
+          {expanded && <span>Home</span>}
+        </NavLink>
+      </div>
+    </div>
+  );
+}
+
+// ── Top bar ──────────────────────────────────────────────────────────
+
+function TopBar({ theme, onToggleTheme }) {
+  const loc = useLocation();
+
+  // Derive page title from route
+  const pageTitle = (() => {
+    if (loc.pathname.startsWith('/event/')) return 'Event Detail';
+    const item = NAV_ITEMS.find(n => loc.pathname === n.to || loc.pathname.startsWith(n.to + '/'));
+    return item?.label || 'DisruptionMatrix';
+  })();
+
+  return (
+    <div style={{
+      flex: '0 0 auto', height: 48,
+      display: 'flex', alignItems: 'center', gap: 12,
+      padding: '0 20px', borderBottom: '1px solid var(--line)', background: 'var(--panel)',
+    }}>
+      <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)' }}>{pageTitle}</div>
+      <div id="topbar-actions" style={{ display: 'flex', alignItems: 'center', gap: 10, marginLeft: 14 }} />
+      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
+        <GlobalSearch />
+        <ThemeBtn theme={theme} onToggle={onToggleTheme} />
+        <LogoutBtn />
+        <Clock />
+      </div>
+    </div>
+  );
+}
+
+// ── Layouts ──────────────────────────────────────────────────────────
+
+const GLOBAL_ROUTES = ['/overview', '/board', '/map', '/event', '/chat', '/agents', '/regions', '/admin', '/master-data'];
 const NAMMA_ROUTES = ['/radar', '/airline-map', '/explorer'];
 
 function airlineFromPath(pathname) {
@@ -118,152 +331,27 @@ function HomeLayout({ theme, onToggleTheme }) {
           <LogoutBtn />
         </div>
       </div>
-
       <main style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
         <Home />
       </main>
-
-      <div style={{
-        flex: '0 0 auto', padding: '10px 28px', borderTop: '1px solid var(--line)',
-        background: 'var(--sunken)', ...MONO, fontSize: 10.5, color: 'var(--faint)'
-      }}>
-        Synthetic data · proof-of-concept build · advises, does not decide
-      </div>
     </div>
   );
 }
 
 function GlobalLayout({ theme, onToggleTheme, children }) {
-  const nav = useNavigate();
-  const activeCount = DM.EVENTS.length;
-
-  const topNavBtn = (isActive, accent) => ({
-    display: 'flex', alignItems: 'center', gap: 8,
-    padding: '7px 14px', fontSize: 13, fontWeight: 600,
-    border: `1px solid ${isActive ? (accent || TEAL) : 'var(--line2)'}`,
-    background: isActive ? (accent || TEAL) + '14' : 'transparent',
-    color: isActive ? 'var(--ink)' : 'var(--ink3)', cursor: 'pointer',
-    borderRadius: 4, whiteSpace: 'nowrap'
+  const [sidebarExpanded, setSidebarExpanded] = useState(() => {
+    return localStorage.getItem('dm-sidebar-expanded') !== 'false';
   });
+
+  useEffect(() => {
+    localStorage.setItem('dm-sidebar-expanded', String(sidebarExpanded));
+  }, [sidebarExpanded]);
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      <div style={{
-        width: 320, flex: '0 0 320px', background: 'var(--sunken)',
-        borderRight: '1px solid var(--line)', display: 'flex', flexDirection: 'column', minHeight: 0
-      }}>
-        <Link to="/" style={{ padding: '16px 18px', borderBottom: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 12, color: 'var(--ink)', cursor: 'pointer' }}>
-          <MatrixLogo size={28} />
-          <div>
-            <div style={{ fontSize: 16, fontWeight: 700, letterSpacing: '-0.2px' }}>DisruptionMatrix</div>
-            <div style={{ ...MONO, fontSize: 10, color: 'var(--faint)', letterSpacing: '0.1em' }}>EXTERNAL INTELLIGENCE</div>
-          </div>
-        </Link>
-
-        <div style={{ padding: '10px 18px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ ...MONO, fontSize: 11, color: 'var(--ink2)', letterSpacing: '0.1em', fontWeight: 600 }}>ACTIVE THREATS</div>
-          <div style={{ ...MONO, fontSize: 11, color: TEAL, fontWeight: 600 }}>{activeCount} live</div>
-        </div>
-
-        <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: '0 12px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {DM.EVENTS.map((e) => {
-            const c = scoreColor(e.score);
-            return (
-              <div
-                key={e.id}
-                onClick={() => nav(`/event/${e.id}`)}
-                className="hoverable"
-                style={{
-                  border: '1px solid var(--line2)', background: 'var(--panel)', padding: '12px 14px', cursor: 'pointer',
-                  borderLeft: `3px solid ${c}`
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                  <div style={{
-                    ...MONO, fontWeight: 700, fontSize: 16, color: c,
-                    border: `1px solid ${c}`, background: c + '1A', padding: '5px 8px', textAlign: 'center', borderRadius: 3
-                  }}>{e.score}</div>
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.3, marginBottom: 4 }}>{e.name}</div>
-                    <div style={{ ...MONO, fontSize: 11, color: 'var(--mute2)', display: 'flex', gap: 8 }}>
-                      <span style={{ color: trajColor(e.traj) }}>{trajArrow(e.traj)}</span>
-                      <span>{e.tti}</span>
-                      <span>L{e.esc}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        <div style={{ padding: '12px 18px', borderTop: '1px solid var(--line)', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 5, ...MONO, fontSize: 11.5, color: 'var(--mute)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Sources polled</span><span style={{ color: 'var(--ink2)' }}>1,284</span></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Reports / 24h</span><span style={{ color: 'var(--ink2)' }}>9,417</span></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Contradictions</span><span style={{ color: '#F59E2B' }}>4</span></div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingTop: 8, borderTop: '1px solid var(--track)' }}>
-            <div className="pulse" style={{ width: 7, height: 7, borderRadius: '50%', background: '#31C48D' }} />
-            <span style={{ ...MONO, fontSize: 11.5, color: 'var(--mute)' }}>Ingest live · EUR region</span>
-          </div>
-        </div>
-      </div>
-
+      <Sidebar expanded={sidebarExpanded} setExpanded={setSidebarExpanded} />
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-        <div style={{
-          flex: '0 0 auto', borderBottom: '1px solid var(--line)', background: 'var(--panel)',
-          display: 'flex', alignItems: 'center', padding: '10px 22px', gap: 10, flexWrap: 'wrap'
-        }}>
-          <NavLink to="/board" style={({ isActive }) => topNavBtn(isActive)}>
-            <span>Threat board</span>
-            <span style={{ ...MONO, fontSize: 11, color: 'var(--faint)' }}>{activeCount}</span>
-          </NavLink>
-          <NavLink to="/map" style={({ isActive }) => topNavBtn(isActive)}>
-            <span>World map</span>
-          </NavLink>
-          <NavLink to="/chat" style={({ isActive }) => topNavBtn(isActive)}>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
-            </svg>
-            <span>AI Assistant</span>
-          </NavLink>
-          <NavLink to="/agents" style={({ isActive }) => topNavBtn(isActive)}>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="3" />
-              <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z" />
-            </svg>
-            <span>Agent Engine</span>
-          </NavLink>
-          <NavLink to="/regions" style={({ isActive }) => topNavBtn(isActive)}>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
-            </svg>
-            <span>Regions</span>
-          </NavLink>
-          <NavLink to="/admin" style={({ isActive }) => topNavBtn(isActive)}>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
-              <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z" />
-            </svg>
-            <span>Admin</span>
-          </NavLink>
-          <span style={{ width: 1, height: 22, background: 'var(--line)', margin: '0 4px' }} />
-          <NavLink to="/" style={{
-            display: 'flex', alignItems: 'center', gap: 6,
-            padding: '7px 12px', ...MONO, fontSize: 12,
-            border: '1px solid var(--line2)', color: 'var(--faint)', cursor: 'pointer', borderRadius: 4
-          }}>
-            ← Home
-          </NavLink>
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
-            <GlobalSearch />
-            <ThemeBtn theme={theme} onToggle={onToggleTheme} />
-            <LogoutBtn />
-            <Clock />
-          </div>
-        </div>
+        <TopBar theme={theme} onToggleTheme={onToggleTheme} />
         <main style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
           {children}
         </main>
@@ -295,7 +383,6 @@ function AirlineLayout({ theme, onToggleTheme, airline, children }) {
             <div style={{ ...MONO, fontSize: 9.5, color: 'var(--mute)', letterSpacing: '0.1em' }}>{airline.occLabel}</div>
           </div>
         </Link>
-
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '10px 14px' }}>
           <NavLink to="/" style={linkBtn}>Home</NavLink>
           <NavLink to={`${rp}/airline-map`} style={linkBtn}>Network map</NavLink>
@@ -305,7 +392,6 @@ function AirlineLayout({ theme, onToggleTheme, airline, children }) {
           <Clock />
         </div>
       </div>
-
       <main style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
         {children}
       </main>
@@ -349,13 +435,19 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/" element={<Home />} />
+      <Route path="/overview" element={<ThreatOverview />} />
       <Route path="/board" element={<ThreatBoard />} />
+      <Route path="/profiling" element={<ThreatProfiling />} />
       <Route path="/event/:id" element={<EventDetail />} />
       <Route path="/map" element={<WorldMap />} />
+      <Route path="/archive" element={<Archive />} />
       <Route path="/chat" element={<Chat />} />
       <Route path="/agents" element={<AgentDashboard />} />
       <Route path="/regions" element={<RegionSettings />} />
+      <Route path="/sources" element={<Sources />} />
       <Route path="/admin" element={<AdminSettings />} />
+      <Route path="/master-data" element={<MasterData />} />
+      <Route path="/guide" element={<Documentation />} />
       <Route path="/radar" element={<Radar airline={AIRLINES.namma} />} />
       <Route path="/airline-map" element={<AirlineMap airline={AIRLINES.namma} />} />
       <Route path="/explorer" element={<DataExplorer airline={AIRLINES.namma} />} />

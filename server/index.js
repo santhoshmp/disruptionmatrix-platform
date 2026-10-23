@@ -2,6 +2,14 @@
 // Express + WebSocket server that serves the agent system API.
 // Seeded with existing PoC data so all endpoints work immediately.
 
+import process from 'node:process';
+import { fileURLToPath } from 'node:url';
+import { existsSync } from 'node:fs';
+
+// Load root .env for server-side keys (OPENSKY_*, AIRLABS_KEY,
+// AVIATIONSTACK_KEY, REDDIT_*). Vite already reads it for VITE_* vars.
+try { process.loadEnvFile(fileURLToPath(new URL('../.env', import.meta.url))); } catch {}
+
 import express from 'express';
 import cors from 'cors';
 import { createServer } from 'http';
@@ -13,8 +21,10 @@ import eventsRouter from './routes/events.js';
 import opsRouter from './routes/ops.js';
 import streamRouter, { setupWebSocket } from './routes/stream.js';
 import llmRouter from './routes/llm.js';
+import masterDataRouter from './routes/master-data.js';
 import sourcesRouter from './routes/sources.js';
 import chatRouter from './routes/chat.js';
+import profilingRouter from './routes/profiling.js';
 import agentManager from './engine/agent-manager.js';
 import { startPipeline } from './engine/pipeline.js';
 import ragIndexer from './engine/rag-indexer.js';
@@ -25,6 +35,9 @@ const START_AGENTS = process.env.AGENTS !== 'off'; // AGENTS=off to disable poll
 // ── Initialize store (async: DB migrations + hydration) ──────────────
 // This replaces the old sync store.seed(). Must complete before starting agents.
 await store.init();
+
+// Load master data reference tables into memory (falls back to hardcoded values if DB empty)
+import('./data/reference-loader.js').then(({ loadAll }) => loadAll()).catch(() => {});
 
 // Load persisted impact mode from DB
 const { initImpactMode } = await import('./engine/impact-assessment.js');
@@ -47,6 +60,12 @@ if (store.dbReady) {
 if (START_AGENTS) {
   agentManager.startAll();
   startPipeline(10000); // process new signals into events every 10s
+}
+
+// ── Start archiver — sweep passed/non-aviation events every 15 min ───
+{
+  const { startArchiver } = await import('./engine/archiver.js');
+  startArchiver();
 }
 
 // ── Express app ─────────────────────────────────────────────────────
@@ -94,8 +113,10 @@ app.use('/api/events', eventsRouter);
 app.use('/api/events', opsRouter); // /api/events/:eventId/ops
 app.use('/api/stream', streamRouter);
 app.use('/api/llm', llmRouter);
+app.use('/api/master', masterDataRouter);
 app.use('/api/sources', sourcesRouter);
 app.use('/api/chat', chatRouter);
+app.use('/api/profiling', profilingRouter);
 
 // ── Reference data ─────────────────────────────────────────────────
 app.get('/api/reference', (_req, res) => {
@@ -103,13 +124,23 @@ app.get('/api/reference', (_req, res) => {
 });
 
 // ── Pipeline status ────────────────────────────────────────────────
-app.get('/api/pipeline', (_req, res) => {
+app.get('/api/pipeline', async (_req, res) => {
+  const { getPipelineStatus } = await import('./engine/pipeline.js');
   const pipeline = store.config.pipeline;
   const status = pipeline.map(step => ({
     ...step,
     itemCount: _getPipelineStepCount(step.step),
   }));
-  res.json({ pipeline: status });
+  const runStatus = getPipelineStatus();
+  res.json({
+    pipeline: status,
+    autoRunning: runStatus.autoRunning,
+    intervalMs: runStatus.intervalMs,
+    lastRun: runStatus.lastRun,
+    runHistory: runStatus.history,
+    activeEvents: store.events.filter(e => !e.archived).length,
+    archivedEvents: store.events.filter(e => e.archived).length,
+  });
 });
 
 // ── Agent runtime status ───────────────────────────────────────────
@@ -123,9 +154,39 @@ app.get('/api/agents-runtime', (_req, res) => {
 
 // ── Pipeline trigger (manual) ──────────────────────────────────────
 app.post('/api/pipeline/run', async (_req, res) => {
-  const { processNewSignals } = await import('./engine/pipeline.js');
+  const { processNewSignals, recordPipelineRun } = await import('./engine/pipeline.js');
   const result = processNewSignals();
+  recordPipelineRun(result);
   res.json({ ...result, message: `Processed ${result.processed} signals` });
+});
+
+// ── Merge duplicate events (one-time cleanup) ──────────────────────
+app.post('/api/pipeline/merge-duplicates', async (_req, res) => {
+  const { mergeDuplicateEvents } = await import('./engine/pipeline.js');
+  const result = mergeDuplicateEvents();
+  res.json(result);
+});
+
+// ── Event archive ──────────────────────────────────────────────────
+// POST /api/maintenance/archive — run the archive sweep now
+app.post('/api/maintenance/archive', async (_req, res) => {
+  const { archiveSweep } = await import('./engine/archiver.js');
+  const result = archiveSweep();
+  res.json({ ...result, active: store.events.filter(e => !e.archived).length, archivedCount: store.countArchived() });
+});
+
+// POST /api/events/:id/archive — manually archive an event
+app.post('/api/events/:id/archive', (req, res) => {
+  const ev = store.archiveEvent(req.params.id, 'manual');
+  if (!ev) return res.status(404).json({ error: 'Event not found' });
+  res.json({ archived: true, id: req.params.id });
+});
+
+// POST /api/events/:id/restore — restore an archived event to the active list
+app.post('/api/events/:id/restore', (req, res) => {
+  const ev = store.restoreEvent(req.params.id);
+  if (!ev) return res.status(404).json({ error: 'Event not found' });
+  res.json({ restored: true, id: req.params.id });
 });
 
 // ── Impact assessment trigger (manual) ─────────────────────────────
@@ -181,23 +242,66 @@ app.put('/api/ops/mode', async (req, res) => {
   res.json({ mode: getImpactMode(), recomputed: computed, total: store.events.length });
 });
 
+// ── Real-only data mode toggle ────────────────────────────────────
+// When enabled, mock connectors are skipped and mock signals are filtered
+// from the pipeline. Only real API data produces events.
+app.get('/api/settings/real-data-mode', (_req, res) => {
+  res.json({
+    enabled: store.realOnlyMode,
+    stats: {
+      realEvents: store.events.filter(e => e._dataModes?.mode === 'real').length,
+      mockEvents: store.events.filter(e => e._dataModes?.mode === 'mock').length,
+      mixedEvents: store.events.filter(e => e._dataModes?.mode === 'mixed').length,
+      seededEvents: store.events.filter(e => e._source === 'seeded').length,
+      total: store.events.length,
+    },
+  });
+});
+
+app.put('/api/settings/real-data-mode', async (req, res) => {
+  const { enabled } = req.body;
+  if (typeof enabled !== 'boolean') {
+    return res.status(400).json({ error: 'enabled must be boolean' });
+  }
+  await store.setRealOnlyMode(enabled);
+  res.json({
+    enabled: store.realOnlyMode,
+    message: enabled
+      ? 'Real data mode ON — mock connectors disabled, only real API signals will produce events'
+      : 'Real data mode OFF — mock fallback enabled for all agents',
+  });
+});
+
 function _getPipelineStepCount(step) {
+  const active = store.events.filter(e => !e.archived).length;
   switch (step) {
     case 1: return store.signals.length;        // Collection
     case 2: return store.signals.length;        // Normalization (same count)
-    case 3: return store.events.length;         // Correlation → events
-    case 4: return store.events.length;         // Scoring
-    case 5: return store.events.length;         // Domain impact
-    case 6: return store.events.length;         // Causal chain
-    case 7: return store.events.length;         // Evidence assembly
+    case 3: return active;                      // Correlation → active events
+    case 4: return active;                      // Scoring
+    case 5: return active;                      // Domain impact
+    case 6: return active;                      // Causal chain
+    case 7: return active;                      // Evidence assembly
     case 8: return Object.keys(store.ops).length; // Impact assessment
-    case 9: return store.events.length;         // Event store
+    case 9: return active;                      // Event store (active)
     default: return 0;
   }
 }
 
-// ── 404 handler ─────────────────────────────────────────────────────
-app.use((_req, res) => {
+// ── Static frontend (production: serve built Vite app) ──────────────
+// In production (Railway), the frontend is built to ../dist and served
+// from this same origin — API, WS stream, and SPA on one service.
+const distDir = fileURLToPath(new URL('../dist', import.meta.url));
+if (existsSync(distDir)) {
+  app.use(express.static(distDir));
+  // SPA fallback: any non-API GET returns index.html (client-side routing)
+  app.get(/^\/(?!api\/).*/, (_req, res) => {
+    res.sendFile(fileURLToPath(new URL('../dist/index.html', import.meta.url)));
+  });
+}
+
+// ── 404 handler (API only) ──────────────────────────────────────────
+app.use((req, res) => {
   res.status(404).json({ error: 'Not found', availableEndpoints: [
     '/api/health', '/api/agents', '/api/regions', '/api/signals',
     '/api/events', '/api/events/:id/ops', '/api/reference', '/api/pipeline',

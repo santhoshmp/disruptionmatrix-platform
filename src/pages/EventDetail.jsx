@@ -114,6 +114,15 @@ function Assessment({ ev, onSelectAirline }) {
 
             {/* Airports in the area of effect */}
             <div className="kicker" style={{ marginBottom: 8 }}>AIRPORTS IN THE AREA OF EFFECT</div>
+            {ops.airports.length === 0 ? (
+              <div style={{
+                ...MONO, fontSize: 11, color: 'var(--mute)', letterSpacing: '0.06em',
+                padding: '12px 14px', border: '1px dashed var(--edge)', borderRadius: 3,
+                background: 'var(--panel2)', marginBottom: 16,
+              }}>
+                NO IMPACT TO AVIATION — no airports in the area of effect
+              </div>
+            ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 6, marginBottom: 16 }}>
               {ops.airports.map((a) => {
                 const expColor = scoreColor(a.exposure);
@@ -134,6 +143,7 @@ function Assessment({ ev, onSelectAirline }) {
                 );
               })}
             </div>
+            )}
 
             {/* Critical / High airlines — featured cards */}
             {(() => {

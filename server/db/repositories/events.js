@@ -8,11 +8,12 @@ export async function upsert(event) {
     INSERT INTO events (
       id, ref, name, cat, "where", detected, score, conf, traj, tti, tti_min,
       esc, summary, sop_key, factors, domains, chain, evidence, assumptions, gaps,
-      source, signal_count, source_signals, geo, airports, airspace, updated_at
+      source, signal_count, source_signals, geo, airports, airspace,
+      archived, archived_at, archive_reason, updated_at
     ) VALUES (
       $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11,
       $12, $13, $14, $15, $16, $17, $18, $19, $20,
-      $21, $22, $23, $24, $25, $26, NOW()
+      $21, $22, $23, $24, $25, $26, $27, $28, $29, NOW()
     )
     ON CONFLICT (id) DO UPDATE SET
       ref = EXCLUDED.ref,
@@ -40,6 +41,9 @@ export async function upsert(event) {
       geo = EXCLUDED.geo,
       airports = EXCLUDED.airports,
       airspace = EXCLUDED.airspace,
+      archived = EXCLUDED.archived,
+      archived_at = EXCLUDED.archived_at,
+      archive_reason = EXCLUDED.archive_reason,
       updated_at = NOW()
   `;
   const params = [
@@ -58,6 +62,9 @@ export async function upsert(event) {
     JSON.stringify(event._geo || null),
     JSON.stringify(event._airports || []),
     JSON.stringify(event._airspace || []),
+    event.archived || false,
+    event.archivedAt || null,
+    event.archiveReason || null,
   ];
   await pool.query(sql, params);
 }
@@ -67,7 +74,8 @@ export async function update(id, updates) {
   const allowed = ['ref', 'name', 'cat', 'where', 'detected', 'score', 'conf',
     'traj', 'tti', 'ttiMin', 'esc', 'summary', 'sopKey', 'factors', 'domains',
     'chain', 'evidence', 'assumptions', 'gaps', 'source', 'signalCount',
-    'sourceSignals', 'geo', 'airports', 'airspace'];
+    'sourceSignals', 'geo', 'airports', 'airspace',
+    'archived', 'archivedAt', 'archiveReason'];
 
   const fields = [];
   const params = [id];
@@ -82,9 +90,11 @@ export async function update(id, updates) {
       : key === '_geo' ? 'geo'
       : key === '_airports' ? 'airports'
       : key === '_airspace' ? 'airspace'
+      : key === 'archivedAt' ? 'archived_at'
+      : key === 'archiveReason' ? 'archive_reason'
       : key;
 
-    if (!allowed.includes(key) && !['tti_min', 'sop_key', 'source', 'signal_count', 'source_signals', 'geo', 'airports', 'airspace'].includes(dbKey)) continue;
+    if (!allowed.includes(key) && !['tti_min', 'sop_key', 'source', 'signal_count', 'source_signals', 'geo', 'airports', 'airspace', 'archived', 'archived_at', 'archive_reason'].includes(dbKey)) continue;
 
     const isJson = ['factors', 'domains', 'chain', 'evidence', 'assumptions', 'gaps',
       'source_signals', 'geo', 'airports', 'airspace'].includes(dbKey);
@@ -111,6 +121,14 @@ export async function getAll(filters = {}) {
   let sql = 'SELECT * FROM events WHERE 1=1';
   const params = [];
   let idx = 1;
+
+  // archived: 'only' → archived events only; 'all' → include archived;
+  // default → exclude archived
+  if (filters.archived === 'only') {
+    sql += ' AND archived = true';
+  } else if (filters.archived !== 'all') {
+    sql += ' AND archived = false';
+  }
 
   if (filters.cat) {
     sql += ` AND cat = $${idx++}`;
@@ -180,6 +198,9 @@ function _mapRow(r) {
     _geo: r.geo,
     _airports: r.airports || [],
     _airspace: r.airspace || [],
+    archived: r.archived || false,
+    archivedAt: r.archived_at || null,
+    archiveReason: r.archive_reason || null,
   };
 }
 

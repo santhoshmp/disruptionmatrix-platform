@@ -2,8 +2,14 @@
 // Uses real airline data from OpenFlights + known hub/network structure.
 // Since we don't have real schedule data, we approximate network share and
 // movements based on known airline operations at major airports.
+//
+// Phase 2 migration: AIRLINE_HUBS and AIRLINE_FLEET_CAPS now read from the
+// DB-backed reference loader when available, falling back to the hardcoded
+// consts below. The registry is rebuilt lazily on first access so it can
+// pick up DB-loaded data (the loader loads asynchronously on startup).
 
 import { getAllAirlines as getAllAirlinesData, getAllAirports } from './airport-airline-data.js';
+import * as refLoader from './reference-loader.js';
 
 // ── Real airline hub mapping (IATA → primary hub airports) ──────────
 // Based on public knowledge of each airline's main base of operations.
@@ -82,6 +88,14 @@ const AIRLINE_HUBS = {
   // Oceania
   'QF': { primary: 'SYD', secondary: ['MEL'], country: 'Australia', name: 'Qantas' },
   'NZ': { primary: 'AKL', secondary: [], country: 'New Zealand', name: 'Air New Zealand' },
+  // South America
+  'LA': { primary: 'SCL', secondary: ['GRU', 'EZE', 'BOG'], country: 'Chile', name: 'LATAM Airlines' },
+  'AV': { primary: 'BOG', secondary: [], country: 'Colombia', name: 'Avianca' },
+  'G3': { primary: 'GRU', secondary: ['CGH'], country: 'Brazil', name: 'GOL Linhas Aereas' },
+  'AR': { primary: 'EZE', secondary: ['AEP'], country: 'Argentina', name: 'Aerolineas Argentinas' },
+  'AD': { primary: 'GRU', secondary: ['CNF'], country: 'Brazil', name: 'Azul Brazilian Airlines' },
+  'JA': { primary: 'SCL', secondary: ['EZE'], country: 'Chile', name: 'JetSMART' },
+  'JJ': { primary: 'GRU', secondary: [], country: 'Brazil', name: 'LATAM Airlines Brasil' },
 };
 
 // ── Approximate network share per airport ────────────────────────────
@@ -123,7 +137,18 @@ function _buildRegistry() {
   const registry = [];
 
   for (const airline of realAirlines) {
-    const hubInfo = AIRLINE_HUBS[airline.iata];
+    // Phase 2: try DB-backed hub info first, fall back to hardcoded AIRLINE_HUBS
+    let hubInfo = refLoader.getAirlineHubs(airline.iata);
+    if (hubInfo) {
+      hubInfo = {
+        primary: hubInfo.primary,
+        secondary: hubInfo.secondary || [],
+        country: airline.country,
+        name: airline.name,
+      };
+    } else {
+      hubInfo = AIRLINE_HUBS[airline.iata];
+    }
     if (!hubInfo) continue; // skip airlines without hub data
 
     const allHubs = [hubInfo.primary, ...(hubInfo.secondary || [])];
@@ -146,6 +171,10 @@ function _buildRegistry() {
       }
     }
 
+    // Phase 2: try DB-backed CAT3 capability first, fall back to hardcoded AIRLINE_FLEET_CAPS
+    const cat3FromDb = refLoader.getAirlineCat3(airline.iata);
+    const cat3Capable = cat3FromDb != null ? cat3FromDb : !!AIRLINE_FLEET_CAPS[airline.iata];
+
     registry.push({
       key: airline.iata,
       name: airline.name,
@@ -159,7 +188,7 @@ function _buildRegistry() {
       networkShare,
       bankStructure: _estimateBankStructure(airline.iata),
       fleetCapabilities: {
-        cat3Count: AIRLINE_FLEET_CAPS[airline.iata] ? 100 : 0,
+        cat3Count: cat3Capable ? 100 : 0,
         cat3Total: 100,
         etops: true,
       },
@@ -203,37 +232,52 @@ function _estimateBankStructure(iata) {
 }
 
 // ── Build the registry ───────────────────────────────────────────────
+// Phase 2: registry is built lazily on first access so it can use DB-loaded
+// airline data from the reference loader (which loads asynchronously on startup).
 
-const REGISTRY = _buildRegistry();
-const AIRLINE_BY_KEY = Object.fromEntries(REGISTRY.map((a) => [a.key, a]));
-const AIRLINE_BY_CODE = Object.fromEntries(REGISTRY.map((a) => [a.code, a]));
+let _registry = null;
+let _airlineByKey = null;
+let _airlineByCode = null;
+
+function _ensureRegistry() {
+  if (_registry) return;
+  _registry = _buildRegistry();
+  _airlineByKey = Object.fromEntries(_registry.map((a) => [a.key, a]));
+  _airlineByCode = Object.fromEntries(_registry.map((a) => [a.code, a]));
+}
 
 // ── API (same interface as airline-registry.js) ──────────────────────
 
 export function getAirline(key) {
-  return AIRLINE_BY_KEY[key] || null;
+  _ensureRegistry();
+  return _airlineByKey[key] || null;
 }
 
 export function getAirlineByCode(code) {
-  return AIRLINE_BY_CODE[code] || null;
+  _ensureRegistry();
+  return _airlineByCode[code] || null;
 }
 
 export function getAllAirlines() {
-  return REGISTRY;
+  _ensureRegistry();
+  return _registry;
 }
 
 export function getAirlinesAtAirport(airportIATA) {
-  return REGISTRY.filter((a) => a.networkShare && a.networkShare[airportIATA] != null && a.networkShare[airportIATA] > 0);
+  _ensureRegistry();
+  return _registry.filter((a) => a.networkShare && a.networkShare[airportIATA] != null && a.networkShare[airportIATA] > 0);
 }
 
 export function getNetworkShare(airlineKey, airportIATA) {
-  const airline = getAirline(airlineKey);
+  _ensureRegistry();
+  const airline = _airlineByKey[airlineKey];
   if (!airline || !airline.networkShare) return 0;
   return airline.networkShare[airportIATA] || 0;
 }
 
 export function getHubRole(airlineKey, airportIATA) {
-  const airline = getAirline(airlineKey);
+  _ensureRegistry();
+  const airline = _airlineByKey[airlineKey];
   if (!airline) return 'outstation';
   if (airline.hub === airportIATA) return 'primary';
   if (airline.secondaryHub === airportIATA) return 'secondary';
@@ -243,16 +287,19 @@ export function getHubRole(airlineKey, airportIATA) {
 }
 
 export function getBankStructure(airlineKey) {
-  const airline = getAirline(airlineKey);
+  _ensureRegistry();
+  const airline = _airlineByKey[airlineKey];
   return airline?.bankStructure || [];
 }
 
 export function getFleetCapabilities(airlineKey) {
-  const airline = getAirline(airlineKey);
+  _ensureRegistry();
+  const airline = _airlineByKey[airlineKey];
   return airline?.fleetCapabilities || { cat3Count: 0, cat3Total: 0, etops: false };
 }
 
 export function hasCat3Capability(airlineKey) {
+  _ensureRegistry();
   const caps = getFleetCapabilities(airlineKey);
   return caps.cat3Count > 0 && caps.cat3Count >= caps.cat3Total * 0.8;
 }

@@ -6,10 +6,15 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "install:server": "npm --prefix server install",
+    "railway:build": "npm install && npm --prefix server install && npm run build",
+    "start": "node server/index.js"
   },
   "dependencies": {
     "leaflet": "^1.9.4",
+    "mapbox-gl": "^3.30.0",
+    "maplibre-gl": "^6.9.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.26.2"

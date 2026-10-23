@@ -12,7 +12,7 @@
 // ── Real airport data (subset from OurAirports) ─────────────────────
 // Fields: iata, icao, name, city, country, lat, lon, scheduledService, type
 
-const AIRPORTS = [
+export const AIRPORTS = [
   // R1 — Indian Subcontinent
   { iata: 'BLR', icao: 'VOBL', name: 'Kempegowda International Airport', city: 'Bengaluru', country: 'India', lat: 13.1986, lon: 77.7069, scheduled: true },
   { iata: 'MAA', icao: 'VOMM', name: 'Chennai International Airport', city: 'Chennai', country: 'India', lat: 12.9941, lon: 80.1709, scheduled: true },
@@ -113,12 +113,50 @@ const AIRPORTS = [
   { iata: 'LOS', icao: 'DNMM', name: 'Murtala Muhammed International Airport', city: 'Lagos', country: 'Nigeria', lat: 6.5774, lon: 3.3211, scheduled: true },
   { iata: 'ACC', icao: 'DGAA', name: 'Kotoka International Airport', city: 'Accra', country: 'Ghana', lat: 5.6051, lon: -0.1668, scheduled: true },
   { iata: 'DKR', icao: 'GOOY', name: 'Blaise Diagne International Airport', city: 'Dakar', country: 'Senegal', lat: 14.6708, lon: -17.0729, scheduled: true },
+
+  // R8 — Oceania / Australasia
+  { iata: 'SYD', icao: 'YSSY', name: 'Sydney Kingsford Smith Airport', city: 'Sydney', country: 'Australia', lat: -33.9461, lon: 151.1772, scheduled: true },
+  { iata: 'MEL', icao: 'YMML', name: 'Melbourne Airport', city: 'Melbourne', country: 'Australia', lat: -37.6690, lon: 144.8410, scheduled: true },
+  { iata: 'BNE', icao: 'YBBN', name: 'Brisbane Airport', city: 'Brisbane', country: 'Australia', lat: -27.3842, lon: 153.1175, scheduled: true },
+  { iata: 'PER', icao: 'YPPH', name: 'Perth Airport', city: 'Perth', country: 'Australia', lat: -31.9403, lon: 115.9671, scheduled: true },
+  { iata: 'AKL', icao: 'NZAA', name: 'Auckland Airport', city: 'Auckland', country: 'New Zealand', lat: -37.0082, lon: 174.7850, scheduled: true },
+
+  // R9 — South America
+  { iata: 'GRU', icao: 'SBGR', name: 'Sao Paulo Guarulhos International Airport', city: 'Sao Paulo', country: 'Brazil', lat: -23.4356, lon: -46.4731, scheduled: true },
+  { iata: 'EZE', icao: 'SAEZ', name: 'Ministro Pistarini International Airport', city: 'Buenos Aires', country: 'Argentina', lat: -34.8222, lon: -58.5358, scheduled: true },
+  { iata: 'SCL', icao: 'SCEL', name: 'Arturo Merino Benitez International Airport', city: 'Santiago', country: 'Chile', lat: -33.3930, lon: -70.7858, scheduled: true },
+  { iata: 'BOG', icao: 'SKBO', name: 'El Dorado International Airport', city: 'Bogota', country: 'Colombia', lat: 4.7016, lon: -74.1469, scheduled: true },
+  { iata: 'LIM', icao: 'SPJC', name: 'Jorge Chavez International Airport', city: 'Lima', country: 'Peru', lat: -12.0219, lon: -77.1143, scheduled: true },
+
+  // R10 — Russia / CIS
+  { iata: 'SVO', icao: 'UUEE', name: 'Sheremetyevo International Airport', city: 'Moscow', country: 'Russia', lat: 55.9726, lon: 37.4146, scheduled: true },
+  { iata: 'DME', icao: 'UUDD', name: 'Moscow Domodedovo Airport', city: 'Moscow', country: 'Russia', lat: 55.4088, lon: 37.9063, scheduled: true },
+  { iata: 'LED', icao: 'ULLI', name: 'Pulkovo Airport', city: 'St. Petersburg', country: 'Russia', lat: 59.8003, lon: 30.2625, scheduled: true },
+  { iata: 'AER', icao: 'URSS', name: 'Sochi International Airport', city: 'Sochi', country: 'Russia', lat: 43.4499, lon: 39.9566, scheduled: true },
+  { iata: 'SVX', icao: 'USSS', name: 'Koltsovo International Airport', city: 'Yekaterinburg', country: 'Russia', lat: 56.7431, lon: 60.8027, scheduled: true },
+  { iata: 'MSQ', icao: 'UMMS', name: 'Minsk National Airport', city: 'Minsk', country: 'Belarus', lat: 53.8825, lon: 28.0307, scheduled: true },
+  { iata: 'GYD', icao: 'UBBB', name: 'Heydar Aliyev International Airport', city: 'Baku', country: 'Azerbaijan', lat: 40.4675, lon: 50.0467, scheduled: true },
+  { iata: 'TBS', icao: 'UGTB', name: 'Tbilisi International Airport', city: 'Tbilisi', country: 'Georgia', lat: 41.6692, lon: 44.9547, scheduled: true },
+  { iata: 'ALA', icao: 'UAAA', name: 'Almaty International Airport', city: 'Almaty', country: 'Kazakhstan', lat: 43.3521, lon: 77.0405, scheduled: true },
+  { iata: 'TSE', icao: 'UACC', name: 'Nursultan Nazarbayev International Airport', city: 'Astana', country: 'Kazakhstan', lat: 51.0222, lon: 71.4669, scheduled: true },
+  { iata: 'TAS', icao: 'UTTT', name: 'Islam Karimov Tashkent International Airport', city: 'Tashkent', country: 'Uzbekistan', lat: 41.2579, lon: 69.2812, scheduled: true },
+
+  // R11 — China (PEK/PVG/CAN above moved here from R6)
+  { iata: 'PKX', icao: 'ZBAD', name: 'Beijing Daxing International Airport', city: 'Beijing', country: 'China', lat: 39.5098, lon: 116.4106, scheduled: true },
+  { iata: 'SZX', icao: 'ZGSZ', name: "Shenzhen Bao'an International Airport", city: 'Shenzhen', country: 'China', lat: 22.6393, lon: 113.8107, scheduled: true },
+  { iata: 'TFU', icao: 'ZUTF', name: 'Chengdu Tianfu International Airport', city: 'Chengdu', country: 'China', lat: 30.3125, lon: 104.4413, scheduled: true },
+  { iata: 'CKG', icao: 'ZUCK', name: 'Chongqing Jiangbei International Airport', city: 'Chongqing', country: 'China', lat: 29.7192, lon: 106.6417, scheduled: true },
+  { iata: 'XIY', icao: 'ZLXY', name: "Xi'an Xianyang International Airport", city: "Xi'an", country: 'China', lat: 34.4471, lon: 108.7516, scheduled: true },
+  { iata: 'HGH', icao: 'ZSHC', name: 'Hangzhou Xiaoshan International Airport', city: 'Hangzhou', country: 'China', lat: 30.2295, lon: 120.4344, scheduled: true },
+  { iata: 'KMG', icao: 'ZPPP', name: 'Kunming Changshui International Airport', city: 'Kunming', country: 'China', lat: 24.9924, lon: 102.7435, scheduled: true },
+  { iata: 'NKG', icao: 'ZSNJ', name: 'Nanjing Lukou International Airport', city: 'Nanjing', country: 'China', lat: 31.7420, lon: 118.8620, scheduled: true },
+  { iata: 'URC', icao: 'ZWWW', name: 'Urumqi Diwopu International Airport', city: 'Urumqi', country: 'China', lat: 43.9071, lon: 87.4742, scheduled: true },
 ];
 
 // ── Real airline data (subset from OpenFlights) ─────────────────────
 // Fields: name, iata, icao, country, active
 
-const AIRLINES = [
+export const AIRLINES = [
   // India
   { name: 'IndiGo', iata: '6E', icao: 'IGO', country: 'India', active: true },
   { name: 'Air India', iata: 'AI', icao: 'AIC', country: 'India', active: true },
@@ -194,68 +232,84 @@ const AIRLINES = [
   { name: 'Qantas', iata: 'QF', icao: 'QFA', country: 'Australia', active: true },
   { name: 'Air New Zealand', iata: 'NZ', icao: 'ANZ', country: 'New Zealand', active: true },
   { name: 'Cathay Pacific', iata: 'CX', icao: 'CPA', country: 'Hong Kong', active: true },
+  // South America
+  { name: 'LATAM Airlines', iata: 'LA', icao: 'LAN', country: 'Chile', active: true },
+  { name: 'Avianca', iata: 'AV', icao: 'AVA', country: 'Colombia', active: true },
+  { name: 'GOL Linhas Aereas', iata: 'G3', icao: 'GLO', country: 'Brazil', active: true },
+  { name: 'Aerolineas Argentinas', iata: 'AR', icao: 'ARG', country: 'Argentina', active: true },
+  { name: 'Azul Brazilian Airlines', iata: 'AD', icao: 'AZU', country: 'Brazil', active: true },
+  { name: 'JetSMART', iata: 'JA', icao: 'JAT', country: 'Chile', active: true },
+  { name: 'LATAM Airlines Brasil', iata: 'JJ', icao: 'TAM', country: 'Brazil', active: true },
 ];
 
 // ── Region → Country mapping ────────────────────────────────────────
 // Maps each monitored region to the countries whose airspace is relevant.
 
-const REGION_COUNTRIES = {
+export const REGION_COUNTRIES = {
   R1: ['India', 'Pakistan', 'Sri Lanka', 'Bangladesh', 'Nepal'],
   R2: ['Austria', 'Germany', 'France', 'United Kingdom', 'Netherlands', 'Belgium', 'Switzerland', 'Czech Republic', 'Hungary', 'Denmark', 'Norway', 'Italy', 'Spain', 'Turkey', 'Poland', 'Greece', 'Ireland', 'Iceland'],
   R3: ['United Arab Emirates', 'Qatar', 'Oman', 'Bahrain', 'Saudi Arabia', 'Kuwait', 'Jordan', 'Lebanon', 'Israel', 'Iran', 'Iraq'],
   R4: ['Singapore', 'Thailand', 'Malaysia', 'Indonesia', 'Philippines', 'Vietnam', 'Cambodia', 'Myanmar'],
   R5: ['United States', 'Canada', 'Iceland', 'Ireland', 'United Kingdom'],
-  R6: ['Hong Kong', 'Japan', 'South Korea', 'China', 'Taiwan'],
+  R6: ['Hong Kong', 'Japan', 'South Korea', 'Taiwan'],
   R7: ['South Africa', 'Kenya', 'Ethiopia', 'Egypt', 'Nigeria', 'Ghana', 'Senegal', 'Sudan'],
+  R8: ['Australia', 'New Zealand'],
+  R9: ['Brazil', 'Argentina', 'Chile', 'Colombia', 'Peru'],
+  R10: ['Russia', 'Belarus', 'Kazakhstan', 'Uzbekistan', 'Azerbaijan', 'Georgia'],
+  R11: ['China', 'Mongolia'],
 };
 
 // ── API ─────────────────────────────────────────────────────────────
+// Phase 1 migration: airport/airline getters now read from the reference
+// loader (DB-backed) and fall back to the hardcoded consts above if the
+// DB is empty or unavailable. The return shapes are identical.
+
+import * as refLoader from './reference-loader.js';
 
 // Get all airports
 export function getAllAirports() {
-  return AIRPORTS;
+  return refLoader.getAllAirports();
 }
 
 // Get airport by IATA code
 export function getAirport(iata) {
-  return AIRPORTS.find((a) => a.iata === iata) || null;
+  return refLoader.getAirport(iata);
 }
 
 // Get airports for a specific region (by matching country to region mapping)
 export function getAirportsByRegion(regionId) {
-  const countries = REGION_COUNTRIES[regionId] || [];
-  return AIRPORTS.filter((a) => countries.includes(a.country));
+  return refLoader.getAirportsByRegion(regionId);
 }
 
 // Get airports for a specific country
 export function getAirportsByCountry(country) {
-  return AIRPORTS.filter((a) => a.country === country);
+  return refLoader.getAirportsByCountry(country);
 }
 
 // Get all airlines
 export function getAllAirlines() {
-  return AIRLINES;
+  return refLoader.getAllAirlines();
 }
 
 // Get airline by IATA code
 export function getAirline(iata) {
-  return AIRLINES.find((a) => a.iata === iata) || null;
+  return refLoader.getAirline(iata);
 }
 
 // Get airlines for a specific region (by country)
 export function getAirlinesByRegion(regionId) {
-  const countries = REGION_COUNTRIES[regionId] || [];
-  return AIRLINES.filter((a) => countries.includes(a.country));
+  const countries = refLoader.getRegionCountries(regionId);
+  return refLoader.getAllAirlines().filter((a) => countries.includes(a.country));
 }
 
 // Get airlines for a specific country
 export function getAirlinesByCountry(country) {
-  return AIRLINES.filter((a) => a.country === country);
+  return refLoader.getAllAirlines().filter((a) => a.country === country);
 }
 
 // Get countries for a region
 export function getCountriesByRegion(regionId) {
-  return REGION_COUNTRIES[regionId] || [];
+  return refLoader.getRegionCountries(regionId);
 }
 
 // Get full region profile: airports + airlines + countries

@@ -2,6 +2,45 @@
 // Deduplicates, merges corroborating sources, and groups signals into candidate events.
 
 import { agentTypeToCategory } from './scoring.js';
+import * as refLoader from '../data/reference-loader.js';
+
+// ── Hazard family mapping ───────────────────────────────────────────
+// Maps specific hazard types to logical families so that the same physical
+// phenomenon (e.g., fog at 451m vs fog at 547m vs low_visibility at 1593m)
+// gets the same event ID across pipeline runs.
+// Phase 5: uses DB-backed hazard family map, falls back to hardcoded const.
+const HAZARD_FAMILY = {
+  fog: 'visibility',
+  low_visibility: 'visibility',
+  low_ceiling: 'ceiling',
+  thunderstorm: 'thunderstorm',
+  snow_ice: 'winter',
+  snow: 'winter',
+  winter_precip: 'winter',
+  strong_wind: 'wind',
+  high_wind: 'wind',
+  heavy_rain: 'rain',
+  extreme_heat: 'heat',
+  extreme_cold: 'cold',
+  // Flight schedule disruptions
+  cancellation: 'cancellation',
+  cancelled: 'cancellation',
+  massdelay: 'massdelay',
+  delay: 'massdelay',
+  groundstop: 'groundstop',
+  grounddelay: 'groundstop',
+  diversion: 'diversion',
+  diverted: 'diversion',
+  socialreport: 'socialreport',
+};
+
+export function hazardFamily(hazardType) {
+  if (!hazardType) return null;
+  // Phase 5: try DB-backed family first
+  const fromDb = refLoader.getHazardFamily(hazardType);
+  if (fromDb) return fromDb;
+  return HAZARD_FAMILY[hazardType] || hazardType;
+}
 
 // ── Geo distance (haversine, km) ─────────────────────────────────────
 
@@ -126,6 +165,8 @@ export function mergeGroup(signals) {
     name: primary.name,
     category: agentTypeToCategory(primary.agentType),
     agentType: primary.agentType,
+    hazardType: primary.hazardType,
+    hazardFamily: hazardFamily(primary.hazardType),
     detected: primary.detected,
     geo: { ...geo, radiusKm: maxRadius },
     airports,
@@ -138,6 +179,7 @@ export function mergeGroup(signals) {
     rawRefs: signals.flatMap((s) => s.rawRefs || []),
     sourceSignals: signals.map((s) => s.signalId),
     signalCount: signals.length,
+    corroborateOnly: signals.some((s) => s.corroborateOnly),
   };
 }
 
@@ -147,6 +189,8 @@ function _singleToCandidate(signal) {
     name: signal.name,
     category: agentTypeToCategory(signal.agentType),
     agentType: signal.agentType,
+    hazardType: signal.hazardType,
+    hazardFamily: hazardFamily(signal.hazardType),
     detected: signal.detected,
     geo: signal.geo || { lat: 0, lon: 0, radiusKm: 100 },
     airports: signal.airports || [],
@@ -159,6 +203,7 @@ function _singleToCandidate(signal) {
     rawRefs: signal.rawRefs || [],
     sourceSignals: [signal.signalId],
     signalCount: 1,
+    corroborateOnly: signal.corroborateOnly || false,
   };
 }
 
@@ -184,4 +229,4 @@ function _averageFactorHints(signals) {
   return result;
 }
 
-export default { correlate, mergeGroup };
+export default { correlate, mergeGroup, hazardFamily };

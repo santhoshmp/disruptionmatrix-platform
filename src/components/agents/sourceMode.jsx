@@ -4,12 +4,16 @@ export const MODE_COLORS = {
   real: '#34D399',
   mock: '#F5A623',
   computed: '#22D3EE',
+  planned: '#5B92C9',
+  mixed: '#A78BFA',
 };
 
 export const MODE_LABELS = {
   real: 'REAL',
   mock: 'MOCK',
   computed: 'COMPUTED',
+  planned: 'PLANNED',
+  mixed: 'MIXED',
 };
 
 export function SourceBadge({ mode }) {
@@ -24,6 +28,52 @@ export function SourceBadge({ mode }) {
       {label}
     </span>
   );
+}
+
+// Compute the aggregate source mode from an agent's data sources.
+// Returns 'real' if all non-planned sources are real,
+// 'mock' if all are mock,
+// 'mixed' if there's a combination of real and mock,
+// 'planned' if all are planned,
+// 'computed' for impact-assessment agents.
+export function computeSourceMode(dataSources, fallbackMode) {
+  if (!dataSources || dataSources.length === 0) return fallbackMode || 'mock';
+
+  // If the fallback is 'computed' (impact-assessment agent), keep it
+  if (fallbackMode === 'computed') return 'computed';
+
+  const modes = dataSources
+    .map(s => s.mode || 'planned')
+    .filter(m => m !== 'planned'); // exclude planned sources from the mix calculation
+
+  if (modes.length === 0) return 'planned';
+
+  const hasReal = modes.includes('real');
+  const hasMock = modes.includes('mock');
+  const hasComputed = modes.includes('computed');
+
+  if (hasComputed && !hasReal && !hasMock) return 'computed';
+  if (hasReal && hasMock) return 'mixed';
+  if (hasReal) return 'real';
+  if (hasMock) return 'mock';
+  return 'planned';
+}
+
+// Get a summary string of source mode counts
+export function sourceModeSummary(dataSources) {
+  if (!dataSources || dataSources.length === 0) return '';
+  const counts = {};
+  for (const s of dataSources) {
+    const m = s.mode || 'planned';
+    counts[m] = (counts[m] || 0) + 1;
+  }
+  return Object.entries(counts)
+    .sort((a, b) => {
+      const order = { real: 0, mock: 1, planned: 2, computed: 3 };
+      return (order[a[0]] || 9) - (order[b[0]] || 9);
+    })
+    .map(([mode, count]) => `${count} ${mode.toUpperCase()}`)
+    .join(' · ');
 }
 
 // ── Help content for each module ───────────────────────────────────

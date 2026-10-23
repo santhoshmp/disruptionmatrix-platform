@@ -1,118 +1,266 @@
-import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import L from 'leaflet';
-import DM from '../data/dm-data.json';
-import GEO from '../data/geo.json';
-import { MONO, scoreColor, trajArrow, trajColor, confLabel } from '../theme.js';
+// WorldMap.jsx — Live threat map using API data (not static JSON)
+// Fetches events from /api/events and geo/airport reference from /api/reference
+// Shows the same events as the Threat Board, with geo coordinates.
+// Map engine is switchable: Leaflet (raster tiles) or GL vector (Mapbox/MapLibre).
 
-const CATS = ['All', 'Weather', 'Industrial action', 'Geopolitical', 'Infrastructure', 'Regulatory'];
+import { useEffect, useRef, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { Link } from 'react-router-dom';
+import { api } from '../api/client.js';
+import { MONO, scoreColor, trajArrow, trajColor, confLabel } from '../theme.js';
+import FilterSelect from '../components/FilterSelect.jsx';
+import LeafletThreatMap from '../components/map/LeafletThreatMap.jsx';
+import GLThreatMap from '../components/map/GLThreatMap.jsx';
+import MapEngineToggle from '../map/MapEngineToggle.jsx';
+import { useMapPrefs } from '../map/useMapEngine.js';
+
+const CATS = ['All', 'Weather', 'ATC / Airspace', 'Industrial action', 'Geopolitical', 'Infrastructure', 'Regulatory'];
 
 export default function WorldMap() {
   const mapEl = useRef(null);
-  const mapRef = useRef(null);
-  const layerRef = useRef(null);
+  const [mapPrefs] = useMapPrefs();
+  const mapEngine = mapPrefs.engine;
+  const [mapHandle, setMapHandle] = useState(null);
   const [cat, setCat] = useState('All');
-  const [selected, setSelected] = useState('storm');
+  const [selected, setSelected] = useState(null);
+  const [events, setEvents] = useState([]);
+  const [eventGeo, setEventGeo] = useState({}); // EVENT_GEO from reference
+  const [airports, setAirports] = useState({}); // AIRPORTS from reference
+  const [regions, setRegions] = useState([]); // REGIONS from reference
+  const [regionFilter, setRegionFilter] = useState('All');
+  const [topbarSlot, setTopbarSlot] = useState(null); // portal target in the app top bar
 
-  const shown = DM.EVENTS.filter((e) => GEO.EVENT_GEO[e.id] && (cat === 'All' || e.cat === cat));
-  const sel = DM.EVENTS.find((e) => e.id === selected) || shown[0] || DM.EVENTS[0];
-
+  // Find the top-bar actions slot (rendered by App.jsx TopBar)
   useEffect(() => {
-    const map = L.map(mapEl.current, { zoomControl: true, worldCopyJump: true, minZoom: 2 });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors', maxZoom: 18
-    }).addTo(map);
-    layerRef.current = L.layerGroup().addTo(map);
-    map.setView([46, 10], 4);
-    mapRef.current = map;
-    setTimeout(() => map.invalidateSize(), 50);
-    return () => map.remove();
+    setTopbarSlot(document.getElementById('topbar-actions'));
+  }, []);
+  const [opsMap, setOpsMap] = useState({}); // eventId → ops
+  const [popupPos, setPopupPos] = useState(null); // {x, y, below} screen point of selected marker
+  const [loading, setLoading] = useState(true);
+  const [sourceFilter, setSourceFilter] = useState('all'); // 'agent' | 'mixed' | 'seeded' | 'all'
+
+  // ── Load data from API ───────────────────────────────────────────
+  const loadData = useCallback(async () => {
+    try {
+      const [eventsRes, refRes] = await Promise.all([
+        api.getEvents('limit=500'),
+        api.getReference(),
+      ]);
+      setEvents(eventsRes.events || []);
+      setEventGeo(refRes.EVENT_GEO || {});
+      setAirports(refRes.AIRPORTS || {});
+      setRegions(refRes.REGIONS || []);
+    } catch (e) {
+      console.error('Failed to load map data:', e);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
-    const layer = layerRef.current;
-    if (!layer) return;
-    layer.clearLayers();
-    shown.forEach((e) => {
-      const g = GEO.EVENT_GEO[e.id];
-      const c = scoreColor(e.score);
-      const on = e.id === selected;
-      L.circle([g.lat, g.lon], {
-        radius: g.radiusKm * 1000, color: c, weight: on ? 2.5 : 1.2,
-        fillColor: c, fillOpacity: on ? 0.18 : 0.08
-      }).on('click', () => setSelected(e.id)).addTo(layer);
-      const icon = L.divIcon({
-        className: '', iconSize: [46, 26], iconAnchor: [23, 13],
-        html: `<div style="font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;text-align:center;padding:3px 6px;color:${c};border:1px solid ${c};background:#0B1220E6;cursor:pointer">${e.score}</div>`
-      });
-      L.marker([g.lat, g.lon], { icon, zIndexOffset: on ? 900 : 400 })
-        .on('click', () => setSelected(e.id)).addTo(layer);
-      g.airports.forEach((code) => {
-        const a = GEO.AIRPORTS[code];
-        if (!a) return;
-        const dot = L.divIcon({
-          className: '', iconSize: [14, 28], iconAnchor: [7, 7],
-          html: `<div style="display:flex;flex-direction:column;align-items:center"><div style="width:8px;height:8px;border-radius:50%;background:${c};border:1.5px solid #05080B"></div><div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#C7D2E3;text-shadow:0 1px 2px #000">${code}</div></div>`
-        });
-        L.marker([a.lat, a.lon], { icon: dot }).addTo(layer);
-      });
-    });
-  }, [cat, selected]);
+    loadData();
+    const timer = setInterval(loadData, 15000); // refresh every 15s
+    return () => clearInterval(timer);
+  }, [loadData]);
 
-  const ops = DM.OPS[sel.id];
+  // ── Resolve geo coordinates for an event ─────────────────────────
+  const resolveGeo = useCallback((event) => {
+    // 1. Check _geo (agent-pipeline events have this)
+    if (event._geo && event._geo.lat != null && event._geo.lon != null) {
+      return {
+        lat: event._geo.lat,
+        lon: event._geo.lon,
+        radiusKm: event._geo.radiusKm || 100,
+        airports: event._geo.airports || event._airports || [],
+      };
+    }
+    // 2. Check EVENT_GEO reference (seeded events)
+    const refGeo = eventGeo[event.id];
+    if (refGeo && refGeo.lat != null) {
+      return refGeo;
+    }
+    // 3. Derive from first affected airport
+    const eventAirports = event._airports || [];
+    if (eventAirports.length > 0) {
+      const firstCode = eventAirports[0];
+      const airport = airports[firstCode];
+      if (airport) {
+        return {
+          lat: airport.lat,
+          lon: airport.lon,
+          radiusKm: 100,
+          airports: eventAirports,
+        };
+      }
+    }
+    // 4. No geo available
+    return null;
+  }, [eventGeo, airports]);
+
+  // ── Filtered events with geo ─────────────────────────────────────
+  const geoEvents = events.filter(e => {
+    if (cat !== 'All' && e.cat !== cat) return false;
+    if (regionFilter !== 'All' && (e._region || 'remote') !== regionFilter) return false;
+    const mode = e._dataModes?.mode;
+    if (sourceFilter === 'agent' && mode !== 'real') return false;
+    if (sourceFilter === 'mixed' && mode !== 'mixed') return false;
+    if (sourceFilter === 'seeded' && mode !== 'mock' && e._source !== 'seeded') return false;
+    return resolveGeo(e) !== null;
+  });
+
+  const sel = selected ? events.find(e => e.id === selected) : null;
+
+  // ── Load OPS for selected event ──────────────────────────────────
+  useEffect(() => {
+    if (!sel) return;
+    api.getOPS(sel.id).then(res => setOpsMap(prev => ({ ...prev, [sel.id]: res }))).catch(() => {});
+  }, [sel?.id]);
+
+  const ops = sel ? opsMap[sel.id] : null;
+
+  // ── Popup card position: track selected marker's screen point ────
+  useEffect(() => {
+    if (!mapHandle || !sel) { setPopupPos(null); return; }
+    const g = resolveGeo(sel);
+    if (!g) { setPopupPos(null); return; }
+    const update = () => {
+      const p = mapHandle.project(g.lat, g.lon);
+      setPopupPos({ x: p.x, y: p.y, below: p.y < 260 });
+    };
+    update();
+    return mapHandle.onViewportChange(update);
+  }, [mapHandle, sel, resolveGeo]);
+
+  const mapProps = {
+    geoEvents, resolveGeo, airports, selId: sel?.id,
+    onSelect: setSelected,
+    onReady: setMapHandle,
+    onMapClick: () => setSelected(null),
+  };
 
   return (
     <div style={{ flex: 1, minHeight: 0, display: 'flex' }}>
-      <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
-        <div ref={mapEl} style={{ position: 'absolute', inset: 0 }} />
-        <div style={{ position: 'absolute', top: 12, left: 12, zIndex: 1000, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {CATS.map((c) => (
-            <button key={c} className={`pill${cat === c ? ' on' : ''}`} onClick={() => setCat(c)} style={{ background: 'var(--panel)' }}>{c}</button>
-          ))}
-        </div>
-      </div>
-
-      <div style={{ flex: '0 0 360px', borderLeft: '1px solid var(--line)', background: 'var(--panel)', overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ padding: 14, borderBottom: '1px solid var(--line)' }}>
-          <div className="kicker" style={{ marginBottom: 10 }}>ACTIVE EVENTS</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {shown.map((e) => (
-              <div
-                key={e.id} onClick={() => setSelected(e.id)} className="hoverable"
-                style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '9px 10px', border: `1px solid ${e.id === selected ? scoreColor(e.score) : 'var(--line)'}`, background: e.id === selected ? scoreColor(e.score) + '14' : 'var(--panel2)' }}
-              >
-                <div style={{ ...MONO, fontWeight: 600, fontSize: 14, color: scoreColor(e.score) }}>{e.score}</div>
-                <div style={{ flex: 1, fontSize: 12.5, fontWeight: 600, lineHeight: 1.3 }}>{e.name}</div>
-                <div style={{ ...MONO, fontSize: 10.5, color: trajColor(e.traj) }}>{trajArrow(e.traj)}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ padding: 14, borderBottom: '1px solid var(--line)', borderTop: `3px solid ${scoreColor(sel.score)}` }}>
-          <div style={{ ...MONO, fontSize: 11, color: 'var(--cyan)', marginBottom: 5 }}>{sel.ref} · {sel.cat} · Conf {confLabel(sel.conf)}</div>
-          <div style={{ fontSize: 15.5, fontWeight: 700, lineHeight: 1.3, marginBottom: 8 }}>{sel.name}</div>
-          <div style={{ fontSize: 12.5, color: 'var(--ink3)', lineHeight: 1.55 }}>{sel.summary}</div>
-        </div>
-
-        {ops && (
-          <div style={{ padding: 14, borderBottom: '1px solid var(--line)' }}>
-            <div className="kicker" style={{ marginBottom: 9 }}>AIRPORTS IN AREA OF EFFECT</div>
-            {ops.airports.map((a) => (
-              <div key={a.iata} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, fontSize: 12.5, padding: '4px 0' }}>
-                <span className="mono" style={{ color: 'var(--ink2)' }}>{a.iata}</span>
-                <span style={{ flex: 1, color: 'var(--ink3)' }}>{a.name}</span>
-                <span className="mono" style={{ color: scoreColor(a.exposure) }}>{a.exposure}</span>
-              </div>
-            ))}
+      <div ref={mapEl} style={{ flex: 1, minWidth: 0, position: 'relative' }}>
+        {mapEngine === 'gl'
+          ? <GLThreatMap {...mapProps} mapStyle={mapPrefs.style} projection={mapPrefs.proj} />
+          : <LeafletThreatMap {...mapProps} loading={loading} />}
+        <MapEngineToggle />
+        {loading && (
+          <div style={{
+            position: 'absolute', inset: 0, zIndex: 2000,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'var(--bg)', color: 'var(--mute)', ...MONO, fontSize: 12,
+          }}>
+            Loading live threat data...
           </div>
         )}
-
-        <div style={{ marginTop: 'auto', padding: 14 }}>
-          <Link to={`/event/${sel.id}`} style={{ display: 'block', textAlign: 'center', padding: '11px 16px', fontSize: 13, fontWeight: 600, border: '1px solid var(--teal)', background: 'rgba(76,194,206,0.12)', color: 'var(--ink)' }}>
-            Open full assessment →
-          </Link>
+        {/* Filter controls — rendered in the app top bar via portal */}
+        {topbarSlot && createPortal(
+          <>
+            <FilterSelect label="CAT" value={cat} onChange={setCat} options={CATS} />
+            <FilterSelect
+              label="REGION" value={regionFilter} onChange={setRegionFilter}
+              options={[
+                { value: 'All', label: 'All regions' },
+                ...regions.map(r => ({ value: r.id, label: r.name })),
+                { value: 'remote', label: 'Oceanic / Remote' },
+              ]}
+            />
+            <FilterSelect
+              label="SOURCE" value={sourceFilter} onChange={setSourceFilter}
+              options={[
+                { value: 'all', label: 'All sources' },
+                { value: 'agent', label: 'Real' },
+                { value: 'mixed', label: 'Mixed' },
+                { value: 'seeded', label: 'Mock/Seeded' },
+              ]}
+            />
+          </>,
+          topbarSlot
+        )}
+        {/* Event count badge */}
+        <div style={{ position: 'absolute', bottom: 12, left: 12, zIndex: 1000, ...MONO, fontSize: 10, color: 'var(--mute)', background: 'var(--panel)', padding: '4px 10px', borderRadius: 4, border: '1px solid var(--line)' }}>
+          {geoEvents.length} events with geo data · {events.length} total
         </div>
+
+        {/* ── Threat popup card — anchored to the selected marker ── */}
+        {sel && popupPos && (
+          <div
+            style={{
+              position: 'absolute',
+              left: Math.min(Math.max(popupPos.x, 175), (mapEl.current?.clientWidth || 1100) - 175),
+              top: popupPos.y,
+              transform: popupPos.below ? 'translate(-50%, 30px)' : 'translate(-50%, calc(-100% - 30px))',
+              zIndex: 1500, width: 330,
+              background: 'var(--panel)',
+              border: `1px solid ${scoreColor(sel.score || 0)}`,
+              borderRadius: 8,
+              boxShadow: '0 14px 44px rgba(0,0,0,0.65)',
+            }}
+          >
+            <div style={{ padding: '11px 13px 9px', borderTop: `3px solid ${scoreColor(sel.score || 0)}`, borderRadius: '8px 8px 0 0' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 }}>
+                <div style={{ ...MONO, fontSize: 10, color: 'var(--cyan)' }}>
+                  {sel.ref || sel.id} · {sel.cat} · Conf {confLabel(sel.conf || 2)}
+                </div>
+                <button
+                  onClick={() => setSelected(null)}
+                  style={{ background: 'none', border: 'none', color: 'var(--mute)', fontSize: 15, cursor: 'pointer', padding: 0, lineHeight: 1 }}
+                  title="Close"
+                >×</button>
+              </div>
+              <div style={{ fontSize: 15, fontWeight: 700, lineHeight: 1.3, marginTop: 6 }}>{sel.name}</div>
+            </div>
+            <div style={{ padding: '10px 13px 12px' }}>
+              <div style={{
+                fontSize: 12.5, color: 'var(--ink3)', lineHeight: 1.5, marginBottom: 9,
+                display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+              }}>
+                {sel.summary}
+              </div>
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+                <span style={{ ...MONO, fontSize: 10, padding: '2px 6px', borderRadius: 3, background: scoreColor(sel.score || 0) + '20', color: scoreColor(sel.score || 0) }}>
+                  EDPS {sel.score || 0}
+                </span>
+                <span style={{ ...MONO, fontSize: 10, padding: '2px 6px', borderRadius: 3, background: 'var(--sunken)', color: 'var(--mute)' }}>
+                  L{sel.esc || 1}
+                </span>
+                <span style={{ ...MONO, fontSize: 10, padding: '2px 6px', borderRadius: 3, background: 'var(--sunken)', color: trajColor(sel.traj) }}>
+                  {trajArrow(sel.traj)} {sel.traj || '—'}
+                </span>
+                <span style={{ ...MONO, fontSize: 10, padding: '2px 6px', borderRadius: 3, background: sel._dataModes?.mode === 'mixed' ? 'rgba(167,139,250,0.1)' : sel._dataModes?.mode === 'mock' ? 'rgba(245,166,35,0.1)' : sel._source === 'agent-pipeline' ? 'rgba(52,211,153,0.1)' : 'rgba(245,166,35,0.1)', color: sel._dataModes?.mode === 'mixed' ? '#A78BFA' : sel._dataModes?.mode === 'mock' ? '#F5A623' : sel._source === 'agent-pipeline' ? '#34D399' : '#F5A623' }}>
+                  {sel._dataModes?.mode === 'mixed' ? 'MIXED' : sel._dataModes?.mode === 'mock' ? 'MOCK' : sel._source === 'agent-pipeline' ? 'REAL' : 'SEEDED'}
+                </span>
+              </div>
+              {ops && ops.airports?.length === 0 && (
+                <div style={{ ...MONO, fontSize: 10, color: 'var(--mute)', letterSpacing: '0.05em', padding: '7px 9px', border: '1px dashed var(--edge)', borderRadius: 4, marginBottom: 10 }}>
+                  NO IMPACT TO AVIATION
+                </div>
+              )}
+              {ops?.airports?.length > 0 && (
+                <div style={{ marginBottom: 10 }}>
+                  <div className="kicker" style={{ marginBottom: 6, fontSize: 9 }}>AIRPORTS IN AREA OF EFFECT</div>
+                  {ops.airports.slice(0, 4).map((a) => (
+                    <div key={a.iata} style={{ display: 'flex', justifyContent: 'space-between', gap: 8, fontSize: 11.5, padding: '2px 0' }}>
+                      <span className="mono" style={{ color: 'var(--ink2)' }}>{a.iata}</span>
+                      <span style={{ flex: 1, color: 'var(--ink3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name}</span>
+                      <span className="mono" style={{ color: scoreColor(a.exposure || a.impactScore || 0) }}>{a.exposure || a.impactScore || '—'}</span>
+                    </div>
+                  ))}
+                  {ops.airports.length > 4 && (
+                    <div style={{ ...MONO, fontSize: 9.5, color: 'var(--mute)', marginTop: 2 }}>+{ops.airports.length - 4} more</div>
+                  )}
+                </div>
+              )}
+              <Link
+                to={`/event/${sel.id}`}
+                style={{ display: 'block', textAlign: 'center', padding: '9px 14px', fontSize: 12.5, fontWeight: 600, border: '1px solid var(--teal)', borderRadius: 5, background: 'rgba(76,194,206,0.12)', color: 'var(--ink)', textDecoration: 'none' }}
+              >
+                Open threat assessment →
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

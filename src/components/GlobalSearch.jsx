@@ -3,12 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import DM from '../data/dm-data.json';
 import GEO from '../data/geo.json';
 import { AIRLINES } from '../airlines.js';
+import { api } from '../api/client.js';
 import { MONO, TEAL, scoreColor, trajColor, trajArrow } from '../theme.js';
 
-function buildSearchIndex() {
+function buildSearchIndex(liveEvents = DM.EVENTS, airportInfo = {}) {
   const items = [];
+  const apText = (code) => {
+    const a = airportInfo[code];
+    return a ? `${code} ${a.name || ''} ${a.city || ''}` : code;
+  };
 
-  for (const e of DM.EVENTS) {
+  for (const e of liveEvents) {
+    // Include affected airport names/cities so "dubai" finds DXB events
+    const aps = (e._airports || e._geo?.airports || []).map(apText).join(' ');
     items.push({
       type: 'Threat',
       id: e.id,
@@ -19,21 +26,26 @@ function buildSearchIndex() {
       traj: e.traj,
       tti: e.tti,
       route: `/event/${e.id}`,
-      searchText: `${e.id} ${e.name} ${e.cat} ${e.where} ${e.summary || ''}`.toLowerCase()
+      searchText: `${e.id} ${e.name} ${e.cat} ${e.where} ${e.summary || ''} ${aps}`.toLowerCase()
     });
   }
 
-  for (const [code, info] of Object.entries(GEO.AIRPORTS || {})) {
+  const airportEntries = Object.keys(airportInfo).length > 0
+    ? Object.values(airportInfo).map((a) => [a.iata, a])
+    : Object.entries(GEO.AIRPORTS || {});
+
+  for (const [code, info] of airportEntries) {
     const station = (GEO.STATIONS || {})[code];
     const name = info.name || code;
+    const city = info.city || '';
     items.push({
       type: 'Airport',
       id: code,
       title: name,
       subtitle: code,
-      detail: station ? station.role : 'Airport',
+      detail: station ? station.role : (city ? `${city} · Airport` : 'Airport'),
       route: `/map`,
-      searchText: `${code} ${name} airport`.toLowerCase()
+      searchText: `${code} ${name} ${city} airport`.toLowerCase()
     });
   }
 
@@ -91,7 +103,7 @@ function buildSearchIndex() {
   }
 
   for (const [eventId, geo] of Object.entries(GEO.EVENT_GEO || {})) {
-    const event = DM.EVENTS.find(e => e.id === eventId);
+    const event = liveEvents.find(e => e.id === eventId);
     if (event) continue;
     items.push({
       type: 'Event Geo',
@@ -107,7 +119,7 @@ function buildSearchIndex() {
   return items;
 }
 
-const SEARCH_INDEX = buildSearchIndex();
+const SEARCH_INDEX = buildSearchIndex(); // static fallback until live events load
 
 const TYPE_ICONS = {
   Threat: (
@@ -161,14 +173,40 @@ export default function GlobalSearch() {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
   const [highlightIdx, setHighlightIdx] = useState(0);
+  const [index, setIndex] = useState(SEARCH_INDEX);
   const containerRef = useRef(null);
   const inputRef = useRef(null);
   const nav = useNavigate();
 
+  // Load live events + airport names into the search index (static index is the fallback)
+  useEffect(() => {
+    let cancelled = false;
+    const refresh = async () => {
+      try {
+        const [evRes, apRes] = await Promise.allSettled([
+          api.getEvents('limit=1000'),
+          api.getAirports(),
+        ]);
+        const evs = evRes.status === 'fulfilled' ? (evRes.value?.events || evRes.value) : null;
+        const aps = apRes.status === 'fulfilled' ? (apRes.value?.airports || apRes.value) : null;
+        const amap = {};
+        if (Array.isArray(aps)) for (const a of aps) { if (a.iata) amap[a.iata] = a; }
+        if (!cancelled && Array.isArray(evs) && evs.length > 0) {
+          setIndex(buildSearchIndex(evs, amap));
+        } else if (!cancelled && Object.keys(amap).length > 0) {
+          setIndex(buildSearchIndex(undefined, amap));
+        }
+      } catch { /* keep static index */ }
+    };
+    refresh();
+    const timer = setInterval(refresh, 60000);
+    return () => { cancelled = true; clearInterval(timer); };
+  }, []);
+
   const results = useMemo(() => {
     if (!query.trim()) return [];
     const q = query.toLowerCase();
-    const scored = SEARCH_INDEX.map(item => {
+    const scored = index.map(item => {
       const text = item.searchText;
       let score = 0;
       if (text.includes(q)) score += 10;
@@ -182,7 +220,7 @@ export default function GlobalSearch() {
       return { item, score };
     }).filter(r => r.score > 0).sort((a, b) => b.score - a.score).slice(0, 12);
     return scored.map(r => r.item);
-  }, [query]);
+  }, [query, index]);
 
   useEffect(() => {
     setHighlightIdx(0);

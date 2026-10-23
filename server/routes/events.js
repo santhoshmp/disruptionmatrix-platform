@@ -29,4 +29,11 @@ router.get('/:id', (req, res) => {
   });
 });
 
+// DELETE /api/events/:id — delete an event (and its OPS)
+router.delete('/:id', (req, res) => {
+  const deleted = store.deleteEvent(req.params.id);
+  if (!deleted) return res.status(404).json({ error: 'Event not found' });
+  res.json({ deleted: true, id: req.params.id });
+});
+
 export default router;

@@ -6,12 +6,29 @@ import safeairspace from '../connectors/safeairspace.js';
 import faaTFR from '../connectors/faa-tfr.js';
 import gdelt from '../connectors/gdelt.js';
 import { generateMockGeopolitical } from '../connectors/mock-geopolitical.js';
+import * as refLoader from '../data/reference-loader.js';
 
 export class GeopoliticalAgent extends Agent {
   async collect() {
     const airports = this.getRegionAirports();
     const bbox = this.getRegionBbox();
     const observations = [];
+
+    // ── Real data: SafeAirspace country-level airspace risk ──
+    // This is the OPSGROUP conflict-zone database — the authoritative
+    // source for airspace closures (e.g. "Saudi Arabia: Do Not Fly").
+    // Results are cached ~1h per country, so this is one HTTP fetch per
+    // country per hour at most.
+    try {
+      const countries = refLoader.getRegionCountries(this.region);
+      if (countries.length > 0) {
+        const risks = await safeairspace.getAirspaceRisks(countries);
+        const asObs = safeairspace.buildAirspaceObservations(risks, this.region, this.subRegion);
+        observations.push(...asObs);
+      }
+    } catch (err) {
+      console.error(`[Agent ${this.id}] SafeAirspace error:`, err.message);
+    }
 
     // ── Real data: FAA TFRs in this region bbox ──
     try {
@@ -33,7 +50,7 @@ export class GeopoliticalAgent extends Agent {
     }
 
     // ── Fallback: if no real data, use mock ──
-    if (observations.length === 0) {
+    if (observations.length === 0 && this.shouldEmitMockSignals()) {
       const mockObs = generateMockGeopolitical(this.region, this.subRegion, airports);
       observations.push(...mockObs);
     }

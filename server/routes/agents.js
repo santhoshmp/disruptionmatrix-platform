@@ -27,6 +27,28 @@ router.get('/:id', (req, res) => {
   res.json(agent);
 });
 
+// POST /api/agents/refresh-all — trigger every agent once, staggered so
+// external APIs aren't hit all at once. Responds immediately with the
+// count; each agent updates its own lastPoll/signalCount as it finishes.
+router.post('/refresh-all', async (req, res) => {
+  const agents = agentManager.getAll();
+  const disabledRegion = (a) => !store.isRegionEnabled(a.region);
+  let triggered = 0;
+  agents.forEach((agent, i) => {
+    if (disabledRegion(agent)) return;
+    setTimeout(() => {
+      agent.trigger().catch(err => console.error(`[Agent ${agent.id}] refresh-all error:`, err.message));
+    }, i * 200); // 200ms stagger → ~117 agents over ~24s
+    triggered++;
+  });
+  res.json({
+    triggered,
+    skipped: agents.length - triggered,
+    staggerMs: 200,
+    message: `${triggered} agents refreshing (staggered over ~${Math.round(triggered * 200 / 1000)}s)`,
+  });
+});
+
 // POST /api/agents/:id/trigger — manually trigger a poll
 router.post('/:id/trigger', async (req, res) => {
   const agent = store.getAgentById(req.params.id);
@@ -43,7 +65,7 @@ router.post('/:id/trigger', async (req, res) => {
         agentId: agent.id,
         triggered: true,
         status: 'completed',
-        signalsGenerated: result?.length || 0,
+        signalsGenerated: result?.signalsGenerated || 0,
         lastPoll: new Date().toISOString(),
       });
     } else {

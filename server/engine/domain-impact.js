@@ -2,7 +2,9 @@
 // Each domain gets a 0-100 score based on the event category and EDPS score.
 
 import store from '../store/event-store.js';
+import * as refLoader from '../data/reference-loader.js';
 
+// Phase 4: DOMAINS now read from DB-backed reference loader, falls back to hardcoded.
 const DOMAINS = [
   'Airport operations',
   'Flight schedule',
@@ -16,6 +18,7 @@ const DOMAINS = [
 ];
 
 // Category-specific domain weight profiles (0-1 multiplier on EDPS score)
+// Phase 4: now read from DB-backed reference loader, falls back to hardcoded.
 const CATEGORY_PROFILES = {
   'Weather': {
     'Airport operations': 1.0,
@@ -88,12 +91,18 @@ const CATEGORY_PROFILES = {
 // Compute the 9-domain vector for an event
 export function computeDomainVector(event) {
   const edps = event.score || 50;
-  const profile = CATEGORY_PROFILES[event.cat] || CATEGORY_PROFILES['Weather'];
+
+  // Phase 4: try DB-backed domain profile first, fall back to hardcoded
+  const profile = refLoader.getDomainProfileByName(event.cat) || CATEGORY_PROFILES[event.cat] || CATEGORY_PROFILES['Weather'];
+
+  // Phase 4: try DB-backed domain list first, fall back to hardcoded
+  const dbDomains = refLoader.getAllDomains();
+  const domains = dbDomains.length > 0 ? dbDomains.map(d => d.name) : DOMAINS;
 
   // Also consider agent-tagged domains — boost those
   const taggedDomains = new Set(event.domains || []);
 
-  return DOMAINS.map((name) => {
+  return domains.map((name) => {
     let v = Math.round(edps * (profile[name] || 0.3));
 
     // Boost if the agent explicitly tagged this domain

@@ -6,10 +6,12 @@
 // Returns: ground stops, ground delay programs, arrival/departure delays, closures
 
 import { fetchWithTimeout } from './http-utils.js';
+import * as refLoader from '../data/reference-loader.js';
 
 const ASWS_URL = 'https://external-api.faa.gov/asws/api/airport/delays';
 const NASSTATUS_URL = 'https://nasstatus.faa.gov/api/airport-status-information';
-const TIMEOUT_MS = 8000;
+// Phase 7: read from DB-backed ref_connectors via loader
+const _timeout = () => refLoader.getConnectorConfig('faa_asws', 'timeout_ms', 8000);
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 min cache
 
 let cache = null;
@@ -37,7 +39,7 @@ export async function fetchAirportDelays() {
 
   // Try ASWS endpoint first
   try {
-    const res = await fetchWithTimeout(ASWS_URL, {}, TIMEOUT_MS);
+    const res = await fetchWithTimeout(ASWS_URL, {}, _timeout());
     if (res.ok) {
       const data = await res.json();
       delays = parseASWSResponse(data);
@@ -49,7 +51,7 @@ export async function fetchAirportDelays() {
   // Fallback: try NAS Status endpoint
   if (delays.length === 0) {
     try {
-      const res = await fetchWithTimeout(NASSTATUS_URL, {}, TIMEOUT_MS);
+      const res = await fetchWithTimeout(NASSTATUS_URL, {}, _timeout());
       if (res.ok) {
         const text = await res.text();
         delays = parseNASStatusXML(text);

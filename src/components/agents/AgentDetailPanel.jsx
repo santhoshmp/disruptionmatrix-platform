@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../api/client.js';
 import { MONO, TEAL, CRIT, HIGH, MOD, LOW, scoreColor } from '../../theme.js';
-import { SourceBadge } from './sourceMode.jsx';
+import { SourceBadge, computeSourceMode, sourceModeSummary } from './sourceMode.jsx';
 
 const TYPE_COLORS = {
   weather: '#22D3EE',
@@ -124,7 +124,12 @@ export default function AgentDetailPanel({ agentId, onTrigger }) {
               {agent.type} · {agent.region} · {agent.subRegion}
             </div>
           </div>
-          <SourceBadge mode={agent.dataSourceMode || 'mock'} />
+          <SourceBadge mode={computeSourceMode(agent.config?.dataSources, agent.dataSourceMode) || 'mock'} />
+          {agent.config?.dataSources && (
+            <span style={{ ...MONO, fontSize: 9, color: 'var(--faint)', marginLeft: 4 }}>
+              {sourceModeSummary(agent.config.dataSources)}
+            </span>
+          )}
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <button
@@ -169,7 +174,21 @@ export default function AgentDetailPanel({ agentId, onTrigger }) {
         <div className="kicker" style={{ marginBottom: 8 }}>LAST RUN</div>
         <div style={{ border: '1px solid var(--edge)', borderRadius: 4, overflow: 'hidden' }}>
           <Row label="Last poll" value={lastPollTime} />
-          <Row label="Last signal" value={agent.lastSignalAt ? new Date(agent.lastSignalAt).toLocaleString('en-GB', { hour12: false }) : '—'} />
+          <Row
+            label="Last poll result"
+            value={runtime?.lastDurationMs != null
+              ? `${runtime.lastSignalsGenerated ?? 0} signals in ${runtime.lastDurationMs}ms`
+              : '—'}
+            valueColor={lastError ? CRIT : runtime?.lastSignalsGenerated > 0 ? '#34D399' : 'var(--ink2)'}
+          />
+          <Row label="Last signal" value={runtime?.lastSignalAt ? new Date(runtime.lastSignalAt).toLocaleString('en-GB', { hour12: false }) : agent.lastSignalAt ? new Date(agent.lastSignalAt).toLocaleString('en-GB', { hour12: false }) : '—'} />
+          {runtime?.lastSignalName && (
+            <div style={{ padding: '6px 10px', borderBottom: '1px solid var(--hover)' }}>
+              <div style={{ ...MONO, fontSize: 9, color: 'var(--faint)', letterSpacing: '0.03em', marginBottom: 2 }}>LAST OUTPUT</div>
+              <div style={{ fontSize: 11, color: 'var(--ink2)', lineHeight: 1.4 }}>{runtime.lastSignalName}</div>
+            </div>
+          )}
+          <Row label="Total signals" value={runtime?.totalSignals ?? agent.signalCount ?? 0} />
           <Row label="Last error" value={lastError || 'None'} valueColor={lastError ? CRIT : '#34D399'} />
           <Row label="Priority" value={agent.priority} valueColor={agent.priority === 'critical' ? CRIT : agent.priority === 'high' ? HIGH : agent.priority === 'medium' ? MOD : LOW} />
         </div>
@@ -178,15 +197,22 @@ export default function AgentDetailPanel({ agentId, onTrigger }) {
       {/* ── Data sources ──────────────────────────────────────── */}
       {agent.config?.dataSources && agent.config.dataSources.length > 0 && (
         <div style={{ marginBottom: 14 }}>
-          <div className="kicker" style={{ marginBottom: 8 }}>DATA SOURCES · {agent.config.dataSources.length}</div>
+          <div className="kicker" style={{ marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span>DATA SOURCES · {agent.config.dataSources.length}</span>
+            <span style={{ ...MONO, fontSize: 9, color: 'var(--faint)' }}>
+              {sourceModeSummary(agent.config.dataSources)}
+            </span>
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {agent.config.dataSources.map((src, i) => {
               const srcMode = src.mode || (agent.dataSourceMode === 'real' ? 'real' : 'mock');
-              const modeColor = srcMode === 'real' ? '#34D399' : srcMode === 'mock' ? HIGH : 'var(--mute)';
+              const modeColor = srcMode === 'real' ? '#34D399' : srcMode === 'mock' ? '#F5A623' : srcMode === 'planned' ? '#5B92C9' : 'var(--mute)';
               return (
                 <div key={i} style={{
                   display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px',
-                  border: '1px solid var(--edge)', background: 'var(--panel2)', borderRadius: 3,
+                  border: `1px solid ${srcMode === 'planned' ? 'var(--edge)' : modeColor + '40'}`,
+                  background: srcMode === 'planned' ? 'var(--sunken)' : 'var(--panel2)',
+                  borderRadius: 3,
                   opacity: srcMode === 'planned' ? 0.55 : 1,
                 }}>
                   <div style={{
@@ -209,7 +235,8 @@ export default function AgentDetailPanel({ agentId, onTrigger }) {
                     ...MONO, fontSize: 9, padding: '2px 6px', borderRadius: 2, fontWeight: 700,
                     border: `1px solid ${modeColor}`, color: modeColor,
                     background: srcMode === 'real' ? 'rgba(52, 211, 153, 0.08)' :
-                               srcMode === 'mock' ? 'rgba(245, 166, 35, 0.08)' : 'transparent',
+                               srcMode === 'mock' ? 'rgba(245, 166, 35, 0.08)' :
+                               srcMode === 'planned' ? 'rgba(91, 146, 201, 0.08)' : 'transparent',
                   }}>
                     {srcMode.toUpperCase()}
                   </span>
@@ -217,21 +244,27 @@ export default function AgentDetailPanel({ agentId, onTrigger }) {
               );
             })}
           </div>
-          {/* Summary line showing real vs mock vs planned counts */}
-          <div style={{ marginTop: 6, display: 'flex', gap: 10, ...MONO, fontSize: 9, color: 'var(--faint)' }}>
-            {(() => {
-              const counts = agent.config.dataSources.reduce((acc, s) => {
-                const m = s.mode || (agent.dataSourceMode === 'real' ? 'real' : 'mock');
-                acc[m] = (acc[m] || 0) + 1;
-                return acc;
-              }, {});
-              return Object.entries(counts).map(([mode, count]) => (
-                <span key={mode} style={{ color: mode === 'real' ? '#34D399' : mode === 'mock' ? HIGH : 'var(--mute)' }}>
-                  {count} {mode.toUpperCase()}
-                </span>
-              ));
-            })()}
-          </div>
+          {/* Explanation of mixed mode */}
+          {(() => {
+            const mode = computeSourceMode(agent.config.dataSources, agent.dataSourceMode);
+            if (mode === 'mixed') {
+              const realCount = agent.config.dataSources.filter(s => s.mode === 'real').length;
+              const mockCount = agent.config.dataSources.filter(s => s.mode === 'mock').length;
+              const plannedCount = agent.config.dataSources.filter(s => s.mode === 'planned').length;
+              return (
+                <div style={{
+                  marginTop: 8, padding: '8px 10px', borderRadius: 3,
+                  background: 'rgba(167, 139, 250, 0.06)', border: '1px solid rgba(167, 139, 250, 0.3)',
+                  fontSize: 10.5, color: 'var(--mute)', lineHeight: 1.5,
+                }}>
+                  <strong style={{ color: '#A78BFA' }}>MIXED MODE</strong> — This agent uses {realCount} real API source{realCount !== 1 ? 's' : ''} as primary input,
+                  with {mockCount} mock fallback{mockCount !== 1 ? 's' : ''} when real APIs return no data{plannedCount > 0 ? `, and ${plannedCount} planned source${plannedCount !== 1 ? 's' : ''} not yet connected` : ''}.
+                  Signals may be a mix of real and synthetic data.
+                </div>
+              );
+            }
+            return null;
+          })()}
         </div>
       )}
 

@@ -427,6 +427,195 @@
           }
         }
       ]
+    },
+    {
+      "id": "R8",
+      "name": "Oceania / Australasia",
+      "priority": "medium",
+      "enabled": true,
+      "subRegions": [
+        {
+          "id": "ausNZ",
+          "name": "Australia / New Zealand",
+          "bbox": {
+            "minLat": -47,
+            "maxLat": -10,
+            "minLon": 110,
+            "maxLon": 180
+          },
+          "airports": [
+            "SYD",
+            "MEL",
+            "BNE",
+            "PER",
+            "AKL"
+          ],
+          "airspace": [
+            "Brisbane FIR",
+            "Melbourne FIR",
+            "Nadi FIR"
+          ],
+          "seasonalWatchlist": [
+            "SYD/MEL cyclone season (Nov-Apr)",
+            "BNE flooding"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R9",
+      "name": "South America",
+      "priority": "medium",
+      "enabled": true,
+      "subRegions": [
+        {
+          "id": "southAmerica",
+          "name": "South America",
+          "bbox": {
+            "minLat": -55,
+            "maxLat": 12,
+            "minLon": -82,
+            "maxLon": -34
+          },
+          "airports": [
+            "GRU",
+            "EZE",
+            "SCL",
+            "BOG",
+            "LIM"
+          ],
+          "airspace": [
+            "Sao Paulo FIR",
+            "Buenos Aires FIR",
+            "Santiago FIR"
+          ],
+          "seasonalWatchlist": [
+            "GRU/SCL winter fog (Jun-Aug)",
+            "Bogota high altitude ops"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R10",
+      "name": "Russia / CIS",
+      "priority": "high",
+      "subRegions": [
+        {
+          "id": "westernRussia",
+          "name": "Western Russia",
+          "airports": [
+            "SVO",
+            "DME",
+            "LED",
+            "AER",
+            "SVX"
+          ],
+          "airspace": [
+            "Moscow FIR",
+            "Rostov FIR",
+            "Yekaterinburg FIR"
+          ],
+          "bbox": {
+            "minLat": 42,
+            "maxLat": 70,
+            "minLon": 27,
+            "maxLon": 62
+          }
+        },
+        {
+          "id": "centralCIS",
+          "name": "Caucasus & Central Asia",
+          "airports": [
+            "MSQ",
+            "GYD",
+            "TBS",
+            "ALA",
+            "TSE",
+            "TAS"
+          ],
+          "airspace": [
+            "Minsk FIR",
+            "Baku FIR",
+            "Tbilisi FIR",
+            "Almaty FIR",
+            "Tashkent FIR"
+          ],
+          "bbox": {
+            "minLat": 36,
+            "maxLat": 56,
+            "minLon": 19,
+            "maxLon": 88
+          }
+        }
+      ]
+    },
+    {
+      "id": "R11",
+      "name": "China",
+      "priority": "high",
+      "subRegions": [
+        {
+          "id": "northChina",
+          "name": "North China",
+          "airports": [
+            "PEK",
+            "PKX",
+            "XIY"
+          ],
+          "airspace": [
+            "Beijing FIR"
+          ],
+          "bbox": {
+            "minLat": 33,
+            "maxLat": 44,
+            "minLon": 103,
+            "maxLon": 122
+          }
+        },
+        {
+          "id": "eastSouthChina",
+          "name": "East & South China",
+          "airports": [
+            "PVG",
+            "HGH",
+            "NKG",
+            "CAN",
+            "SZX"
+          ],
+          "airspace": [
+            "Shanghai FIR",
+            "Guangzhou FIR"
+          ],
+          "bbox": {
+            "minLat": 20,
+            "maxLat": 34,
+            "minLon": 108,
+            "maxLon": 124
+          }
+        },
+        {
+          "id": "westChina",
+          "name": "West China",
+          "airports": [
+            "TFU",
+            "CKG",
+            "KMG",
+            "URC"
+          ],
+          "airspace": [
+            "Chengdu FIR",
+            "Kunming FIR",
+            "Urumqi FIR"
+          ],
+          "bbox": {
+            "minLat": 24,
+            "maxLat": 48,
+            "minLon": 73,
+            "maxLon": 110
+          }
+        }
+      ]
     }
   ],
   "agentTypes": [
@@ -806,6 +995,72 @@
         "certification_requirement"
       ],
       "dataSourceMode": "real"
+    },
+    {
+      "type": "flight",
+      "category": "ATC / Airspace",
+      "mission": "Detect flight schedule disruptions \u2014 cancellations, mass delays, diversions, ground stops \u2014 from live flight tracking data (OpenSky ADS-B, AviationStack schedules) and FAA ground-stop programs.",
+      "pollIntervalMinutes": 2,
+      "dataSourceMode": "real",
+      "hazardTypes": [
+        "cancellation",
+        "massdelay",
+        "diversion",
+        "groundstop"
+      ],
+      "dataSources": [
+        {
+          "name": "OpenSky Network (ADS-B)",
+          "tier": 1,
+          "scope": "global",
+          "mode": "real",
+          "url": "https://opensky-network.org/api"
+        },
+        {
+          "name": "AviationStack (schedules)",
+          "tier": 1,
+          "scope": "airports",
+          "mode": "real",
+          "url": "https://aviationstack.com/"
+        },
+        {
+          "name": "FAA ASWS (ground stops)",
+          "tier": 1,
+          "scope": "us",
+          "mode": "real",
+          "url": "https://asws.faa.gov/api"
+        }
+      ]
+    },
+    {
+      "type": "social",
+      "category": "ATC / Airspace",
+      "mission": "Corroborate flight disruptions with passenger and crew social reports from aviation forums and news. Social signals enrich existing events with early-warning evidence rather than creating new events.",
+      "pollIntervalMinutes": 5,
+      "dataSourceMode": "real",
+      "hazardTypes": [
+        "socialreport",
+        "cancellation",
+        "massdelay",
+        "diversion",
+        "groundstop"
+      ],
+      "dataSources": [
+        {
+          "name": "Reddit (aviation subreddits)",
+          "tier": 2,
+          "scope": "global",
+          "mode": "real",
+          "url": "https://oauth.reddit.com"
+        },
+        {
+          "name": "GDELT (news)",
+          "tier": 1,
+          "scope": "global",
+          "mode": "real",
+          "url": "https://api.gdeltproject.org/api/v2"
+        }
+      ]
     },
     {
       "type": "impact-assessment",
@@ -1283,6 +1538,902 @@
       "subRegion": "global",
       "priority": "critical",
       "triggerModel": "event-driven"
+    },
+    {
+      "id": "weather-R2-southernEurope",
+      "type": "weather",
+      "region": "R2",
+      "subRegion": "southernEurope",
+      "priority": "critical"
+    },
+    {
+      "id": "atc-R2-southernEurope",
+      "type": "atc",
+      "region": "R2",
+      "subRegion": "southernEurope",
+      "priority": "critical"
+    },
+    {
+      "id": "industrial-R2-southernEurope",
+      "type": "industrial",
+      "region": "R2",
+      "subRegion": "southernEurope",
+      "priority": "high"
+    },
+    {
+      "id": "geopolitical-R2-southernEurope",
+      "type": "geopolitical",
+      "region": "R2",
+      "subRegion": "southernEurope",
+      "priority": "critical"
+    },
+    {
+      "id": "infrastructure-R2-southernEurope",
+      "type": "infrastructure",
+      "region": "R2",
+      "subRegion": "southernEurope",
+      "priority": "critical"
+    },
+    {
+      "id": "regulatory-R2-southernEurope",
+      "type": "regulatory",
+      "region": "R2",
+      "subRegion": "southernEurope",
+      "priority": "high"
+    },
+    {
+      "id": "industrial-R3-gulfStates",
+      "type": "industrial",
+      "region": "R3",
+      "subRegion": "gulfStates",
+      "priority": "high"
+    },
+    {
+      "id": "infrastructure-R3-gulfStates",
+      "type": "infrastructure",
+      "region": "R3",
+      "subRegion": "gulfStates",
+      "priority": "high"
+    },
+    {
+      "id": "weather-R4-mainlandSEA",
+      "type": "weather",
+      "region": "R4",
+      "subRegion": "mainlandSEA",
+      "priority": "medium"
+    },
+    {
+      "id": "atc-R4-mainlandSEA",
+      "type": "atc",
+      "region": "R4",
+      "subRegion": "mainlandSEA",
+      "priority": "medium"
+    },
+    {
+      "id": "industrial-R4-mainlandSEA",
+      "type": "industrial",
+      "region": "R4",
+      "subRegion": "mainlandSEA",
+      "priority": "high"
+    },
+    {
+      "id": "geopolitical-R4-mainlandSEA",
+      "type": "geopolitical",
+      "region": "R4",
+      "subRegion": "mainlandSEA",
+      "priority": "medium"
+    },
+    {
+      "id": "infrastructure-R4-mainlandSEA",
+      "type": "infrastructure",
+      "region": "R4",
+      "subRegion": "mainlandSEA",
+      "priority": "medium"
+    },
+    {
+      "id": "regulatory-R4-mainlandSEA",
+      "type": "regulatory",
+      "region": "R4",
+      "subRegion": "mainlandSEA",
+      "priority": "high"
+    },
+    {
+      "id": "weather-R5-britishIsles",
+      "type": "weather",
+      "region": "R5",
+      "subRegion": "britishIsles",
+      "priority": "medium"
+    },
+    {
+      "id": "industrial-R5-britishIsles",
+      "type": "industrial",
+      "region": "R5",
+      "subRegion": "britishIsles",
+      "priority": "high"
+    },
+    {
+      "id": "geopolitical-R5-britishIsles",
+      "type": "geopolitical",
+      "region": "R5",
+      "subRegion": "britishIsles",
+      "priority": "medium"
+    },
+    {
+      "id": "infrastructure-R5-britishIsles",
+      "type": "infrastructure",
+      "region": "R5",
+      "subRegion": "britishIsles",
+      "priority": "medium"
+    },
+    {
+      "id": "weather-R5-northAmerica",
+      "type": "weather",
+      "region": "R5",
+      "subRegion": "northAmerica",
+      "priority": "medium"
+    },
+    {
+      "id": "atc-R5-northAmerica",
+      "type": "atc",
+      "region": "R5",
+      "subRegion": "northAmerica",
+      "priority": "medium"
+    },
+    {
+      "id": "industrial-R5-northAmerica",
+      "type": "industrial",
+      "region": "R5",
+      "subRegion": "northAmerica",
+      "priority": "high"
+    },
+    {
+      "id": "geopolitical-R5-northAmerica",
+      "type": "geopolitical",
+      "region": "R5",
+      "subRegion": "northAmerica",
+      "priority": "medium"
+    },
+    {
+      "id": "infrastructure-R5-northAmerica",
+      "type": "infrastructure",
+      "region": "R5",
+      "subRegion": "northAmerica",
+      "priority": "medium"
+    },
+    {
+      "id": "regulatory-R5-northAmerica",
+      "type": "regulatory",
+      "region": "R5",
+      "subRegion": "northAmerica",
+      "priority": "high"
+    },
+    {
+      "id": "weather-R6-eastAsia",
+      "type": "weather",
+      "region": "R6",
+      "subRegion": "eastAsia",
+      "priority": "low"
+    },
+    {
+      "id": "atc-R6-eastAsia",
+      "type": "atc",
+      "region": "R6",
+      "subRegion": "eastAsia",
+      "priority": "low"
+    },
+    {
+      "id": "industrial-R6-eastAsia",
+      "type": "industrial",
+      "region": "R6",
+      "subRegion": "eastAsia",
+      "priority": "high"
+    },
+    {
+      "id": "geopolitical-R6-eastAsia",
+      "type": "geopolitical",
+      "region": "R6",
+      "subRegion": "eastAsia",
+      "priority": "low"
+    },
+    {
+      "id": "infrastructure-R6-eastAsia",
+      "type": "infrastructure",
+      "region": "R6",
+      "subRegion": "eastAsia",
+      "priority": "low"
+    },
+    {
+      "id": "regulatory-R6-eastAsia",
+      "type": "regulatory",
+      "region": "R6",
+      "subRegion": "eastAsia",
+      "priority": "high"
+    },
+    {
+      "id": "weather-R7-eastAfrica",
+      "type": "weather",
+      "region": "R7",
+      "subRegion": "eastAfrica",
+      "priority": "low"
+    },
+    {
+      "id": "atc-R7-eastAfrica",
+      "type": "atc",
+      "region": "R7",
+      "subRegion": "eastAfrica",
+      "priority": "low"
+    },
+    {
+      "id": "industrial-R7-eastAfrica",
+      "type": "industrial",
+      "region": "R7",
+      "subRegion": "eastAfrica",
+      "priority": "high"
+    },
+    {
+      "id": "geopolitical-R7-eastAfrica",
+      "type": "geopolitical",
+      "region": "R7",
+      "subRegion": "eastAfrica",
+      "priority": "low"
+    },
+    {
+      "id": "infrastructure-R7-eastAfrica",
+      "type": "infrastructure",
+      "region": "R7",
+      "subRegion": "eastAfrica",
+      "priority": "low"
+    },
+    {
+      "id": "regulatory-R7-eastAfrica",
+      "type": "regulatory",
+      "region": "R7",
+      "subRegion": "eastAfrica",
+      "priority": "high"
+    },
+    {
+      "id": "weather-R7-southernAfrica",
+      "type": "weather",
+      "region": "R7",
+      "subRegion": "southernAfrica",
+      "priority": "low"
+    },
+    {
+      "id": "atc-R7-southernAfrica",
+      "type": "atc",
+      "region": "R7",
+      "subRegion": "southernAfrica",
+      "priority": "low"
+    },
+    {
+      "id": "industrial-R7-southernAfrica",
+      "type": "industrial",
+      "region": "R7",
+      "subRegion": "southernAfrica",
+      "priority": "high"
+    },
+    {
+      "id": "geopolitical-R7-southernAfrica",
+      "type": "geopolitical",
+      "region": "R7",
+      "subRegion": "southernAfrica",
+      "priority": "low"
+    },
+    {
+      "id": "infrastructure-R7-southernAfrica",
+      "type": "infrastructure",
+      "region": "R7",
+      "subRegion": "southernAfrica",
+      "priority": "low"
+    },
+    {
+      "id": "regulatory-R7-southernAfrica",
+      "type": "regulatory",
+      "region": "R7",
+      "subRegion": "southernAfrica",
+      "priority": "high"
+    },
+    {
+      "id": "weather-R8-ausNZ",
+      "type": "weather",
+      "region": "R8",
+      "subRegion": "ausNZ",
+      "priority": "medium"
+    },
+    {
+      "id": "atc-R8-ausNZ",
+      "type": "atc",
+      "region": "R8",
+      "subRegion": "ausNZ",
+      "priority": "medium"
+    },
+    {
+      "id": "industrial-R8-ausNZ",
+      "type": "industrial",
+      "region": "R8",
+      "subRegion": "ausNZ",
+      "priority": "high"
+    },
+    {
+      "id": "geopolitical-R8-ausNZ",
+      "type": "geopolitical",
+      "region": "R8",
+      "subRegion": "ausNZ",
+      "priority": "medium"
+    },
+    {
+      "id": "infrastructure-R8-ausNZ",
+      "type": "infrastructure",
+      "region": "R8",
+      "subRegion": "ausNZ",
+      "priority": "medium"
+    },
+    {
+      "id": "regulatory-R8-ausNZ",
+      "type": "regulatory",
+      "region": "R8",
+      "subRegion": "ausNZ",
+      "priority": "high"
+    },
+    {
+      "id": "weather-R9-southAmerica",
+      "type": "weather",
+      "region": "R9",
+      "subRegion": "southAmerica",
+      "priority": "medium"
+    },
+    {
+      "id": "atc-R9-southAmerica",
+      "type": "atc",
+      "region": "R9",
+      "subRegion": "southAmerica",
+      "priority": "medium"
+    },
+    {
+      "id": "industrial-R9-southAmerica",
+      "type": "industrial",
+      "region": "R9",
+      "subRegion": "southAmerica",
+      "priority": "high"
+    },
+    {
+      "id": "geopolitical-R9-southAmerica",
+      "type": "geopolitical",
+      "region": "R9",
+      "subRegion": "southAmerica",
+      "priority": "medium"
+    },
+    {
+      "id": "infrastructure-R9-southAmerica",
+      "type": "infrastructure",
+      "region": "R9",
+      "subRegion": "southAmerica",
+      "priority": "medium"
+    },
+    {
+      "id": "regulatory-R9-southAmerica",
+      "type": "regulatory",
+      "region": "R9",
+      "subRegion": "southAmerica",
+      "priority": "high"
+    },
+    {
+      "id": "flight-R1-southIndia",
+      "type": "flight",
+      "region": "R1",
+      "subRegion": "southIndia",
+      "priority": "high"
+    },
+    {
+      "id": "social-R1-southIndia",
+      "type": "social",
+      "region": "R1",
+      "subRegion": "southIndia",
+      "priority": "medium"
+    },
+    {
+      "id": "flight-R1-northIndia",
+      "type": "flight",
+      "region": "R1",
+      "subRegion": "northIndia",
+      "priority": "high"
+    },
+    {
+      "id": "social-R1-northIndia",
+      "type": "social",
+      "region": "R1",
+      "subRegion": "northIndia",
+      "priority": "medium"
+    },
+    {
+      "id": "flight-R1-westIndia",
+      "type": "flight",
+      "region": "R1",
+      "subRegion": "westIndia",
+      "priority": "high"
+    },
+    {
+      "id": "social-R1-westIndia",
+      "type": "social",
+      "region": "R1",
+      "subRegion": "westIndia",
+      "priority": "medium"
+    },
+    {
+      "id": "flight-R1-eastIndia",
+      "type": "flight",
+      "region": "R1",
+      "subRegion": "eastIndia",
+      "priority": "high"
+    },
+    {
+      "id": "social-R1-eastIndia",
+      "type": "social",
+      "region": "R1",
+      "subRegion": "eastIndia",
+      "priority": "medium"
+    },
+    {
+      "id": "flight-R2-centralEurope",
+      "type": "flight",
+      "region": "R2",
+      "subRegion": "centralEurope",
+      "priority": "high"
+    },
+    {
+      "id": "social-R2-centralEurope",
+      "type": "social",
+      "region": "R2",
+      "subRegion": "centralEurope",
+      "priority": "medium"
+    },
+    {
+      "id": "flight-R2-westernEurope",
+      "type": "flight",
+      "region": "R2",
+      "subRegion": "westernEurope",
+      "priority": "high"
+    },
+    {
+      "id": "social-R2-westernEurope",
+      "type": "social",
+      "region": "R2",
+      "subRegion": "westernEurope",
+      "priority": "medium"
+    },
+    {
+      "id": "flight-R2-northernEurope",
+      "type": "flight",
+      "region": "R2",
+      "subRegion": "northernEurope",
+      "priority": "high"
+    },
+    {
+      "id": "social-R2-northernEurope",
+      "type": "social",
+      "region": "R2",
+      "subRegion": "northernEurope",
+      "priority": "medium"
+    },
+    {
+      "id": "flight-R2-southernEurope",
+      "type": "flight",
+      "region": "R2",
+      "subRegion": "southernEurope",
+      "priority": "high"
+    },
+    {
+      "id": "social-R2-southernEurope",
+      "type": "social",
+      "region": "R2",
+      "subRegion": "southernEurope",
+      "priority": "medium"
+    },
+    {
+      "id": "flight-R3-gulfStates",
+      "type": "flight",
+      "region": "R3",
+      "subRegion": "gulfStates",
+      "priority": "high"
+    },
+    {
+      "id": "social-R3-gulfStates",
+      "type": "social",
+      "region": "R3",
+      "subRegion": "gulfStates",
+      "priority": "medium"
+    },
+    {
+      "id": "flight-R4-mainlandSEA",
+      "type": "flight",
+      "region": "R4",
+      "subRegion": "mainlandSEA",
+      "priority": "high"
+    },
+    {
+      "id": "social-R4-mainlandSEA",
+      "type": "social",
+      "region": "R4",
+      "subRegion": "mainlandSEA",
+      "priority": "medium"
+    },
+    {
+      "id": "flight-R5-britishIsles",
+      "type": "flight",
+      "region": "R5",
+      "subRegion": "britishIsles",
+      "priority": "high"
+    },
+    {
+      "id": "social-R5-britishIsles",
+      "type": "social",
+      "region": "R5",
+      "subRegion": "britishIsles",
+      "priority": "medium"
+    },
+    {
+      "id": "flight-R5-northAmerica",
+      "type": "flight",
+      "region": "R5",
+      "subRegion": "northAmerica",
+      "priority": "high"
+    },
+    {
+      "id": "social-R5-northAmerica",
+      "type": "social",
+      "region": "R5",
+      "subRegion": "northAmerica",
+      "priority": "medium"
+    },
+    {
+      "id": "flight-R6-eastAsia",
+      "type": "flight",
+      "region": "R6",
+      "subRegion": "eastAsia",
+      "priority": "high"
+    },
+    {
+      "id": "social-R6-eastAsia",
+      "type": "social",
+      "region": "R6",
+      "subRegion": "eastAsia",
+      "priority": "medium"
+    },
+    {
+      "id": "flight-R7-eastAfrica",
+      "type": "flight",
+      "region": "R7",
+      "subRegion": "eastAfrica",
+      "priority": "high"
+    },
+    {
+      "id": "social-R7-eastAfrica",
+      "type": "social",
+      "region": "R7",
+      "subRegion": "eastAfrica",
+      "priority": "medium"
+    },
+    {
+      "id": "flight-R7-southernAfrica",
+      "type": "flight",
+      "region": "R7",
+      "subRegion": "southernAfrica",
+      "priority": "high"
+    },
+    {
+      "id": "social-R7-southernAfrica",
+      "type": "social",
+      "region": "R7",
+      "subRegion": "southernAfrica",
+      "priority": "medium"
+    },
+    {
+      "id": "flight-R8-ausNZ",
+      "type": "flight",
+      "region": "R8",
+      "subRegion": "ausNZ",
+      "priority": "high"
+    },
+    {
+      "id": "social-R8-ausNZ",
+      "type": "social",
+      "region": "R8",
+      "subRegion": "ausNZ",
+      "priority": "medium"
+    },
+    {
+      "id": "flight-R9-southAmerica",
+      "type": "flight",
+      "region": "R9",
+      "subRegion": "southAmerica",
+      "priority": "high"
+    },
+    {
+      "id": "social-R9-southAmerica",
+      "type": "social",
+      "region": "R9",
+      "subRegion": "southAmerica",
+      "priority": "medium"
+    },
+    {
+      "id": "weather-R10-westernRussia",
+      "type": "weather",
+      "region": "R10",
+      "subRegion": "westernRussia",
+      "priority": "high"
+    },
+    {
+      "id": "atc-R10-westernRussia",
+      "type": "atc",
+      "region": "R10",
+      "subRegion": "westernRussia",
+      "priority": "high"
+    },
+    {
+      "id": "industrial-R10-westernRussia",
+      "type": "industrial",
+      "region": "R10",
+      "subRegion": "westernRussia",
+      "priority": "high"
+    },
+    {
+      "id": "geopolitical-R10-westernRussia",
+      "type": "geopolitical",
+      "region": "R10",
+      "subRegion": "westernRussia",
+      "priority": "high"
+    },
+    {
+      "id": "infrastructure-R10-westernRussia",
+      "type": "infrastructure",
+      "region": "R10",
+      "subRegion": "westernRussia",
+      "priority": "high"
+    },
+    {
+      "id": "regulatory-R10-westernRussia",
+      "type": "regulatory",
+      "region": "R10",
+      "subRegion": "westernRussia",
+      "priority": "high"
+    },
+    {
+      "id": "flight-R10-westernRussia",
+      "type": "flight",
+      "region": "R10",
+      "subRegion": "westernRussia",
+      "priority": "high"
+    },
+    {
+      "id": "social-R10-westernRussia",
+      "type": "social",
+      "region": "R10",
+      "subRegion": "westernRussia",
+      "priority": "high"
+    },
+    {
+      "id": "weather-R10-centralCIS",
+      "type": "weather",
+      "region": "R10",
+      "subRegion": "centralCIS",
+      "priority": "high"
+    },
+    {
+      "id": "atc-R10-centralCIS",
+      "type": "atc",
+      "region": "R10",
+      "subRegion": "centralCIS",
+      "priority": "high"
+    },
+    {
+      "id": "industrial-R10-centralCIS",
+      "type": "industrial",
+      "region": "R10",
+      "subRegion": "centralCIS",
+      "priority": "high"
+    },
+    {
+      "id": "geopolitical-R10-centralCIS",
+      "type": "geopolitical",
+      "region": "R10",
+      "subRegion": "centralCIS",
+      "priority": "high"
+    },
+    {
+      "id": "infrastructure-R10-centralCIS",
+      "type": "infrastructure",
+      "region": "R10",
+      "subRegion": "centralCIS",
+      "priority": "high"
+    },
+    {
+      "id": "regulatory-R10-centralCIS",
+      "type": "regulatory",
+      "region": "R10",
+      "subRegion": "centralCIS",
+      "priority": "high"
+    },
+    {
+      "id": "flight-R10-centralCIS",
+      "type": "flight",
+      "region": "R10",
+      "subRegion": "centralCIS",
+      "priority": "high"
+    },
+    {
+      "id": "social-R10-centralCIS",
+      "type": "social",
+      "region": "R10",
+      "subRegion": "centralCIS",
+      "priority": "high"
+    },
+    {
+      "id": "weather-R11-northChina",
+      "type": "weather",
+      "region": "R11",
+      "subRegion": "northChina",
+      "priority": "high"
+    },
+    {
+      "id": "atc-R11-northChina",
+      "type": "atc",
+      "region": "R11",
+      "subRegion": "northChina",
+      "priority": "high"
+    },
+    {
+      "id": "industrial-R11-northChina",
+      "type": "industrial",
+      "region": "R11",
+      "subRegion": "northChina",
+      "priority": "high"
+    },
+    {
+      "id": "geopolitical-R11-northChina",
+      "type": "geopolitical",
+      "region": "R11",
+      "subRegion": "northChina",
+      "priority": "high"
+    },
+    {
+      "id": "infrastructure-R11-northChina",
+      "type": "infrastructure",
+      "region": "R11",
+      "subRegion": "northChina",
+      "priority": "high"
+    },
+    {
+      "id": "regulatory-R11-northChina",
+      "type": "regulatory",
+      "region": "R11",
+      "subRegion": "northChina",
+      "priority": "high"
+    },
+    {
+      "id": "flight-R11-northChina",
+      "type": "flight",
+      "region": "R11",
+      "subRegion": "northChina",
+      "priority": "high"
+    },
+    {
+      "id": "social-R11-northChina",
+      "type": "social",
+      "region": "R11",
+      "subRegion": "northChina",
+      "priority": "high"
+    },
+    {
+      "id": "weather-R11-eastSouthChina",
+      "type": "weather",
+      "region": "R11",
+      "subRegion": "eastSouthChina",
+      "priority": "high"
+    },
+    {
+      "id": "atc-R11-eastSouthChina",
+      "type": "atc",
+      "region": "R11",
+      "subRegion": "eastSouthChina",
+      "priority": "high"
+    },
+    {
+      "id": "industrial-R11-eastSouthChina",
+      "type": "industrial",
+      "region": "R11",
+      "subRegion": "eastSouthChina",
+      "priority": "high"
+    },
+    {
+      "id": "geopolitical-R11-eastSouthChina",
+      "type": "geopolitical",
+      "region": "R11",
+      "subRegion": "eastSouthChina",
+      "priority": "high"
+    },
+    {
+      "id": "infrastructure-R11-eastSouthChina",
+      "type": "infrastructure",
+      "region": "R11",
+      "subRegion": "eastSouthChina",
+      "priority": "high"
+    },
+    {
+      "id": "regulatory-R11-eastSouthChina",
+      "type": "regulatory",
+      "region": "R11",
+      "subRegion": "eastSouthChina",
+      "priority": "high"
+    },
+    {
+      "id": "flight-R11-eastSouthChina",
+      "type": "flight",
+      "region": "R11",
+      "subRegion": "eastSouthChina",
+      "priority": "high"
+    },
+    {
+      "id": "social-R11-eastSouthChina",
+      "type": "social",
+      "region": "R11",
+      "subRegion": "eastSouthChina",
+      "priority": "high"
+    },
+    {
+      "id": "weather-R11-westChina",
+      "type": "weather",
+      "region": "R11",
+      "subRegion": "westChina",
+      "priority": "high"
+    },
+    {
+      "id": "atc-R11-westChina",
+      "type": "atc",
+      "region": "R11",
+      "subRegion": "westChina",
+      "priority": "high"
+    },
+    {
+      "id": "industrial-R11-westChina",
+      "type": "industrial",
+      "region": "R11",
+      "subRegion": "westChina",
+      "priority": "high"
+    },
+    {
+      "id": "geopolitical-R11-westChina",
+      "type": "geopolitical",
+      "region": "R11",
+      "subRegion": "westChina",
+      "priority": "high"
+    },
+    {
+      "id": "infrastructure-R11-westChina",
+      "type": "infrastructure",
+      "region": "R11",
+      "subRegion": "westChina",
+      "priority": "high"
+    },
+    {
+      "id": "regulatory-R11-westChina",
+      "type": "regulatory",
+      "region": "R11",
+      "subRegion": "westChina",
+      "priority": "high"
+    },
+    {
+      "id": "flight-R11-westChina",
+      "type": "flight",
+      "region": "R11",
+      "subRegion": "westChina",
+      "priority": "high"
+    },
+    {
+      "id": "social-R11-westChina",
+      "type": "social",
+      "region": "R11",
+      "subRegion": "westChina",
+      "priority": "high"
     }
   ],
   "outputContract": {

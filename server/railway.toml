@@ -1,0 +1,16 @@
+# railway.toml — Railway deployment config for DisruptionMatrix backend
+# Deploys the server/ directory as an always-on Node.js service
+
+[build]
+builder = "NIXPACKS"
+buildCommand = "npm ci"
+
+[deploy]
+startCommand = "node index.js"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3
+
+# Railway auto-assigns PORT — the code already reads process.env.PORT
+# Set DATABASE_URL in Railway dashboard environment variables

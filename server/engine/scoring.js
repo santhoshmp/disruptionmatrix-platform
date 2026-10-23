@@ -3,6 +3,7 @@
 // and reference ID for candidate events.
 
 import store from '../store/event-store.js';
+import * as refLoader from '../data/reference-loader.js';
 
 const FACTOR_LABELS = [
   'Probability of occurrence',
@@ -27,31 +28,43 @@ const FACTOR_KEYS = [
 ];
 
 // ── EDPS computation ─────────────────────────────────────────────────
-// EDPS = Σ(factor.val × factor.weight) for all 8 factors
+// EDPS = Σ(factor.val × factor.weight) ÷ Σ(active weights)
+// Disabled factors (ref_edps_factors.active=false) contribute nothing and
+// the score is renormalised over the remaining weights, keeping the 0-100 scale.
 
 export function computeEDPS(factorHints) {
-  const weights = store.config.edpsFactors;
+  // Phase 6: use DB-backed EDPS factors, fall back to hardcoded config
+  const weights = refLoader.getEdpsFactors().length > 0
+    ? refLoader.getEdpsFactors()
+    : store.config.edpsFactors;
   const factors = [];
   let score = 0;
+  let weightSum = 0;
 
   for (let i = 0; i < 8; i++) {
     const label = FACTOR_LABELS[i];
     const key = FACTOR_KEYS[i];
-    const weight = weights[i].weight;
+    // Disabled factors contribute nothing; score is renormalized below so
+    // the 0-100 scale is preserved (weights still sum to ~1 when all on).
+    const enabled = weights[i].active !== false;
+    const weight = enabled ? weights[i].weight : 0;
     const val = factorHints[key] ?? 50; // default to 50 if missing
 
     score += val * weight;
+    weightSum += weight;
 
     factors.push({
       label,
       val,
-      weight,
-      readout: _formatReadout(label, val),
+      weight: enabled ? weights[i].weight : 0,
+      enabled,
+      readout: enabled ? _formatReadout(label, val) : 'DISABLED',
       why: _explainFactor(label, val, factorHints),
     });
   }
 
-  return { score: Math.round(score), factors };
+  const normalized = weightSum > 0 ? score / weightSum : score;
+  return { score: Math.round(normalized), factors };
 }
 
 function _formatReadout(label, val) {
@@ -167,9 +180,14 @@ function _minutesToHuman(minutes) {
 // Maps score to L1-L4 using the score bands from config.
 
 export function mapEscalation(score) {
-  const bands = store.config.scoreBands;
+  // Phase 6: use DB-backed scoring bands, fall back to hardcoded config
+  const bands = refLoader.getScoringBands().length > 0
+    ? refLoader.getScoringBands()
+    : store.config.scoreBands;
   for (const band of bands) {
-    if (score >= band.min && score <= band.max) {
+    const min = band.min_score ?? band.min;
+    const max = band.max_score ?? band.max;
+    if (score >= min && score <= max) {
       return band.escalation === 'L4' ? 4 : band.escalation === 'L3' ? 3 : band.escalation === 'L2' ? 2 : 1;
     }
   }
@@ -179,9 +197,14 @@ export function mapEscalation(score) {
 // ── Score band label ─────────────────────────────────────────────────
 
 export function scoreBandLabel(score) {
-  const bands = store.config.scoreBands;
+  // Phase 6: use DB-backed scoring bands, fall back to hardcoded config
+  const bands = refLoader.getScoringBands().length > 0
+    ? refLoader.getScoringBands()
+    : store.config.scoreBands;
   for (const band of bands) {
-    if (score >= band.min && score <= band.max) return band.band;
+    const min = band.min_score ?? band.min;
+    const max = band.max_score ?? band.max;
+    if (score >= min && score <= max) return band.band;
   }
   return 'Low';
 }
@@ -198,6 +221,7 @@ export function assignRef() {
 }
 
 // ── Category to SOP key mapping ─────────────────────────────────────
+// Phase 4: uses DB-backed category map, falls back to hardcoded const.
 
 const CAT_TO_SOP = {
   'Weather': 'storm',
@@ -209,10 +233,14 @@ const CAT_TO_SOP = {
 };
 
 export function catToSopKey(cat) {
+  // Try DB-backed map first
+  const fromDb = refLoader.getCategoryByName(cat);
+  if (fromDb && fromDb.sop_key) return fromDb.sop_key;
   return CAT_TO_SOP[cat] || 'storm';
 }
 
 // ── Agent type to category mapping ──────────────────────────────────
+// Phase 4: uses DB-backed agent types + categories, falls back to hardcoded const.
 
 const AGENT_TYPE_TO_CAT = {
   weather: 'Weather',
@@ -221,9 +249,17 @@ const AGENT_TYPE_TO_CAT = {
   geopolitical: 'Geopolitical',
   infrastructure: 'Infrastructure',
   regulatory: 'Regulatory',
+  flight: 'ATC / Airspace',
+  social: 'ATC / Airspace',
 };
 
 export function agentTypeToCategory(agentType) {
+  // Try DB-backed: agent type → category_id → category name
+  const agentTypeRow = refLoader.getAgentType(agentType);
+  if (agentTypeRow && agentTypeRow.category_id) {
+    const cat = refLoader.getCategory(agentTypeRow.category_id);
+    if (cat && cat.name) return cat.name;
+  }
   return AGENT_TYPE_TO_CAT[agentType] || 'Weather';
 }
 

@@ -3,31 +3,21 @@ import { Link } from 'react-router-dom';
 import L from 'leaflet';
 import GEO from '../data/geo.json';
 import { MONO, sevColor } from '../theme.js';
+import GLAirlineMap from '../components/map/GLAirlineMap.jsx';
+import MapEngineToggle from '../map/MapEngineToggle.jsx';
+import { useMapPrefs } from '../map/useMapEngine.js';
 
 function destOf(route) {
   const m = route.match(/–([A-Z]{3})/g);
   return m ? m[m.length - 1].slice(1) : null;
 }
 
-export default function AirlineMap({ airline }) {
-  const D = airline.data;
-  const scoreField = airline.scoreField;
-  const accent = airline.accent;
-  const THREATS = [...D.THREATS].sort((a, b) => b[scoreField] - a[scoreField]);
-  const hubs = airline.hubs;
-  const rp = airline.routePrefix;
-
+function LeafletAirlineMap({ airline, selected, hub, flights, c }) {
   const mapEl = useRef(null);
   const mapRef = useRef(null);
   const layerRef = useRef(null);
-  const [selected, setSelected] = useState(THREATS[0].id);
-  const [hub, setHub] = useState('All');
-
-  const t = THREATS.find((x) => x.id === selected) || THREATS[0];
-  const ex = D.EXPOSURE[t.id];
-  const flights = D.FLIGHTS.filter(
-    (f) => f.threat === selected && (hub === 'All' || hubs.some((h) => f.route.includes(h) && hub === h))
-  );
+  const hubs = airline.hubs;
+  const accent = airline.accent;
 
   useEffect(() => {
     const map = L.map(mapEl.current, { zoomControl: true, minZoom: 2 });
@@ -45,7 +35,6 @@ export default function AirlineMap({ airline }) {
     const layer = layerRef.current;
     if (!layer) return;
     layer.clearLayers();
-    const c = sevColor(t[scoreField]);
 
     hubs.forEach((code, idx) => {
       const s = GEO.STATIONS[code];
@@ -79,14 +68,37 @@ export default function AirlineMap({ airline }) {
       });
       L.marker([d.lat, d.lon], { icon, zIndexOffset: 500 }).addTo(layer);
     });
-  }, [selected, hub, airline]);
+  }, [selected, hub, airline, flights, c]);
 
+  return <div ref={mapEl} style={{ position: 'absolute', inset: 0 }} />;
+}
+
+export default function AirlineMap({ airline }) {
+  const D = airline.data;
+  const scoreField = airline.scoreField;
+  const accent = airline.accent;
+  const THREATS = [...D.THREATS].sort((a, b) => b[scoreField] - a[scoreField]);
+  const hubs = airline.hubs;
+  const rp = airline.routePrefix;
+
+  const [prefs] = useMapPrefs();
+  const [selected, setSelected] = useState(THREATS[0].id);
+  const [hub, setHub] = useState('All');
+
+  const t = THREATS.find((x) => x.id === selected) || THREATS[0];
+  const ex = D.EXPOSURE[t.id];
+  const flights = D.FLIGHTS.filter(
+    (f) => f.threat === selected && (hub === 'All' || hubs.some((h) => f.route.includes(h) && hub === h))
+  );
   const c = sevColor(t[scoreField]);
 
   return (
     <div style={{ flex: 1, minHeight: 0, display: 'flex' }}>
       <div style={{ flex: 1, minWidth: 0, position: 'relative' }}>
-        <div ref={mapEl} style={{ position: 'absolute', inset: 0 }} />
+        {prefs.engine === 'gl'
+          ? <GLAirlineMap airline={airline} GEO={GEO} selected={selected} hub={hub} flights={flights} mapStyle={prefs.style} projection={prefs.proj} />
+          : <LeafletAirlineMap airline={airline} selected={selected} hub={hub} flights={flights} c={c} />}
+        <MapEngineToggle />
         <div style={{ position: 'absolute', top: 12, left: 12, zIndex: 1000, display: 'flex', gap: 6, flexWrap: 'wrap', maxWidth: 'calc(100% - 24px)' }}>
           <span className="kicker" style={{ alignSelf: 'center', background: 'var(--panel)', padding: '6px 8px' }}>THREAT</span>
           {THREATS.map((x) => (

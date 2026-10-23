@@ -5,7 +5,163 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client.js';
-import { MONO, TEAL, CRIT, HIGH, scoreColor } from '../theme.js';
+import { MONO, TEAL, CRIT, HIGH, OK, scoreColor } from '../theme.js';
+
+// ── Simple markdown renderer for chat messages ──────────────────────
+// Handles: **bold**, ## headings, - lists, > quotes, and plain paragraphs
+
+function renderMarkdown(text) {
+  if (!text) return null;
+  const lines = text.split('\n');
+  const elements = [];
+  let listItems = [];
+  let listKey = 0;
+
+  const flushList = () => {
+    if (listItems.length > 0) {
+      elements.push(
+        <ul key={`list-${listKey++}`} style={{ margin: '8px 0', paddingLeft: 20, listStyle: 'none' }}>
+          {listItems.map((item, i) => (
+            <li key={i} style={{ marginBottom: 4, lineHeight: 1.5, display: 'flex', gap: 8 }}>
+              <span style={{ color: TEAL, flexShrink: 0, marginTop: 1 }}>•</span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      );
+      listItems = [];
+    }
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // Empty line — flush list and add spacing
+    if (!line.trim()) {
+      flushList();
+      if (elements.length > 0) elements.push(<div key={`sp-${i}`} style={{ height: 8 }} />);
+      continue;
+    }
+
+    // Heading (## or **heading** style)
+    const h2Match = line.match(/^#{1,3}\s+(.+)$/);
+    if (h2Match) {
+      flushList();
+      elements.push(
+        <div key={`h-${i}`} style={{ fontSize: 15, fontWeight: 700, color: 'var(--ink)', margin: '10px 0 4px' }}>
+          {renderInline(h2Match[1])}
+        </div>
+      );
+      continue;
+    }
+
+    // Bold heading on its own line (e.g., "**Event Overview**")
+    const boldLine = line.match(/^\*\*(.+)\*\*$/);
+    if (boldLine && !line.includes('\n')) {
+      flushList();
+      elements.push(
+        <div key={`bh-${i}`} style={{ fontSize: 14, fontWeight: 700, color: 'var(--ink)', margin: '10px 0 4px' }}>
+          {boldLine[1]}
+        </div>
+      );
+      continue;
+    }
+
+    // List item (- or • or number)
+    const listMatch = line.match(/^[-•\d]+[.)]?\s+(.+)$/);
+    if (listMatch) {
+      listItems.push(renderInline(listMatch[1]));
+      continue;
+    }
+
+    // Quote (> text)
+    const quoteMatch = line.match(/^>\s*(.+)$/);
+    if (quoteMatch) {
+      flushList();
+      elements.push(
+        <div key={`q-${i}`} style={{
+          padding: '8px 12px', margin: '6px 0', borderLeft: `3px solid ${TEAL}`,
+          background: TEAL + '08', fontSize: 13, color: 'var(--mute)', fontStyle: 'italic',
+        }}>
+          {renderInline(quoteMatch[1])}
+        </div>
+      );
+      continue;
+    }
+
+    // Separator (---)
+    if (line.trim() === '---') {
+      flushList();
+      elements.push(<div key={`hr-${i}`} style={{ height: 1, background: 'var(--hover)', margin: '8px 0' }} />);
+      continue;
+    }
+
+    // Regular paragraph
+    flushList();
+    elements.push(
+      <div key={`p-${i}`} style={{ marginBottom: 4, lineHeight: 1.55 }}>
+        {renderInline(line)}
+      </div>
+    );
+  }
+
+  flushList();
+  return <div>{elements}</div>;
+}
+
+// ── Inline formatting: **bold**, *italic*, `code` ──────────────────
+function renderInline(text) {
+  if (!text) return text;
+
+  // Split by markdown patterns and render
+  const parts = [];
+  let remaining = text;
+  let key = 0;
+
+  while (remaining.length > 0) {
+    // Bold: **text**
+    const boldMatch = remaining.match(/\*\*(.+?)\*\*/);
+    if (boldMatch) {
+      const idx = remaining.indexOf(boldMatch[0]);
+      if (idx > 0) parts.push(remaining.slice(0, idx));
+      parts.push(<strong key={key++} style={{ fontWeight: 700, color: 'var(--ink)' }}>{boldMatch[1]}</strong>);
+      remaining = remaining.slice(idx + boldMatch[0].length);
+      continue;
+    }
+
+    // Italic: *text* (not inside bold)
+    const italicMatch = remaining.match(/\*([^*]+)\*/);
+    if (italicMatch) {
+      const idx = remaining.indexOf(italicMatch[0]);
+      if (idx > 0) parts.push(remaining.slice(0, idx));
+      parts.push(<em key={key++} style={{ fontStyle: 'italic' }}>{italicMatch[1]}</em>);
+      remaining = remaining.slice(idx + italicMatch[0].length);
+      continue;
+    }
+
+    // Code: `text`
+    const codeMatch = remaining.match(/`([^`]+)`/);
+    if (codeMatch) {
+      const idx = remaining.indexOf(codeMatch[0]);
+      if (idx > 0) parts.push(remaining.slice(0, idx));
+      parts.push(
+        <code key={key++} style={{
+          ...MONO, fontSize: 12, padding: '1px 5px',
+          background: 'var(--sunken)', border: '1px solid var(--edge)',
+          borderRadius: 3, color: TEAL,
+        }}>{codeMatch[1]}</code>
+      );
+      remaining = remaining.slice(idx + codeMatch[0].length);
+      continue;
+    }
+
+    // No more patterns — push remaining text
+    parts.push(remaining);
+    break;
+  }
+
+  return parts.length === 1 ? parts[0] : parts;
+}
 
 export default function Chat() {
   const [messages, setMessages] = useState([]);
@@ -73,10 +229,13 @@ export default function Chat() {
 
   const defaultSuggestions = [
     'What are the most critical threats right now?',
+    'Summarize the current threat landscape',
     'What weather disruptions are active?',
     'Are there any ATC or airspace restrictions?',
-    'What agents are currently monitoring?',
-    'Summarize the current threat landscape',
+    'Which airports have the highest disruption exposure?',
+    'What agents are currently monitoring and what regions?',
+    'What data sources are the agents using?',
+    'Which industrial actions or strikes are affecting flights?',
   ];
 
   const displaySuggestions = suggestions.length > 0 ? suggestions : defaultSuggestions;
@@ -134,20 +293,21 @@ export default function Chat() {
               events, signals, impact assessments, airports, airlines, schedules, and reference data.
               {!llmEnabled && ' LLM is disabled, so answers will be deterministic summaries of retrieved documents.'}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 520, margin: '0 auto' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, maxWidth: 640, margin: '0 auto' }}>
               {displaySuggestions.map((q, i) => (
                 <button
                   key={i}
                   onClick={() => sendQuestion(q)}
                   style={{
-                    padding: '12px 16px', fontSize: 13.5, textAlign: 'left', cursor: 'pointer',
+                    padding: '11px 14px', fontSize: 12.5, textAlign: 'left', cursor: 'pointer',
                     border: '1px solid var(--line2)', background: 'var(--panel)', color: 'var(--ink2)',
-                    borderRadius: 8, transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: 10
+                    borderRadius: 8, transition: 'all 0.15s', display: 'flex', alignItems: 'flex-start', gap: 8,
+                    lineHeight: 1.4,
                   }}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = TEAL + '55'; e.currentTarget.style.background = TEAL + '08'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--line2)'; e.currentTarget.style.background = 'var(--panel)'; }}
                 >
-                  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke={TEAL} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke={TEAL} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}>
                     <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" />
                   </svg>
                   {q}
@@ -270,8 +430,8 @@ function MessageBubble({ msg }) {
           border: `1px solid ${msg.error ? CRIT + '44' : 'var(--line2)'}`,
           borderRadius: '4px 12px 12px 12px', color: msg.error ? CRIT : 'var(--ink)'
         }}>
-          {/* Answer text */}
-          <div style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</div>
+          {/* Answer text — rendered as markdown */}
+          <div>{renderMarkdown(msg.content)}</div>
 
           {/* Source citations */}
           {msg.sources && msg.sources.length > 0 && (

@@ -6,19 +6,37 @@
 // Aviation relevance: earthquakes near airports can damage runways, terminals, ATC infrastructure.
 
 import { fetchWithTimeout } from './http-utils.js';
+import { findAirportsWithin, findNearestAirport } from '../data/airport-lookup.js';
+import * as refLoader from '../data/reference-loader.js';
 
 const USGS_URL = 'https://earthquake.usgs.gov/fdsnws/event/1/query';
-const TIMEOUT_MS = 10000;
+// Phase 7: read from DB-backed ref_connectors via loader
+const _timeout = () => refLoader.getConnectorConfig('usgs', 'timeout_ms', 10000);
 const CACHE_TTL_MS = 10 * 60 * 1000; // 10 min cache
 
 let cache = null;
 let cacheTime = 0;
 
 // Minimum magnitude to consider as a disruption signal
+// Phase 5: read from DB-backed ref_connectors via loader
 const MIN_MAGNITUDE = 4.5;
 
+function _minMagnitude() {
+  return refLoader.getConnectorConfig('usgs', 'min_magnitude', MIN_MAGNITUDE);
+}
+
+function _radiusKm(magnitude) {
+  // Phase 5: radius from DB-backed ref_connectors via loader
+  const large = refLoader.getConnectorConfig('usgs', 'radius_km_large', 500);
+  const medium = refLoader.getConnectorConfig('usgs', 'radius_km_medium', 400);
+  const small = refLoader.getConnectorConfig('usgs', 'radius_km_small', 350);
+  if (magnitude >= 7) return large;
+  if (magnitude >= 6) return medium;
+  return small;
+}
+
 export async function fetchEarthquakes(options = {}) {
-  const { minMagnitude = MIN_MAGNITUDE, bbox, days = 1 } = options;
+  const { minMagnitude = _minMagnitude(), bbox, days = 1 } = options;
 
   if (cache && Date.now() - cacheTime < CACHE_TTL_MS) {
     return filterByBbox(cache, bbox);
@@ -35,7 +53,7 @@ export async function fetchEarthquakes(options = {}) {
     url += `&minmagnitude=${minMagnitude}`;
     url += '&orderby=time';
 
-    const res = await fetchWithTimeout(url, {}, TIMEOUT_MS);
+    const res = await fetchWithTimeout(url, {}, _timeout());
     if (res.ok) {
       const data = await res.json();
       events = (data.features || []).map(parseUSGSFeature);
@@ -97,24 +115,44 @@ export function buildEarthquakeObservations(events, region, subRegion) {
       severity = 'moderate'; sevVal = 55;
     }
 
+    // Resolve nearby airports from the earthquake's coordinates
+    // Use a radius proportional to magnitude (larger quakes affect wider area)
+    const radiusKm = _radiusKm(eq.magnitude);
+    const nearbyAirports = findAirportsWithin(eq.lat, eq.lon, radiusKm);
+    const airports = nearbyAirports.slice(0, 5).map((a) => a.iata);
+
+    // Build a human-readable location description
+    let locationDesc = eq.place;
+    if (airports.length > 0) {
+      const airportList = nearbyAirports
+        .slice(0, 3)
+        .map((a) => `${a.iata} (${a.name}, ${a.distanceKm}km)`)
+        .join(', ');
+      locationDesc = `${eq.place} — near ${airportList}`;
+    }
+
     observations.push({
       signalId: `usgs-eq-${eq.id}-${Date.now()}`,
       detected: eq.time,
       name: `M${eq.magnitude.toFixed(1)} Earthquake — ${eq.place}`,
       hazardType: 'earthquake',
       geo: { lat: eq.lat, lon: eq.lon, radiusKm: eq.magnitude >= 6 ? 200 : 100 },
-      airports: [],
+      airports,
       airspace: [],
-      summary: `Magnitude ${eq.magnitude.toFixed(1)} earthquake ${eq.place}. Depth ${eq.depth} km.${eq.tsunami ? ' TSUNAMI WARNING ISSUED.' : ''}${eq.alert ? ` PAGER alert: ${eq.alert}.` : ''}`,
+      summary: `Magnitude ${eq.magnitude.toFixed(1)} earthquake ${eq.place}. Depth ${eq.depth} km.${eq.tsunami ? ' TSUNAMI WARNING ISSUED.' : ''}${eq.alert ? ` PAGER alert: ${eq.alert}.` : ''}${airports.length > 0 ? ` Nearest airport: ${nearbyAirports[0].iata} (${nearbyAirports[0].name}, ${nearbyAirports[0].distanceKm}km).` : ' No airports within the impact radius — no direct aviation impact.'}`,
       factorHints: {
         probability: 90, // earthquake already happened
-        severity: sevVal,
-        geographicReach: eq.magnitude >= 6 ? 65 : 40,
+        // Dampen aviation-relevant factors when no airport is in the impact
+        // radius — a remote oceanic quake is a real event but not an
+        // aviation disruption.
+        severity: airports.length === 0 ? Math.min(sevVal, 25) : sevVal,
+        geographicReach: airports.length === 0 ? 10 : (eq.magnitude >= 6 ? 65 : 40),
         expectedDuration: eq.magnitude >= 6 ? 70 : 40, // aftershocks
-        timeToImpact: 95, // immediate
-        escalationRate: 80, // sudden onset
+        timeToImpact: airports.length === 0 ? 35 : 95, // nothing aviation-side to impact
+        escalationRate: airports.length === 0 ? 30 : 80, // no aviation path to escalate
         sourceCredibility: 95, // USGS
         predictionConfidence: 90,
+        _airportCount: airports.length,
       },
       domains: ['Airport operations', 'Infrastructure', 'Ground access'],
       preliminaryEffects: [
@@ -137,4 +175,4 @@ export function buildEarthquakeObservations(events, region, subRegion) {
   return observations;
 }
 
-export default { fetchEarthquakes, buildEarthquakeObservations, MIN_MAGNITUDE };
+export default { fetchEarthquakes, buildEarthquakeObservations, MIN_MAGNITUDE: _minMagnitude() };

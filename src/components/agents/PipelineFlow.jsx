@@ -23,12 +23,19 @@ export default function PipelineFlow() {
   const [running, setRunning] = useState(false);
   const [lastRun, setLastRun] = useState(null);
   const [runHistory, setRunHistory] = useState([]);
-  const [autoRun, setAutoRun] = useState(true);
+  const [autoRun, setAutoRun] = useState(false);
+  const [intervalMs, setIntervalMs] = useState(10000);
+  const [archivedEvents, setArchivedEvents] = useState(0);
 
   async function loadPipeline() {
     try {
       const data = await api.getPipeline();
       setPipeline(data.pipeline || []);
+      setAutoRun(!!data.autoRunning);
+      if (data.intervalMs) setIntervalMs(data.intervalMs);
+      setArchivedEvents(data.archivedEvents || 0);
+      if (data.lastRun) setLastRun(data.lastRun);
+      if (data.runHistory) setRunHistory(data.runHistory);
     } catch (e) { /* server may be down */ }
   }
 
@@ -41,9 +48,7 @@ export default function PipelineFlow() {
   async function handleRun() {
     setRunning(true);
     try {
-      const result = await api.runPipeline();
-      setLastRun(result);
-      setRunHistory((prev) => [{ ...result, timestamp: new Date().toISOString() }, ...prev].slice(0, 10));
+      await api.runPipeline();
       await loadPipeline();
     } catch (e) { /* ignore */ }
     setRunning(false);
@@ -89,13 +94,27 @@ export default function PipelineFlow() {
             boxShadow: autoRun ? '0 0 6px #34D399' : 'none', animation: autoRun ? 'dmPulse 2s ease-in-out infinite' : 'none',
           }} />
           <span style={{ ...MONO, fontSize: 10, color: autoRun ? '#34D399' : 'var(--mute)', fontWeight: 600 }}>
-            {autoRun ? 'AUTO-RUNNING (every 10s)' : 'MANUAL ONLY'}
+            {autoRun ? `AUTO-RUNNING (every ${Math.round(intervalMs / 1000)}s)` : 'MANUAL ONLY'}
           </span>
         </div>
         <span style={{ ...MONO, fontSize: 10, color: 'var(--faint)' }}>|</span>
         <span style={{ ...MONO, fontSize: 10, color: 'var(--mute)' }}>
           {pipeline.length} steps loaded
         </span>
+        {lastRun?.timestamp && (
+          <>
+            <span style={{ ...MONO, fontSize: 10, color: 'var(--faint)' }}>|</span>
+            <span style={{ ...MONO, fontSize: 10, color: 'var(--mute)' }}>
+              LAST RUN {new Date(lastRun.timestamp).toLocaleTimeString('en-GB', { hour12: false })}
+              {lastRun.processed > 0 ? ` · ${lastRun.processed} signals` : ' · idle'}
+            </span>
+          </>
+        )}
+        {archivedEvents > 0 && (
+          <span style={{ ...MONO, fontSize: 9.5, color: 'var(--faint)', marginLeft: 'auto' }}>
+            item counts show ACTIVE events ({archivedEvents} archived not counted)
+          </span>
+        )}
       </div>
 
       {/* Step-by-step detail table */}

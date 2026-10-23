@@ -8,6 +8,7 @@ import scheduleStore from '../data/schedule-store.js';
 import airlineRegistry from '../data/airline-registry.js';
 import realAirlineRegistry from '../data/real-airline-registry.js';
 import { scoreBandLabel } from './scoring.js';
+import * as refLoader from '../data/reference-loader.js';
 
 // Current impact mode: 'mock' (Namma/EuroVista/IndiConnect) or 'real' (real airlines)
 let impactMode = 'mock';
@@ -37,6 +38,8 @@ function _getRegistry() {
 
 // ── Airport name lookup ──────────────────────────────────────────────
 
+// Phase 1: AIRPORT_NAMES kept as fallback; getAirportNameDb() reads from
+// the DB-backed reference loader when available.
 const AIRPORT_NAMES = {
   BLR: 'Bengaluru', DEL: 'Delhi', BOM: 'Mumbai', MAA: 'Chennai',
   HYD: 'Hyderabad', COK: 'Kochi', CCU: 'Kolkata', GOI: 'Goa',
@@ -53,12 +56,24 @@ const AIRPORT_NAMES = {
   JFK: 'New York JFK', YYZ: 'Toronto', ORD: 'Chicago', SFO: 'San Francisco',
   HKG: 'Hong Kong', NRT: 'Tokyo Narita', ICN: 'Seoul Incheon',
   JNB: 'Johannesburg', NBO: 'Nairobi',
+  // Oceania
+  SYD: 'Sydney', MEL: 'Melbourne', BNE: 'Brisbane', PER: 'Perth', AKL: 'Auckland',
+  // South America
+  GRU: 'Sao Paulo', EZE: 'Buenos Aires', SCL: 'Santiago', BOG: 'Bogota', LIM: 'Lima',
 };
 
 // ── Hazard → capability mapping ──────────────────────────────────────
 // Determines if the airline's fleet can handle the hazard type
+// Phase 5: uses DB-backed hazard requires_cat3, falls back to hardcoded const.
 
 const HAZARD_REQUIRES_CAT3 = ['fog', 'low_visibility', 'low_ceiling'];
+
+function _hazardRequiresCat3(hazardType) {
+  // Try DB-backed first
+  const fromDb = refLoader.getHazardRequiresCat3(hazardType);
+  if (fromDb != null) return fromDb;
+  return HAZARD_REQUIRES_CAT3.includes(hazardType);
+}
 
 // ── Main entry: compute OPS for an event ────────────────────────────
 
@@ -131,7 +146,7 @@ export function computeOPS(event) {
 
 function _computeAirportExposure(event, iata, edps) {
   const registry = _getRegistry();
-  const name = AIRPORT_NAMES[iata] || iata;
+  const name = refLoader.getAirportName(iata) || AIRPORT_NAMES[iata] || iata;
   const arrivals = impactMode === 'mock' ? scheduleStore.getArrivals(iata).length : _estimateRealArrivals(iata);
   const departures = impactMode === 'mock' ? scheduleStore.getDepartures(iata).length : _estimateRealDepartures(iata);
   const movements = arrivals + departures;
@@ -211,7 +226,7 @@ function _computeAirlineExposures(event, affectedAirports, edps, hazardType) {
 
     // 3. Fleet capability factor (0.5-1.3)
     let fleetCapabilityFactor = 1.0;
-    if (HAZARD_REQUIRES_CAT3.includes(hazardType)) {
+    if (_hazardRequiresCat3(hazardType)) {
       // Fog/low visibility — check CAT III capability
       const hasCat3 = registry.hasCat3Capability(airline.key);
       fleetCapabilityFactor = hasCat3 ? 0.5 : 1.3; // equipped = less exposed
@@ -357,30 +372,42 @@ function _detectOverflightExposure(event, airspace, affectedAirports) {
 }
 
 // ── Real movement estimation (no schedule data) ──────────────────────
+// Phase 1: AIRPORT_DAILY_MOVEMENTS kept as fallback; _getDailyMovements()
+// reads from the DB-backed reference loader when available.
 
 const AIRPORT_DAILY_MOVEMENTS = {
   DEL: 450, BOM: 400, BLR: 300, MAA: 200, HYD: 180, COK: 150, CCU: 150,
   GOI: 80, PNQ: 100, VTZ: 60, AMD: 120, JAI: 80, LKO: 80, IXC: 60, GAU: 60,
   VIE: 200, MUC: 400, FRA: 500, AMS: 500, CDG: 540, BRU: 200, ZRH: 300,
   GVA: 150, CPH: 250, OSL: 200, EDI: 200, FCO: 400, MAD: 400, IST: 500,
-  WAW: 250, ATH: 200, BUD: 150, PRG: 200,
+  WAW: 250, ATH: 200, BUD: 150, PRG: 200, LIS: 200,
   DXB: 600, AUH: 300, DOH: 300, MCT: 150, BAH: 200, RUH: 300, JED: 250,
   KWI: 150, AMM: 150, BEY: 150, TLV: 200,
   SIN: 500, BKK: 500, KUL: 400, CGK: 400, MNL: 250, HAN: 200, SGN: 250,
   PNH: 80, RGN: 80,
-  JFK: 500, EWR: 400, YYZ: 400, ORD: 500, ATL: 600, SFO: 400, LAX: 500,
+  LHR: 650, LGW: 300, STN: 150, JFK: 500, EWR: 400, YYZ: 400, ORD: 500, ATL: 600, SFO: 400, LAX: 500,
   IAD: 300, BOS: 400, KEF: 100, SNN: 100,
   HKG: 500, NRT: 400, HND: 500, ICN: 400, PEK: 500, PVG: 500, CAN: 400,
   TPE: 300,
   JNB: 300, CPT: 200, NBO: 150, ADD: 200, CAI: 300, LOS: 150, ACC: 100, DKR: 100,
+  // Oceania
+  SYD: 400, MEL: 350, BNE: 250, PER: 200, AKL: 200,
+  // South America
+  GRU: 500, EZE: 300, SCL: 250, BOG: 300, LIM: 250,
 };
 
+function _getDailyMovements(iata) {
+  const ap = refLoader.getAirport(iata);
+  if (ap && ap.daily_movements) return ap.daily_movements;
+  return AIRPORT_DAILY_MOVEMENTS[iata] || 100;
+}
+
 function _estimateRealArrivals(iata) {
-  return Math.round((AIRPORT_DAILY_MOVEMENTS[iata] || 100) / 2);
+  return Math.round(_getDailyMovements(iata) / 2);
 }
 
 function _estimateRealDepartures(iata) {
-  return Math.round((AIRPORT_DAILY_MOVEMENTS[iata] || 100) / 2);
+  return Math.round(_getDailyMovements(iata) / 2);
 }
 
 // ── Airport resolution ───────────────────────────────────────────────
@@ -396,9 +423,15 @@ function _resolveAirports(event, explicitAirports) {
     return eventGeo.airports;
   }
 
-  // Fall back to the "where" field
+  // Fall back to the "where" field — only keep tokens that resolve to a
+  // known airport. Place names like "34 km WNW of Luwuk, Indonesia" must
+  // not be treated as airport codes.
   if (event.where) {
-    const airports = event.where.split(/[\/,]/).map((s) => s.trim()).filter(Boolean);
+    const tokens = event.where
+      .split(/[\/,]/)
+      .map((s) => s.replace(/\(.*$/, '').trim()) // strip "(place name)" suffixes
+      .filter(Boolean);
+    const airports = tokens.filter((t) => /^[A-Z]{3}$/.test(t) && refLoader.getAirport(t));
     return airports;
   }
 
@@ -407,10 +440,25 @@ function _resolveAirports(event, explicitAirports) {
 
 // ── Hazard type inference ───────────────────────────────────────────
 
+// Phase 5: _inferHazardType now uses DB-backed keyword lookup (ref_hazard_keywords),
+// falls back to the original if/else chain if DB is empty or no keyword matches.
 function _inferHazardType(event) {
   const name = (event.name || '').toLowerCase();
   const summary = (event.summary || '').toLowerCase();
 
+  // Try DB-backed keyword lookup first
+  // Check name first (more specific), then summary
+  const combined = `${name} ${summary}`;
+  for (const [keyword, hazardType] of _getKeywordMap()) {
+    if (combined.includes(keyword)) {
+      // Preserve backward compatibility: 'infrastructure_failure' maps to 'infrastructure'
+      // for the original if/else chain return value
+      if (hazardType === 'infrastructure_failure') return 'infrastructure';
+      return hazardType;
+    }
+  }
+
+  // Fallback: original if/else chain
   if (name.includes('fog') || summary.includes('fog') || summary.includes('visibility')) return 'fog';
   if (name.includes('storm') || summary.includes('thunderstorm') || summary.includes('convective')) return 'thunderstorm';
   if (name.includes('monsoon') || summary.includes('monsoon')) return 'monsoon';
@@ -424,4 +472,24 @@ function _inferHazardType(event) {
   return 'general';
 }
 
-export default { computeOPS, setImpactMode, getImpactMode };
+// Build keyword→hazard_type map from DB, preserving the original check order.
+// The original if/else chain has a specific priority (fog > thunderstorm > monsoon > snow > atfm > strike > airspace > fuel > infrastructure).
+// We replicate that order so overlapping keywords (e.g., 'storm' vs 'sector') resolve correctly.
+const _HAZARD_CHECK_ORDER = [
+  'fog', 'thunderstorm', 'monsoon', 'snow_ice', 'atfm_regulation',
+  'strike', 'airspace_restriction', 'fuel_supply', 'infrastructure_failure',
+];
+
+function _getKeywordMap() {
+  const map = new Map();
+  if (!refLoader.isLoaded()) return map;
+  for (const hazardType of _HAZARD_CHECK_ORDER) {
+    const keywords = refLoader.getHazardKeywords(hazardType);
+    for (const kw of keywords) {
+      map.set(kw, hazardType);
+    }
+  }
+  return map;
+}
+
+export default { computeOPS, setImpactMode, getImpactMode, _inferHazardType };

@@ -56,7 +56,7 @@ export async function chat(question, options = {}) {
     // LLM disabled — return a deterministic response based on retrieved docs
     return {
       answer: buildDeterministicAnswer(question, documents),
-      sources: documents.map(d => ({ type: d.docType, id: d.sourceId })),
+      sources: documents.map(d => ({ type: d.docType, id: d.sourceId, title: extractTitle(d) })),
       documents: documents.length,
       llmEnabled: false,
       provider: null,
@@ -66,12 +66,19 @@ export async function chat(question, options = {}) {
 
   return {
     answer: llmResult.content,
-    sources: documents.map(d => ({ type: d.docType, id: d.sourceId, score: d.score })),
+    sources: documents.map(d => ({ type: d.docType, id: d.sourceId, title: extractTitle(d), score: d.score })),
     documents: documents.length,
     llmEnabled: true,
     provider: llmResult.provider,
     model: llmResult.model,
   };
+}
+
+// Extract a human-readable title from a document
+function extractTitle(doc) {
+  const firstLine = doc.content?.split('\n')[0] || doc.sourceId;
+  // Remove "Event: ", "Signal: ", "Region: " etc. prefix
+  return firstLine.replace(/^[A-Z][a-z]+:\s*/, '');
 }
 
 // ── Deterministic answer (when LLM is disabled) ──────────────────
@@ -105,35 +112,84 @@ function buildDeterministicAnswer(question, documents) {
 // ── Get suggested questions based on current data ────────────────
 export async function getSuggestedQuestions() {
   const suggestions = [];
-  const { events } = store.getEvents({ limit: 100 });
+  const { events } = store.getEvents({ limit: 500 });
 
-  // Top-scoring event
-  const topEvent = events.sort((a, b) => b.score - a.score)[0];
+  if (events.length === 0) return suggestions;
+
+  const sorted = [...events].sort((a, b) => b.score - a.score);
+  const topEvent = sorted[0];
+  const secondEvent = sorted[1];
+  const critical = events.filter((e) => e.esc >= 4);
+  const escalating = events.filter((e) => e.traj === 'Escalating');
+
+  // ── Critical / overview questions ──
+  suggestions.push('What are the most critical threats right now?');
+  if (escalating.length > 0) {
+    suggestions.push(`${escalating.length} events are escalating — which ones need attention?`);
+  }
+  suggestions.push('Summarize the current threat landscape');
+
+  // ── Top event specific ──
   if (topEvent) {
-    suggestions.push(`What is the ${topEvent.name} event and what's its impact?`);
-    suggestions.push(`Which airports are affected by ${topEvent.name}?`);
+    suggestions.push(`What is the ${topEvent.name} and what's its impact?`);
+    suggestions.push(`Which airports and airlines are affected by ${topEvent.name}?`);
   }
 
-  // High-escalation events
-  const critical = events.filter((e) => e.esc >= 3);
-  if (critical.length > 0) {
-    suggestions.push(`What are the most critical threats right now?`);
-  }
-
-  // Category-based
+  // ── Category-based ──
   const cats = [...new Set(events.map((e) => e.cat))];
+  const catCounts = {};
+  for (const e of events) catCounts[e.cat] = (catCounts[e.cat] || 0) + 1;
+
   if (cats.includes('Weather')) {
-    suggestions.push(`What weather disruptions are active?`);
+    suggestions.push('What weather disruptions are currently active?');
   }
   if (cats.includes('ATC / Airspace')) {
-    suggestions.push(`Are there any ATC or airspace restrictions?`);
+    suggestions.push('Are there any ATC or airspace restrictions?');
+  }
+  if (cats.includes('Industrial action')) {
+    suggestions.push('Which industrial actions or strikes are affecting flights?');
+  }
+  if (cats.includes('Infrastructure')) {
+    suggestions.push('Are there any infrastructure failures affecting airports?');
+  }
+  if (cats.includes('Geopolitical')) {
+    suggestions.push('What geopolitical events are impacting airspace?');
+  }
+  if (cats.includes('Regulatory')) {
+    suggestions.push('Are there any regulatory changes affecting operations?');
   }
 
-  // General
-  suggestions.push(`What agents are currently monitoring?`);
-  suggestions.push(`Summarize the current threat landscape`);
+  // ── Airport / region specific ──
+  const airports = new Set();
+  for (const e of events) {
+    for (const a of (e._airports || [])) airports.add(a);
+  }
+  const airportList = [...airports];
+  if (airportList.includes('BLR')) suggestions.push('What disruptions are affecting BLR airport?');
+  if (airportList.includes('BOM')) suggestions.push('What\'s happening at BOM airport?');
+  if (airportList.includes('FRA')) suggestions.push('How is FRA affected by current events?');
 
-  return suggestions.slice(0, 6);
+  // ── Escalating events ──
+  if (escalating.length >= 2) {
+    const topEscalating = escalating.sort((a, b) => b.score - a.score)[0];
+    if (topEscalating && topEscalating.id !== topEvent?.id) {
+      suggestions.push(`Why is ${topEscalating.name} escalating?`);
+    }
+  }
+
+  // ── Agent / monitoring ──
+  suggestions.push('What agents are currently monitoring and what regions?');
+  suggestions.push('What data sources are the agents using?');
+
+  // ── Impact / airline ──
+  if (secondEvent && secondEvent.id !== topEvent?.id) {
+    suggestions.push(`Compare the impact of ${topEvent.name} vs ${secondEvent.name}`);
+  }
+  suggestions.push('Which airports have the highest disruption exposure?');
+
+  // Deduplicate and return top 12
+  const unique = [...new Set(suggestions)];
+  return unique.slice(0, 12);
 }
 
 export default { chat, getSuggestedQuestions };

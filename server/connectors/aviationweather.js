@@ -5,9 +5,11 @@
 // Provides: METAR (observations), TAF (forecasts), SIGMET (weather warnings)
 
 import { ICAO_TO_IATA } from '../engine/agent-base.js';
+import * as refLoader from '../data/reference-loader.js';
 
 const BASE_URL = 'https://aviationweather.gov/api/data';
-const TIMEOUT_MS = 8000;
+// Phase 7: read from DB-backed ref_connectors via loader
+const _timeout = () => refLoader.getConnectorConfig('aviationweather', 'timeout_ms', 8000);
 
 // Simple in-memory rate limiter (100 req/min)
 let requestCount = 0;
@@ -32,7 +34,7 @@ async function rateLimit() {
 
 async function fetchWithTimeout(url) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  const timeout = setTimeout(() => controller.abort(), _timeout());
   try {
     const res = await fetch(url, { signal: controller.signal });
     if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);

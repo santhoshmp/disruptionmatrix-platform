@@ -1,11 +1,14 @@
-// AgentRegionMap.jsx — Leaflet map showing 7 regions + 29 agent pins
+// AgentRegionMap.jsx — Map showing region bounding boxes + agent pins.
+// Engine-switchable: Leaflet (default) or GL vector (Mapbox/MapLibre).
 
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
-import { api } from '../../api/client.js';
 import { MONO, TEAL, CRIT, HIGH, MOD, LOW } from '../../theme.js';
 import InfoIcon from './InfoIcon.jsx';
 import { HELP } from './sourceMode.jsx';
+import GLAgentRegionMap from '../map/GLAgentRegionMap.jsx';
+import MapEngineToggle from '../../map/MapEngineToggle.jsx';
+import { useMapPrefs } from '../../map/useMapEngine.js';
 
 const TYPE_COLORS = {
   weather: '#22D3EE',
@@ -25,7 +28,7 @@ const PRIORITY_SIZES = {
   standard: 4,
 };
 
-export default function AgentRegionMap({ agents, regions, selectedAgent, onSelectAgent }) {
+function LeafletAgentRegionMap({ agents, regions, selectedAgent, onSelectAgent }) {
   const mapEl = useRef(null);
   const mapRef = useRef(null);
   const layerRef = useRef(null);
@@ -95,9 +98,19 @@ export default function AgentRegionMap({ agents, regions, selectedAgent, onSelec
     });
   }, [agents, regions, selectedAgent]);
 
+  return <div ref={mapEl} style={{ position: 'absolute', inset: 0 }} />;
+}
+
+export default function AgentRegionMap({ agents, regions, selectedAgent, onSelectAgent }) {
+  const [prefs] = useMapPrefs();
+  const mapProps = { agents, regions, selectedAgent, onSelectAgent };
+
   return (
     <div style={{ flex: 1, minHeight: 0, position: 'relative' }}>
-      <div ref={mapEl} style={{ position: 'absolute', inset: 0 }} />
+      {prefs.engine === 'gl'
+        ? <GLAgentRegionMap {...mapProps} mapStyle={prefs.style} projection={prefs.proj} />
+        : <LeafletAgentRegionMap {...mapProps} />}
+      <MapEngineToggle />
       <div style={{ position: 'absolute', bottom: 12, left: 12, zIndex: 1000, background: 'var(--panel)', border: '1px solid var(--line)', padding: '8px 12px', ...MONO, fontSize: 10.5, color: 'var(--mute)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
           <span style={{ fontWeight: 600, color: 'var(--ink2)', letterSpacing: '0.05em' }}>AGENT TYPES</span>

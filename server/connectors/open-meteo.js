@@ -7,41 +7,60 @@
 // Useful for: heatwaves, flooding, storms not yet at METAR threshold, dust storms.
 
 import { fetchWithTimeout } from './http-utils.js';
+import * as refLoader from '../data/reference-loader.js';
 
 const BASE_URL = 'https://api.open-meteo.com/v1/forecast';
-const TIMEOUT_MS = 8000;
+// Phase 7: read from DB-backed ref_connectors via loader
+const _timeout = () => refLoader.getConnectorConfig('open_meteo', 'timeout_ms', 8000);
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 min cache
 
 const cache = new Map(); // key: "lat,lon" → { data, time }
 
-// Airport coordinates (subset — extend as needed)
+// Airport coordinates (all region airports)
+// Phase 1: kept as fallback; getAirportCoord() reads from the DB-backed
+// reference loader when available.
 const AIRPORT_COORDS = {
   // India
   BLR: { lat: 13.2, lon: 77.7 }, DEL: { lat: 28.6, lon: 77.1 }, BOM: { lat: 19.1, lon: 72.9 },
   MAA: { lat: 13.0, lon: 80.2 }, HYD: { lat: 17.2, lon: 78.4 }, COK: { lat: 10.2, lon: 76.4 },
   CCU: { lat: 22.7, lon: 88.3 }, GOI: { lat: 15.4, lon: 73.8 },
+  PNQ: { lat: 18.6, lon: 73.9 }, VTZ: { lat: 17.7, lon: 83.2 },
+  AMD: { lat: 23.1, lon: 72.6 }, JAI: { lat: 26.8, lon: 75.8 },
+  LKO: { lat: 26.8, lon: 80.9 }, IXC: { lat: 30.7, lon: 76.8 }, GAU: { lat: 26.1, lon: 91.6 },
   // Europe
   VIE: { lat: 48.1, lon: 16.6 }, MUC: { lat: 48.4, lon: 11.8 }, PRG: { lat: 50.1, lon: 14.3 },
+  BUD: { lat: 47.4, lon: 19.3 },
   FRA: { lat: 50.0, lon: 8.6 }, AMS: { lat: 52.3, lon: 4.8 }, CDG: { lat: 49.0, lon: 2.5 },
-  BRU: { lat: 50.9, lon: 4.5 }, ZRH: { lat: 47.5, lon: 8.5 }, CPH: { lat: 55.6, lon: 12.7 },
-  OSL: { lat: 60.2, lon: 11.1 }, EDI: { lat: 55.9, lon: -3.4 },
+  BRU: { lat: 50.9, lon: 4.5 }, ZRH: { lat: 47.5, lon: 8.5 }, GVA: { lat: 46.2, lon: 6.1 },
+  CPH: { lat: 55.6, lon: 12.7 }, OSL: { lat: 60.2, lon: 11.1 }, EDI: { lat: 55.9, lon: -3.4 },
+  FCO: { lat: 41.8, lon: 12.3 }, MAD: { lat: 40.5, lon: -3.6 }, IST: { lat: 41.0, lon: 28.8 },
+  LIS: { lat: 38.8, lon: -9.1 }, ATH: { lat: 37.9, lon: 23.7 },
   // Middle East
   DXB: { lat: 25.3, lon: 55.4 }, AUH: { lat: 24.4, lon: 54.7 }, MCT: { lat: 23.6, lon: 58.3 },
-  DOH: { lat: 25.3, lon: 51.6 },
+  DOH: { lat: 25.3, lon: 51.6 }, BAH: { lat: 26.3, lon: 50.6 },
   // SE Asia
   BKK: { lat: 13.7, lon: 100.8 }, KUL: { lat: 3.1, lon: 101.7 }, SIN: { lat: 1.4, lon: 104.0 },
   CGK: { lat: -6.1, lon: 106.7 },
-  // North America
-  LHR: { lat: 51.5, lon: -0.5 }, LGW: { lat: 51.2, lon: -0.2 },
+  // North America / British Isles
+  LHR: { lat: 51.5, lon: -0.5 }, LGW: { lat: 51.2, lon: -0.2 }, STN: { lat: 51.9, lon: 0.2 },
   JFK: { lat: 40.6, lon: -73.8 }, YYZ: { lat: 43.7, lon: -79.4 },
   ORD: { lat: 41.9, lon: -87.9 }, SFO: { lat: 37.6, lon: -122.4 },
   // East Asia
   HKG: { lat: 22.3, lon: 113.9 }, NRT: { lat: 35.8, lon: 140.4 }, ICN: { lat: 37.5, lon: 126.5 },
   // Africa
   JNB: { lat: -26.1, lon: 28.2 }, NBO: { lat: -1.3, lon: 36.9 },
+  // Oceania
+  SYD: { lat: -33.9, lon: 151.2 }, MEL: { lat: -37.7, lon: 144.8 },
+  BNE: { lat: -27.4, lon: 153.1 }, PER: { lat: -31.9, lon: 115.9 }, AKL: { lat: -37.0, lon: 174.8 },
+  // South America
+  GRU: { lat: -23.4, lon: -46.5 }, EZE: { lat: -34.8, lon: -58.5 },
+  SCL: { lat: -33.4, lon: -70.8 }, BOG: { lat: 4.7, lon: -74.1 }, LIM: { lat: -12.0, lon: -77.1 },
 };
 
 export function getAirportCoord(iata) {
+  // Phase 1: use DB-backed loader, fall back to hardcoded AIRPORT_COORDS
+  const ap = refLoader.getAirport(iata);
+  if (ap && ap.lat != null && ap.lon != null) return { lat: ap.lat, lon: ap.lon };
   return AIRPORT_COORDS[iata];
 }
 
@@ -61,7 +80,7 @@ export async function fetchForecast(lat, lon) {
       timezone: 'auto',
     });
 
-    const res = await fetchWithTimeout(`${BASE_URL}?${params}`, {}, TIMEOUT_MS);
+    const res = await fetchWithTimeout(`${BASE_URL}?${params}`, {}, _timeout());
     if (res.ok) {
       const data = await res.json();
       cache.set(key, { data, time: Date.now() });
@@ -75,21 +94,17 @@ export async function fetchForecast(lat, lon) {
 }
 
 // WMO weather codes that indicate severe conditions
-const SEVERE_WMO_CODES = {
-  95: 'thunderstorm_slight', 96: 'thunderstorm_slight_hail', 99: 'thunderstorm_heavy_hail',
-  71: 'snow_slight', 73: 'snow_moderate', 75: 'snow_heavy',
-  77: 'snow_grains',
-  65: 'rain_heavy', 66: 'freezing_rain', 67: 'freezing_rain_heavy',
-  45: 'fog', 48: 'fog_rime',
-  3: 'overcast', 2: 'partly_cloudy',
-};
+// Phase 5: SEVERE_WMO_CODES removed — detection now uses getWmoHazardType()
+// from the reference loader (DB-backed ref_wmo_codes).
+// Kept for reference: the DB maps 45/48→fog, 65/66/67→heavy_rain,
+// 71/73/75/77→snow, 95/96/99→thunderstorm, 2/3→general.
 
 // Build observations for airports with severe weather in forecast
 export async function buildWeatherObservations(airports) {
   const observations = [];
 
   for (const iata of airports) {
-    const coord = AIRPORT_COORDS[iata];
+    const coord = getAirportCoord(iata);
     if (!coord) continue;
 
     const forecast = await fetchForecast(coord.lat, coord.lon);
@@ -112,10 +127,13 @@ export async function buildWeatherObservations(airports) {
       const temp = temperature_2m?.[i] || 20;
 
       // Detect severe conditions
-      const isThunderstorm = wmo && wmo >= 95;
-      const isHeavyRain = wmo && (wmo === 65 || wmo === 66 || wmo === 67) || precip > 10;
-      const isHeavySnow = wmo && (wmo === 73 || wmo === 75 || wmo === 77);
-      const isFog = wmo && (wmo === 45 || wmo === 48) || vis < 1000;
+      // Phase 5: WMO-based detection uses DB-backed getWmoHazardType()
+      // Keep range checks as fallback for codes not in the DB
+      const wmoHazard = wmo != null ? refLoader.getWmoHazardType(wmo) : null;
+      const isThunderstorm = wmoHazard === 'thunderstorm' || (wmo && wmo >= 95);
+      const isHeavyRain = wmoHazard === 'heavy_rain' || (wmo && (wmo === 65 || wmo === 66 || wmo === 67)) || precip > 10;
+      const isHeavySnow = (wmoHazard === 'snow' && wmo !== 71) || (wmo && (wmo === 73 || wmo === 75 || wmo === 77));
+      const isFog = wmoHazard === 'fog' || (wmo && (wmo === 45 || wmo === 48)) || vis < 1000;
       const isHighWind = wind > 50; // > 50 km/h ≈ 27 kt
       const isExtremeHeat = temp > 45;
       const isExtremeCold = temp < -20;

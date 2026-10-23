@@ -130,10 +130,39 @@ table.data td {
   vertical-align: top;
 }
 
-.leaflet-container { background: var(--sunken); }
+/* leaflet.css ships `.leaflet-container { background: #ddd }` and loads after
+   this file — the [data-theme] selector bumps specificity so the dark bg wins. */
+[data-theme] .leaflet-container { background: var(--sunken); }
 
 [data-theme='dark'] .leaflet-tile-pane {
   filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.85);
+}
+
+/* GL (mapbox/maplibre) popup styling — match dark theme */
+.agent-tooltip .maplibregl-popup-content,
+.agent-tooltip .mapboxgl-popup-content {
+  background: var(--panel);
+  color: var(--ink2);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  line-height: 1.5;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+.agent-tooltip .maplibregl-popup-tip,
+.agent-tooltip .mapboxgl-popup-tip {
+  border-top-color: var(--panel);
+}
+/* GL attribution / controls — subdued to match theme */
+.maplibregl-ctrl-attrib, .mapboxgl-ctrl-attrib {
+  font-size: 9px;
+  background: rgba(11, 18, 32, 0.7) !important;
+  color: var(--mute) !important;
+}
+.maplibregl-ctrl-attrib a, .mapboxgl-ctrl-attrib a {
+  color: var(--mute) !important;
 }
 
 @keyframes dm-chat-dot {

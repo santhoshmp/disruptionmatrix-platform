@@ -20,7 +20,7 @@ export class IndustrialActionAgent extends Agent {
     }
 
     // ── Fallback: if no real data, use mock ──
-    if (observations.length === 0) {
+    if (observations.length === 0 && this.shouldEmitMockSignals()) {
       const mockObs = generateMockIndustrial(this.region, this.subRegion, airports);
       observations.push(...mockObs);
     }

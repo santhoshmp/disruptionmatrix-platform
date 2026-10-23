@@ -3,16 +3,70 @@
 //   1. Full-text search (PostgreSQL tsvector + ts_rank) — always available
 //   2. Trigram similarity (pg_trgm) — always available, fuzzy keyword matching
 //   3. Vector similarity (embedding cosine) — when LLM is enabled
+//   4. Structured query intent — detects "critical threats", "top events", etc.
 // Uses Reciprocal Rank Fusion (RRF) to merge results from all methods.
 
 import ragRepo from '../db/repositories/rag.js';
 import llmService from './llm-service.js';
+import pool from '../db/pool.js';
+import * as refLoader from '../data/reference-loader.js';
 
-const RRF_K = 60; // RRF constant (standard value)
+// Phase 7: read from DB-backed ref_connectors via loader
+const _rrfK = () => refLoader.getConnectorConfig('rag', 'rrf_k', 60);
+const _vectorThreshold = () => refLoader.getConnectorConfig('rag', 'vector_threshold', 0.5);
+
+// ── Query intent detection ─────────────────────────────────────────
+// Detects when the user is asking for "top/critical/severe threats"
+// and fetches high-EDPS events directly instead of relying on keyword search.
+const INTENT_PATTERNS = [
+  { pattern: /critical (threat|event|disruption)/i, minScore: 70, intent: 'critical' },
+  { pattern: /most (critical|severe|serious|important|urgent)/i, minScore: 70, intent: 'critical' },
+  { pattern: /(top|highest|biggest|worst|major) (threat|event|disruption)/i, minScore: 70, intent: 'top' },
+  { pattern: /(what.*threat|current threat|active threat|live threat|ongoing)/i, minScore: 50, intent: 'active' },
+  { pattern: /(severe|high impact|high priority)/i, minScore: 65, intent: 'severe' },
+  { pattern: /(what.*happening|what.*going on|current|right now|status)/i, minScore: 50, intent: 'active' },
+];
+
+function detectQueryIntent(query) {
+  for (const { pattern, minScore, intent } of INTENT_PATTERNS) {
+    if (pattern.test(query)) return { minScore, intent };
+  }
+  return null;
+}
+
+// Fetch top events by EDPS score directly from the RAG index
+async function fetchTopEvents(minScore, limit = 8) {
+  try {
+    const res = await pool.query(`
+      SELECT id, doc_type, source_id, content, metadata
+      FROM rag_documents
+      WHERE doc_type = 'event'
+        AND (metadata->>'score')::int >= $1
+      ORDER BY (metadata->>'score')::int DESC
+      LIMIT $2
+    `, [minScore, limit]);
+
+    return res.rows.map(r => ({
+      id: r.id,
+      docType: r.doc_type,
+      sourceId: r.source_id,
+      content: r.content,
+      metadata: r.metadata,
+      score: 1.0, // high base score so RRF ranks these well
+    }));
+  } catch (e) {
+    console.error('[rag-retriever] fetchTopEvents error:', e.message);
+    return [];
+  }
+}
 
 // ── Main retrieval function ───────────────────────────────────────
 export async function retrieve(query, options = {}) {
   const { topK = 8, docTypes = null, useVector = true } = options;
+
+  // Detect query intent — if asking for "critical threats", fetch top events directly
+  const intent = detectQueryIntent(query);
+  const intentResults = intent ? await fetchTopEvents(intent.minScore, topK * 2) : [];
 
   // Run all retrieval methods in parallel
   const [ftsResults, trigramResults, vectorResults] = await Promise.all([
@@ -21,12 +75,34 @@ export async function retrieve(query, options = {}) {
     useVector ? vectorSearch(query, { limit: topK * 2, docTypes }).catch(() => []) : [],
   ]);
 
-  // Apply Reciprocal Rank Fusion
-  const fused = reciprocalRankFusion([
+  // Build ranked lists for RRF
+  const rankedLists = [
     { results: ftsResults, weight: 1.0 },
     { results: trigramResults, weight: 0.7 },
     { results: vectorResults, weight: 1.2 }, // vector search gets higher weight when available
-  ]);
+  ];
+
+  // If intent detected, add structured results with high weight
+  if (intentResults.length > 0) {
+    rankedLists.push({ results: intentResults, weight: 1.5 });
+  }
+
+  // Apply Reciprocal Rank Fusion
+  const fused = reciprocalRankFusion(rankedLists);
+
+  // If we have intent results but RRF didn't surface enough events, boost them
+  if (intent && fused.filter(d => d.docType === 'event').length < 3 && intentResults.length > 0) {
+    // Prepend intent results that aren't already in the fused list
+    const existing = new Set(fused.map(d => `${d.docType}:${d.sourceId}`));
+    for (const doc of intentResults) {
+      const key = `${doc.docType}:${doc.sourceId}`;
+      if (!existing.has(key)) {
+        fused.push(doc);
+        existing.add(key);
+      }
+    }
+    fused.sort((a, b) => (b.score || 0) - (a.score || 0));
+  }
 
   return fused.slice(0, topK);
 }
@@ -41,7 +117,7 @@ function reciprocalRankFusion(rankedLists) {
     for (let i = 0; i < results.length; i++) {
       const doc = results[i];
       const key = `${doc.docType}:${doc.sourceId}`;
-      const rrfScore = weight * (1 / (RRF_K + i + 1));
+      const rrfScore = weight * (1 / (_rrfK() + i + 1));
       scores.set(key, {
         docType: doc.docType,
         sourceId: doc.sourceId,

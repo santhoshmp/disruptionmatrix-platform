@@ -13,6 +13,11 @@ import openMeteo from '../connectors/open-meteo.js';
 import gdelt from '../connectors/gdelt.js';
 import aw from '../connectors/aviationweather.js';
 import safeairspace from '../connectors/safeairspace.js';
+import airlabs from '../connectors/airlabs.js';
+import adsblol from '../connectors/adsblol.js';
+import opensky from '../connectors/opensky.js';
+import aviationstack from '../connectors/aviationstack.js';
+import reddit from '../connectors/reddit.js';
 
 const router = Router();
 
@@ -143,6 +148,106 @@ const SOURCES = [
       // safeairspace doesn't export a simple fetch — just verify URL is reachable
       const res = await fetchWithTimeout('https://safeairspace.net/', {}, 5000);
       return { status: res.ok ? 'ok' : 'error', count: 0, sample: res.ok ? 'site reachable' : `HTTP ${res.status}` };
+    },
+  },
+  {
+    id: 'adsblol',
+    category: 'Flight Tracking',
+    name: 'adsb.lol Community ADS-B',
+    type: 'REST API',
+    url: 'https://api.adsb.lol/v2',
+    auth: 'None (free, community feeder network)',
+    license: 'Open (community)',
+    tier: 1,
+    updateFreq: 'Real-time (cached 5 min)',
+    coverage: 'Global — often denser than OpenSky in Gulf/Asia',
+    dataTypes: ['Live positions', 'Ground activity', 'Emergency squawks (7700/7600/7500)'],
+    agentsUsing: 'flight-* (live ground activity + emergency squawks)',
+    check: async () => {
+      const ac = await adsblol.fetchAircraftNearPoint(25.2532, 55.3657, 15); // DXB
+      return { status: 'ok', count: ac.length, sample: ac[0]?.callsign || `${ac.length} aircraft near DXB` };
+    },
+  },
+  {
+    id: 'airlabs',
+    category: 'Flight Schedules',
+    name: 'AirLabs Flight Data API',
+    type: 'REST API',
+    url: 'https://airlabs.co/api/v9',
+    auth: 'API key (free tier ~1,000 req/month)',
+    license: 'Commercial (AirLabs)',
+    tier: 2,
+    updateFreq: 'Real-time (cached 15 min)',
+    coverage: 'Global (scheduled vs actual, delays, cancellations)',
+    dataTypes: ['Schedules', 'Delays', 'Cancellations', 'Flight status'],
+    agentsUsing: 'flight-* (scheduled vs actual flights)',
+    check: async () => {
+      if (!airlabs.isConfigured()) {
+        return { status: 'ok', count: 0, sample: 'not configured — set AIRLABS_KEY' };
+      }
+      const deps = await airlabs.fetchDepartures('JFK', 5);
+      return { status: 'ok', count: deps.length, sample: deps[0]?.flightNumber || 'no flights' };
+    },
+  },
+  {
+    id: 'opensky',
+    category: 'Flight Tracking',
+    name: 'OpenSky Network',
+    type: 'REST API (OAuth2)',
+    url: 'https://opensky-network.org/api',
+    auth: 'OAuth2 client credentials (optional — anonymous works with lower quota)',
+    license: 'Open (OpenSky Network)',
+    tier: 2,
+    updateFreq: 'Real-time (cached 90s)',
+    coverage: 'Global live states; /flights/* actual dep/arr (daily quota bucket)',
+    dataTypes: ['Live positions', 'Flight arrivals/departures', 'Ground activity'],
+    agentsUsing: 'flight-* (live positions + actual flight times)',
+    check: async () => {
+      // states bucket is separate from flights bucket; uses shared cache
+      const states = await opensky.fetchAllStates();
+      return { status: 'ok', count: states.length, sample: `${states.length} aircraft tracked globally` };
+    },
+  },
+  {
+    id: 'aviationstack',
+    category: 'Flight Schedules',
+    name: 'AviationStack',
+    type: 'REST API',
+    url: 'https://api.aviationstack.com/v1',
+    auth: 'API key (paid — AirLabs preferred when configured)',
+    license: 'Commercial (AviationStack)',
+    tier: 2,
+    updateFreq: 'Real-time (cached 15 min)',
+    coverage: 'Global (scheduled vs actual, delays, cancellations)',
+    dataTypes: ['Schedules', 'Delays', 'Cancellations', 'Flight status'],
+    agentsUsing: 'flight-* (fallback when AIRLABS_KEY not set)',
+    check: async () => {
+      if (!aviationstack.isConfigured()) {
+        return { status: 'ok', count: 0, sample: 'not configured — set AVIATIONSTACK_KEY' };
+      }
+      const deps = await aviationstack.fetchDepartures('JFK', 5);
+      return { status: 'ok', count: deps.length, sample: deps[0]?.flightNumber || 'no flights' };
+    },
+  },
+  {
+    id: 'reddit',
+    category: 'Social',
+    name: 'Reddit API',
+    type: 'REST API (OAuth2)',
+    url: 'https://www.reddit.com',
+    auth: 'OAuth2 app credentials (free — reddit.com/prefs/apps)',
+    license: 'Reddit API terms',
+    tier: 2,
+    updateFreq: 'Every 5 min',
+    coverage: 'r/aviation, r/flights and regional subreddits',
+    dataTypes: ['Passenger reports', 'Delay/cancel complaints', 'Incident sightings'],
+    agentsUsing: 'social-* (17 agents)',
+    check: async () => {
+      if (!reddit.isConfigured()) {
+        return { status: 'ok', count: 0, sample: 'not configured — set REDDIT_CLIENT_ID/SECRET' };
+      }
+      const posts = await reddit.fetchSubredditPosts('aviation', 5);
+      return { status: 'ok', count: posts.length, sample: posts[0]?.title?.slice(0, 80) || 'no posts' };
     },
   },
   {

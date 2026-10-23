@@ -62,7 +62,7 @@ export class WeatherAgent extends Agent {
     }
 
     // ── Fallback: if no real data came through, use mock ──
-    if (observations.length === 0) {
+    if (observations.length === 0 && this.shouldEmitMockSignals()) {
       const mockObs = generateMockWeather(this.region, this.subRegion, airports);
       observations.push(...mockObs);
     }

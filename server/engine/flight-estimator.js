@@ -7,6 +7,7 @@ import realAirlineRegistry from '../data/real-airline-registry.js';
 import airlineRegistry from '../data/airline-registry.js';
 import store from '../store/event-store.js';
 import { getImpactMode } from './impact-assessment.js';
+import * as refLoader from '../data/reference-loader.js';
 
 // ── Generate flights for an airline at affected airports ─────────────
 // Returns: [{ flt, origin, dest, airline, airlineCode, bank, type, date, scheduled, status, impact }]
@@ -253,6 +254,9 @@ function _getBankForIndex(i) {
 }
 
 function _getAircraftForAirline(code) {
+  // Phase 2: read from DB-backed reference loader, fall back to hardcoded fleet
+  const fromDb = refLoader.getAirlineNarrowbody(code);
+  if (fromDb && fromDb !== 'A320neo') return fromDb;
   // Common narrow-body aircraft by airline
   const fleet = {
     '6E': 'A320neo', 'AI': 'A321neo', 'UK': 'A320neo', 'SG': 'B737 MAX',
@@ -264,6 +268,9 @@ function _getAircraftForAirline(code) {
 }
 
 function _getLongHaulAircraft(code) {
+  // Phase 2: read from DB-backed reference loader, fall back to hardcoded widebody
+  const fromDb = refLoader.getAirlineWidebody(code);
+  if (fromDb && fromDb !== 'A350-900') return fromDb;
   const widebody = {
     '6E': 'A321neo', 'AI': 'B787-8', 'UK': 'B787-9', 'LH': 'A350-900',
     'EK': 'B777-300ER', 'QR': 'A350-1000', 'SQ': 'A350-900', 'TK': 'B787-9',

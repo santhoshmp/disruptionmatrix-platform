@@ -7,9 +7,12 @@
 // airspace closures, wildfire restrictions, stadium/venue restrictions.
 
 import { fetchWithTimeout } from './http-utils.js';
+import { findAirportsWithin } from '../data/airport-lookup.js';
+import * as refLoader from '../data/reference-loader.js';
 
 const TFR_API_URL = 'https://tfr.faa.gov/tfrapi/exportTfrList';
-const TIMEOUT_MS = 10000;
+// Phase 7: read from DB-backed ref_connectors via loader
+const _timeout = () => refLoader.getConnectorConfig('faa_tfr', 'timeout_ms', 10000);
 const CACHE_TTL_MS = 10 * 60 * 1000; // 10 min cache
 
 let cache = null;
@@ -23,7 +26,7 @@ export async function fetchTFRs() {
   let tfrs = [];
 
   try {
-    const res = await fetchWithTimeout(TFR_API_URL, {}, TIMEOUT_MS);
+    const res = await fetchWithTimeout(TFR_API_URL, {}, _timeout());
     if (res.ok) {
       const data = await res.json();
       tfrs = parseTFRResponse(data);
@@ -124,7 +127,7 @@ export function buildTFRObservations(tfrs, region, subRegion) {
       name: `TFR: ${tfr.name}${tfr.reason ? ' — ' + tfr.reason : ''}`,
       hazardType: 'airspace_restriction',
       geo: { lat: tfr.lat, lon: tfr.lon, radiusKm: 100 },
-      airports: [],
+      airports: findAirportsWithin(tfr.lat, tfr.lon, 200).slice(0, 5).map((a) => a.iata),
       airspace: [tfr.name],
       summary: tfr.rawText || `${tfr.name}: ${tfr.reason}. Alt ${tfr.altitudeFloor}-${tfr.altitudeCeiling} ft.`,
       factorHints: {

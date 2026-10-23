@@ -15,6 +15,8 @@ import opsRepo from '../db/repositories/ops.js';
 import agentsRepo from '../db/repositories/agents.js';
 import regionsRepo from '../db/repositories/regions.js';
 import settingsRepo from '../db/repositories/settings.js';
+import { deriveEventRegion, AIRPORT_REGION } from '../data/airport-lookup.js';
+import * as refLoader from '../data/reference-loader.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..');
@@ -38,6 +40,7 @@ class EventStore {
     this.refCounter = 1;
     this.dbReady = false;     // DB connection status
     this.initialized = false; // init() has run
+    this.realOnlyMode = false; // when true, mock connectors are skipped
   }
 
   // ── Initialization (async) ──────────────────────────────────────────
@@ -82,22 +85,29 @@ class EventStore {
     }
 
     this.initialized = true;
-    console.log(`[EventStore] Ready: ${this.events.length} events, ${Object.keys(this.ops).length} OPS, ${this.agents.length} agents, ${this.signals.length} signals (DB: ${this.dbReady ? 'ON' : 'OFF'})`);
+    // Load realOnlyMode from settings
+    this.realOnlyMode = (await this.getSetting('realOnlyMode', 'false')) === 'true';
+    console.log(`[EventStore] Ready: ${this.events.length} events, ${Object.keys(this.ops).length} OPS, ${this.agents.length} agents, ${this.signals.length} signals (DB: ${this.dbReady ? 'ON' : 'OFF'}, realOnlyMode: ${this.realOnlyMode})`);
   }
 
   // Hydrate all entities from DB into in-memory cache
   async _hydrateFromDb() {
-    // Events
-    const dbEvents = await eventsRepo.getAll({ limit: 5000 });
+    // Events — include archived so the store preserves their archive flag
+    // through pipeline updates; getEvents() filters them for API consumers.
+    const dbEvents = await eventsRepo.getAll({ limit: 5000, archived: 'all' });
     this.events = dbEvents;
 
     // OPS
     const dbOps = await opsRepo.getAll();
     this.ops = dbOps;
 
-    // Signals (latest 5000)
-    const dbSignals = await signalsRepo.getAll({ limit: 5000 });
+    // Signals (latest N from DB-backed config)
+    const maxSignals = refLoader.getConnectorConfig('store', 'max_signals', 5000);
+    const dbSignals = await signalsRepo.getAll({ limit: maxSignals });
     this.signals = dbSignals;
+
+    // Enrich events with data provenance (compute from signals)
+    this._enrichEventsWithDataModes();
 
     // Agents
     const dbAgents = await agentsRepo.getAll();
@@ -216,7 +226,7 @@ class EventStore {
 
   addSignal(signal) {
     this.signals.push(signal);
-    if (this.signals.length > 5000) this.signals.shift(); // cap memory
+    if (this.signals.length > refLoader.getConnectorConfig('store', 'max_signals', 5000)) this.signals.shift(); // cap memory
     this._notify({ type: 'signal', data: signal });
 
     // Update agent stats
@@ -263,24 +273,44 @@ class EventStore {
 
   getEvents(filters = {}) {
     let result = [...this.events];
+    // archived=only → archived only; archived=all → include all; default → active only
+    if (filters.archived === 'only') {
+      result = result.filter(e => e.archived);
+    } else if (filters.archived !== 'all') {
+      result = result.filter(e => !e.archived);
+    }
     if (filters.cat) result = result.filter(e => e.cat === filters.cat);
     if (filters.minScore) result = result.filter(e => e.score >= parseInt(filters.minScore));
+    if (filters.region) result = result.filter(e => this._eventRegion(e) === filters.region);
     result.sort((a, b) => b.score - a.score);
     const limit = parseInt(filters.limit) || 50;
     const offset = parseInt(filters.offset) || 0;
+    const page = result.slice(offset, offset + limit);
+    for (const e of page) e._region = this._eventRegion(e);
     return {
       total: result.length,
       offset,
       limit,
-      events: result.slice(offset, offset + limit),
+      events: page,
     };
   }
 
+  // Region id (R1–R9) or 'remote', derived once and cached on the event.
+  _eventRegion(event) {
+    if (!event._region) {
+      event._region = deriveEventRegion(event, geoData.EVENT_GEO[event.id]);
+    }
+    return event._region;
+  }
+
   getEventById(id) {
-    return this.events.find(e => e.id === id);
+    const e = this.events.find(e => e.id === id);
+    if (e) e._region = this._eventRegion(e);
+    return e;
   }
 
   addEvent(event) {
+    event._dataModes = event._dataModes || this._computeEventDataMode(event);
     this.events.push(event);
     this._notify({ type: 'event', data: event });
     // Write-through to DB
@@ -294,12 +324,48 @@ class EventStore {
     const idx = this.events.findIndex(e => e.id === id);
     if (idx === -1) return null;
     this.events[idx] = { ...this.events[idx], ...updates };
+    // Recompute data provenance if signals changed
+    if (updates._sourceSignals || updates._dataModes == null) {
+      this.events[idx]._dataModes = this._computeEventDataMode(this.events[idx]);
+    }
     this._notify({ type: 'event_updated', data: this.events[idx] });
     // Write-through to DB
     if (this.dbReady) {
-      eventsRepo.update(id, updates).catch(e => console.error('[DB] event update failed:', e.message));
+      eventsRepo.upsert(this.events[idx]).catch(e => console.error('[DB] event write failed:', e.message));
     }
     return this.events[idx];
+  }
+
+  archiveEvent(id, reason = 'manual') {
+    return this.updateEvent(id, {
+      archived: true,
+      archivedAt: new Date().toISOString(),
+      archiveReason: reason,
+    });
+  }
+
+  restoreEvent(id) {
+    return this.updateEvent(id, {
+      archived: false,
+      archivedAt: null,
+      archiveReason: null,
+    });
+  }
+
+  countArchived() {
+    return this.events.filter(e => e.archived).length;
+  }
+
+  deleteEvent(id) {
+    const idx = this.events.findIndex(e => e.id === id);
+    if (idx === -1) return false;
+    const [removed] = this.events.splice(idx, 1);
+    delete this.ops[id];
+    this._notify({ type: 'event_deleted', data: { id } });
+    if (this.dbReady) {
+      eventsRepo.deleteById(id).catch(e => console.error('[DB] event delete failed:', e.message));
+    }
+    return true;
   }
 
   // ── OPS operations ────────────────────────────────────────────────────
@@ -340,7 +406,7 @@ class EventStore {
       if (extra.signalCount != null) agent.signalCount = extra.signalCount;
       if (extra.lastSignalAt) agent.lastSignalAt = extra.lastSignalAt;
       if (extra.errorCount != null) agent.errorCount = extra.errorCount;
-      if (extra.lastError) agent.lastError = extra.lastError;
+      if ('lastError' in extra) agent.lastError = extra.lastError;
       this._notify({ type: 'agent_status', data: { id, status, lastPoll: agent.lastPoll } });
       // Write-through to DB
       if (this.dbReady) {
@@ -371,12 +437,54 @@ class EventStore {
       STATIONS: geoData.STATIONS,
       AIRPORTS: geoData.AIRPORTS,
       EVENT_GEO: geoData.EVENT_GEO,
-      edpsFactors: agentConfig.edpsFactors,
+      REGIONS: refLoader.getAllRegions().map(r => ({ id: r.id, name: r.name })),
+      AIRPORT_REGION,
+      edpsFactors: refLoader.getEdpsFactors().length > 0
+        ? refLoader.getEdpsFactors()
+        : agentConfig.edpsFactors,
       operationalDomains: agentConfig.operationalDomains,
-      scoreBands: agentConfig.scoreBands,
+      scoreBands: refLoader.getScoringBands().length > 0
+        ? refLoader.getScoringBands()
+        : agentConfig.scoreBands,
       sourceTiers: agentConfig.sourceTiers,
       pipeline: agentConfig.pipeline,
     };
+  }
+
+  // ── Data provenance ─────────────────────────────────────────────────
+
+  // Compute _dataModes for all events by looking up their source signals
+  _enrichEventsWithDataModes() {
+    const signalMap = {};
+    for (const s of this.signals) {
+      signalMap[s.signalId] = s;
+    }
+    for (const ev of this.events) {
+      ev._dataModes = this._computeEventDataMode(ev, signalMap);
+    }
+  }
+
+  // Compute data provenance for a single event
+  _computeEventDataMode(event, signalMap = null) {
+    if (event._source === 'seeded') {
+      return { mode: 'mock', realCount: 0, mockCount: 0, totalCount: 0 };
+    }
+    if (!signalMap) {
+      signalMap = {};
+      for (const s of this.signals) signalMap[s.signalId] = s;
+    }
+    const sourceSignals = event._sourceSignals || [];
+    let realCount = 0, mockCount = 0;
+    for (const sigId of sourceSignals) {
+      const sig = signalMap[sigId];
+      if (!sig) continue;
+      if (sig.dataSourceMode === 'mock') mockCount++;
+      else realCount++;
+    }
+    const mode = mockCount > 0 && realCount > 0 ? 'mixed'
+      : mockCount > 0 ? 'mock'
+      : 'real';
+    return { mode, realCount, mockCount, totalCount: realCount + mockCount };
   }
 
   // ── Settings (DB-backed) ──────────────────────────────────────────────
@@ -391,6 +499,14 @@ class EventStore {
     await settingsRepo.set(key, value).catch(e => console.error('[DB] setting write failed:', e.message));
   }
 
+  // Real-only mode: when true, agents skip mock connectors
+  async setRealOnlyMode(enabled) {
+    this.realOnlyMode = !!enabled;
+    await this.setSetting('realOnlyMode', String(this.realOnlyMode));
+    this._notify({ type: 'real_only_mode', data: { enabled: this.realOnlyMode } });
+    console.log(`[EventStore] realOnlyMode: ${this.realOnlyMode}`);
+  }
+
   // ── WebSocket subscriptions ──────────────────────────────────────────
 
   subscribe(client) {
@@ -399,6 +515,11 @@ class EventStore {
 
   unsubscribe(client) {
     this.subscribers = this.subscribers.filter(c => c !== client);
+  }
+
+  // Public broadcast — used by agents to report poll outcomes, etc.
+  notify(message) {
+    this._notify(message);
   }
 
   _notify(message) {

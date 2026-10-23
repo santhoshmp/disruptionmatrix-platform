@@ -70,8 +70,14 @@ export async function indexEvents() {
 }
 
 function buildEventContent(e) {
+  // Determine threat level keywords based on EDPS score for better searchability
+  const threatLevel = e.score >= 80 ? 'critical threat' : e.score >= 60 ? 'high threat' : e.score >= 40 ? 'moderate threat' : 'low threat';
+  const severity = e.score >= 80 ? 'severe disruption' : e.score >= 60 ? 'major disruption' : e.score >= 40 ? 'moderate disruption' : 'minor disruption';
+
   const parts = [
     `Event: ${e.name}`,
+    `Threat: ${threatLevel}`,
+    `Severity: ${severity}`,
     `Category: ${e.cat}`,
     `Location: ${e.where}`,
     `EDPS Score: ${e.score}/100`,

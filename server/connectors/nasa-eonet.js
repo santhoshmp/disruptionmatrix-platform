@@ -6,9 +6,12 @@
 // Each event has: id, title, category, geometry (point or polygon), sources, date
 
 import { fetchWithTimeout } from './http-utils.js';
+import { findAirportsWithin } from '../data/airport-lookup.js';
+import * as refLoader from '../data/reference-loader.js';
 
 const EONET_URL = 'https://eonet.gsfc.nasa.gov/api/v3/events';
-const TIMEOUT_MS = 10000;
+// Phase 7: read from DB-backed ref_connectors via loader
+const _timeout = () => refLoader.getConnectorConfig('nasa_eonet', 'timeout_ms', 10000);
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 min cache
 
 let cache = null;
@@ -33,7 +36,7 @@ export async function fetchEvents(options = {}) {
     let url = `${EONET_URL}?status=${status}&limit=${limit}`;
     if (days) url += `&days=${days}`;
 
-    const res = await fetchWithTimeout(url, {}, TIMEOUT_MS);
+    const res = await fetchWithTimeout(url, {}, _timeout());
     if (res.ok) {
       const data = await res.json();
       events = data.events || [];
@@ -111,22 +114,30 @@ export function buildEonetObservations(events, region, subRegion) {
     }
 
     // Map EONET category to hazard type + severity
+    // Phase 5: severity/sevVal read from DB-backed ref_hazard_types via loader;
+    // domains remain hardcoded (EONET-specific, not in ref_*).
     const hazardMap = {
-      wildfires: { hazard: 'wildfire', severity: 'high', sevVal: 72, domains: ['Airport operations', 'Flight schedule', 'Air quality'] },
-      severeStorms: { hazard: 'severe_storm', severity: 'high', sevVal: 75, domains: ['Airport operations', 'Flight schedule'] },
-      volcanoes: { hazard: 'volcanic_ash', severity: 'critical', sevVal: 88, domains: ['Airport operations', 'Flight schedule', 'Air quality'] },
-      floods: { hazard: 'flooding', severity: 'moderate', sevVal: 55, domains: ['Airport operations', 'Ground access'] },
-      dustHaze: { hazard: 'dust_haze', severity: 'moderate', sevVal: 50, domains: ['Airport operations', 'Flight schedule'] },
-      snow: { hazard: 'snow', severity: 'moderate', sevVal: 55, domains: ['Airport operations', 'Flight schedule'] },
-      tempExtremes: { hazard: 'extreme_temp', severity: 'low', sevVal: 40, domains: ['Airport operations'] },
-      seaLakeIce: { hazard: 'ice', severity: 'low', sevVal: 35, domains: ['Airport operations'] },
+      wildfires: { hazard: 'wildfire', domains: ['Airport operations', 'Flight schedule', 'Air quality'] },
+      severeStorms: { hazard: 'severe_storm', domains: ['Airport operations', 'Flight schedule'] },
+      volcanoes: { hazard: 'volcanic_ash', domains: ['Airport operations', 'Flight schedule', 'Air quality'] },
+      floods: { hazard: 'flooding', domains: ['Airport operations', 'Ground access'] },
+      dustHaze: { hazard: 'dust_haze', domains: ['Airport operations', 'Flight schedule'] },
+      snow: { hazard: 'snow', domains: ['Airport operations', 'Flight schedule'] },
+      tempExtremes: { hazard: 'extreme_temp', domains: ['Airport operations'] },
+      seaLakeIce: { hazard: 'ice', domains: ['Airport operations'] },
     };
 
-    const mapping = hazardMap[primaryCat] || { hazard: 'natural_event', severity: 'low', sevVal: 35, domains: ['Airport operations'] };
+    const mapping = hazardMap[primaryCat] || { hazard: 'natural_event', domains: ['Airport operations'] };
+
+    // Phase 5: severity/sevVal from DB-backed hazard type
+    const ht = refLoader.getHazardType(mapping.hazard);
+    const severity = ht?.default_severity || 'low';
+    const sevVal = ht?.default_sev_val ?? 35;
 
     // Source URLs for evidence
     const sources = (event.sources || []).map((s) => s.url).filter(Boolean);
     const sourceNames = (event.sources || []).map((s) => s.id).join(', ');
+    const airports = findAirportsWithin(lat, lon, primaryCat === 'volcanoes' ? 400 : 250).slice(0, 5).map((a) => a.iata);
 
     observations.push({
       signalId: `eonet-${event.id}-${Date.now()}`,
@@ -134,18 +145,21 @@ export function buildEonetObservations(events, region, subRegion) {
       name: title,
       hazardType: mapping.hazard,
       geo: { lat, lon, radiusKm: primaryCat === 'volcanoes' ? 300 : 150 },
-      airports: [],
+      airports,
       airspace: [],
-      summary: `${title} — NASA EONET ${primaryCat} event${sourceNames ? ' (sources: ' + sourceNames + ')' : ''}`,
+      summary: `${title} — NASA EONET ${primaryCat} event${sourceNames ? ' (sources: ' + sourceNames + ')' : ''}${airports.length === 0 ? ' No airports within the impact radius — no direct aviation impact.' : ''}`,
       factorHints: {
         probability: 75,
-        severity: mapping.sevVal,
-        geographicReach: primaryCat === 'volcanoes' ? 70 : 45,
+        // Dampen aviation-relevant factors when no airport is in range —
+        // a remote wildfire/volcano is real but not an aviation disruption.
+        severity: airports.length === 0 ? Math.min(sevVal, 25) : sevVal,
+        geographicReach: airports.length === 0 ? 10 : (primaryCat === 'volcanoes' ? 70 : 45),
         expectedDuration: primaryCat === 'volcanoes' ? 85 : 50,
-        timeToImpact: 70,
-        escalationRate: primaryCat === 'severeStorms' ? 65 : 35,
+        timeToImpact: airports.length === 0 ? 35 : 70, // nothing aviation-side to impact
+        escalationRate: airports.length === 0 ? 30 : (primaryCat === 'severeStorms' ? 65 : 35),
         sourceCredibility: 85, // NASA
         predictionConfidence: 70,
+        _airportCount: airports.length,
       },
       domains: mapping.domains,
       preliminaryEffects: [

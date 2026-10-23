@@ -4,8 +4,11 @@
 // the `collect()` method which calls its connector(s) and returns raw observations.
 
 import store from '../store/event-store.js';
+import * as refLoader from '../data/reference-loader.js';
 
 // IATA → ICAO code mapping for aviationweather.gov API
+// Phase 1: hardcoded const kept as fallback; getIataToIcaoMap() reads from
+// the DB-backed reference loader when available.
 export const IATA_TO_ICAO = {
   // India
   BLR: 'VOBL', DEL: 'VIDP', BOM: 'VABB', MAA: 'VOMM', HYD: 'VOHS',
@@ -27,11 +30,29 @@ export const IATA_TO_ICAO = {
   HKG: 'VHHH', NRT: 'RJAA', ICN: 'RKSI',
   // Africa
   JNB: 'FAOR', NBO: 'HKJK',
+  // Oceania
+  SYD: 'YSSY', MEL: 'YMML', BNE: 'YBBN', PER: 'YPPH', AKL: 'NZAA',
+  // South America
+  GRU: 'SBGR', EZE: 'SAEZ', SCL: 'SCEL', BOG: 'SKBO', LIM: 'SPJC',
 };
 
 export const ICAO_TO_IATA = Object.fromEntries(
   Object.entries(IATA_TO_ICAO).map(([iata, icao]) => [icao, iata])
 );
+
+// DB-backed IATA↔ICAO lookups (fall back to hardcoded consts above)
+export function getIataToIcaoMap() {
+  return refLoader.getIataToIcao();
+}
+export function getIcaoToIataMap() {
+  return refLoader.getIcaoToIata();
+}
+export function iataToIcao(iata) {
+  return refLoader.getIataToIcao()[iata] || IATA_TO_ICAO[iata] || null;
+}
+export function icaoToIata(icao) {
+  return refLoader.getIcaoToIata()[icao] || ICAO_TO_IATA[icao] || null;
+}
 
 export class Agent {
   constructor(config, typeConfig) {
@@ -46,9 +67,17 @@ export class Agent {
     this.timer = null;
     this.isRunning = false;
     this.paused = false;
+    this.status = 'idle';
     this.pollCount = 0;
     this.lastPollAt = null;
     this.lastError = null;
+    // Outcome tracking — surfaced in getStatus() so the UI can show what
+    // each agent actually produced, not just when it last ran.
+    this.totalSignals = 0;
+    this.lastSignalsGenerated = 0;
+    this.lastSignalAt = null;
+    this.lastSignalName = null;
+    this.lastDurationMs = null;
   }
 
   // Start the polling loop
@@ -89,34 +118,61 @@ export class Agent {
       return { skipped: true, reason: 'Region disabled' };
     }
 
-    this.lastPollAt = new Date().toISOString();
+    const startedAt = Date.now();
+    this.lastPollAt = new Date(startedAt).toISOString();
     this.pollCount++;
     this._updateStatus('polling');
 
     try {
       const observations = await this.collect();
+      let signalsGenerated = 0;
+      let lastSignalName = null;
       if (observations && observations.length > 0) {
         for (const obs of observations) {
           const signal = this.normalize(obs);
           if (signal) {
             store.addSignal(signal);
+            lastSignalName = signal.name;
+            signalsGenerated++;
           }
         }
-        this._updateStatus('active');
-      } else {
-        this._updateStatus('idle');
+      }
+      this.lastDurationMs = Date.now() - startedAt;
+      this.lastSignalsGenerated = signalsGenerated;
+      if (signalsGenerated > 0) {
+        this.totalSignals += signalsGenerated;
+        this.lastSignalAt = new Date().toISOString();
+        this.lastSignalName = lastSignalName;
       }
       this.lastError = null;
+      this._updateStatus(signalsGenerated > 0 ? 'active' : 'idle', {
+        signalCount: this.totalSignals,
+        lastSignalAt: this.lastSignalAt,
+        lastError: null,
+      });
+      store.notify({
+        type: 'agent_poll',
+        data: { id: this.id, agentType: this.type, region: this.region, signals: signalsGenerated, durationMs: this.lastDurationMs },
+      });
+      return { signalsGenerated };
     } catch (err) {
+      this.lastDurationMs = Date.now() - startedAt;
+      this.lastSignalsGenerated = 0;
       this.lastError = err.message;
-      this._updateStatus('error');
+      this._updateStatus('error', { lastError: err.message });
+      store.notify({
+        type: 'agent_poll',
+        data: { id: this.id, agentType: this.type, region: this.region, signals: 0, durationMs: this.lastDurationMs, error: err.message },
+      });
       console.error(`[Agent ${this.id}] Poll error:`, err.message);
+      return { signalsGenerated: 0, error: err.message };
     }
   }
 
   // Update agent status in the store
-  _updateStatus(status) {
-    store.updateAgentStatus(this.id, status);
+  _updateStatus(status, extra = {}) {
+    this.status = status;
+    store.updateAgentStatus(this.id, status, extra);
   }
 
   // Normalize a raw observation into the signal contract
@@ -142,12 +198,18 @@ export class Agent {
       rawRefs: obs.rawRefs || [],
       eventId: obs.eventId || null,
       dataSourceMode: obs.dataSourceMode || this.typeConfig.dataSourceMode || 'mock',
+      corroborateOnly: obs.corroborateOnly || false,
     };
   }
 
   // Subclasses MUST implement this — returns array of raw observations
   async collect() {
     throw new Error(`${this.id}: collect() must be implemented by subclass`);
+  }
+
+  // Whether mock connectors should emit signals (respects realOnlyMode)
+  shouldEmitMockSignals() {
+    return !store.realOnlyMode;
   }
 
   // Helper: get airports for this agent's sub-region from the config

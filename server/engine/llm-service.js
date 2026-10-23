@@ -49,6 +49,17 @@ export async function setConversationLLMEnabled(enabled) {
   console.log(`[LLM] Conversation ${enabled ? 'ENABLED' : 'DISABLED'}`);
 }
 
+// Profiling LLM (threat profiling agent)
+export async function isProfilingLLMEnabled() {
+  const val = await _getSetting('llm_profiling_enabled', 'false');
+  return val === 'true';
+}
+
+export async function setProfilingLLMEnabled(enabled) {
+  await _setSetting('llm_profiling_enabled', enabled ? 'true' : 'false');
+  console.log(`[LLM] Profiling ${enabled ? 'ENABLED' : 'DISABLED'}`);
+}
+
 // ── Active providers (per purpose) ──────────────────────────────────
 
 // Prediction active provider
@@ -69,6 +80,16 @@ export async function getConversationActiveProvider() {
 export async function setConversationActiveProvider(provider) {
   await _setSetting('llm_conversation_active_provider', provider);
   console.log(`[LLM] Conversation active provider: ${provider}`);
+}
+
+// Profiling active provider
+export async function getProfilingActiveProvider() {
+  return _getSetting('llm_profiling_active_provider', 'custom');
+}
+
+export async function setProfilingActiveProvider(provider) {
+  await _setSetting('llm_profiling_active_provider', provider);
+  console.log(`[LLM] Profiling active provider: ${provider}`);
 }
 
 // ── Provider configs (masked for display) ───────────────────────────
@@ -120,19 +141,41 @@ async function _getConversationConfig() {
   return config;
 }
 
+// For profiling (threat profiling agent)
+async function _getProfilingConfig() {
+  if (!store.dbReady) return null;
+  const enabled = await isProfilingLLMEnabled();
+  if (!enabled) return null;
+  const provider = await getProfilingActiveProvider();
+  const config = await llmSettingsRepo.getByProvider(provider, 'profiling');
+  if (!config) return null;
+  // For custom/private cloud providers, apiKey may be optional
+  if (!config.apiKey && config.provider !== 'custom') return null;
+  return config;
+}
+
 // ── Chat completion (provider-agnostic) ──────────────────────────────
 // Returns { content, provider, model } or null if LLM is disabled
 // options.purpose: 'prediction' | 'conversation' (defaults to 'prediction')
 
 export async function chatCompletion(messages, options = {}) {
   const purpose = options.purpose || 'prediction';
-  const config = purpose === 'conversation'
-    ? await _getConversationConfig()
-    : await _getActiveConfig();
+  let config;
+  if (purpose === 'conversation') {
+    config = await _getConversationConfig();
+  } else if (purpose === 'profiling') {
+    config = await _getProfilingConfig();
+  } else {
+    config = await _getActiveConfig();
+  }
 
   if (!config) {
     return null; // LLM disabled or not configured for this purpose
   }
+
+  // Abortable + bounded: callers may pass options.signal; otherwise apply a
+  // default 2-minute timeout so a hung provider can't stall a job forever.
+  options.signal = options.signal || AbortSignal.timeout(120000);
 
   const { provider, apiKey, apiBase, model } = config;
 
@@ -161,6 +204,7 @@ async function _callOpenAI(apiKey, apiBase, model, messages, options) {
   const base = apiBase || 'https://api.openai.com/v1';
   const res = await fetch(`${base}/chat/completions`, {
     method: 'POST',
+    signal: options.signal,
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiKey}`,
@@ -185,6 +229,7 @@ async function _callAnthropic(apiKey, apiBase, model, messages, options) {
   const base = apiBase || 'https://api.anthropic.com/v1';
   const res = await fetch(`${base}/messages`, {
     method: 'POST',
+    signal: options.signal,
     headers: {
       'Content-Type': 'application/json',
       'x-api-key': apiKey,
@@ -211,6 +256,7 @@ async function _callAzure(apiKey, apiBase, model, messages, options) {
   const url = `${apiBase}/chat/completions?api-version=2024-02-15-preview`;
   const res = await fetch(url, {
     method: 'POST',
+    signal: options.signal,
     headers: {
       'Content-Type': 'application/json',
       'api-key': apiKey,
@@ -237,6 +283,10 @@ async function _callGoogle(apiKey, model, messages, options) {
     parts: [{ text: m.content }],
   }));
   const systemPrompt = messages.find(m => m.role === 'system')?.content;
+
+  // Gemini 3.x models use "thinking" tokens — need higher maxTokens to get actual output
+  const maxTokens = Math.max(options.maxTokens ?? 1000, 512);
+
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -245,14 +295,36 @@ async function _callGoogle(apiKey, model, messages, options) {
       systemInstruction: systemPrompt ? { parts: [{ text: systemPrompt }] } : undefined,
       generationConfig: {
         temperature: options.temperature ?? 0.3,
-        maxOutputTokens: options.maxTokens ?? 1000,
+        maxOutputTokens: maxTokens,
       },
     }),
+    signal: options.signal,
   });
   if (!res.ok) throw new Error(`Google API error: ${res.status} ${await res.text()}`);
   const data = await res.json();
+
+  // Handle both old and new response formats
+  // New format (Gemini 3.x): candidates[0].content.parts[0].text
+  // Old format (Gemini 1.x): candidates[0].content.parts[0].text
+  const candidate = data.candidates?.[0];
+  if (!candidate) {
+    throw new Error('Google API returned no candidates');
+  }
+
+  // Extract text from parts (may include thoughtSignature fields)
+  const parts = candidate.content?.parts || [];
+  const textPart = parts.find(p => p.text && !p.thoughtSignature);
+  if (!textPart?.text) {
+    // Fallback: try the first part even if it has thoughtSignature
+    const fallback = parts.find(p => p.text);
+    if (fallback?.text) {
+      return { content: fallback.text, provider: 'google', model };
+    }
+    throw new Error('Google API returned no text content');
+  }
+
   return {
-    content: data.candidates[0].content.parts[0].text,
+    content: textPart.text,
     provider: 'google',
     model,
   };
@@ -262,6 +334,7 @@ async function _callMistral(apiKey, apiBase, model, messages, options) {
   const base = apiBase || 'https://api.mistral.ai/v1';
   const res = await fetch(`${base}/chat/completions`, {
     method: 'POST',
+    signal: options.signal,
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiKey}`,
@@ -305,6 +378,7 @@ async function _callCustom(apiKey, apiBase, model, messages, options) {
 
   const res = await fetch(url, {
     method: 'POST',
+    signal: options.signal,
     headers,
     body: JSON.stringify({
       model: model || 'default',
@@ -344,9 +418,9 @@ async function _callCustom(apiKey, apiBase, model, messages, options) {
 
 // ── Get config for a specific purpose (public, for retriever/embeddings) ─
 export async function getConfigForPurpose(purpose = 'prediction') {
-  return purpose === 'conversation'
-    ? _getConversationConfig()
-    : _getActiveConfig();
+  if (purpose === 'conversation') return _getConversationConfig();
+  if (purpose === 'profiling') return _getProfilingConfig();
+  return _getActiveConfig();
 }
 
 export default {
@@ -354,10 +428,14 @@ export default {
   setLLMEnabled,
   isConversationLLMEnabled,
   setConversationLLMEnabled,
+  isProfilingLLMEnabled,
+  setProfilingLLMEnabled,
   getActiveProvider,
   setActiveProvider,
   getConversationActiveProvider,
   setConversationActiveProvider,
+  getProfilingActiveProvider,
+  setProfilingActiveProvider,
   getProviderConfigs,
   saveProviderConfig,
   chatCompletion,

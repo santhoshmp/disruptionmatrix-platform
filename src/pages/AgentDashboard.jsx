@@ -1,15 +1,15 @@
 // AgentDashboard.jsx — Main Agent Dashboard page
-// Tabs: Agents | Signals | Pipeline | Sources
+// Tabs: Overview | Agents | Signals | Pipeline
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api, createStream } from '../api/client.js';
 import { MONO, TEAL, CRIT, HIGH, MOD, LOW, scoreColor } from '../theme.js';
 import AgentRegionMap from '../components/agents/AgentRegionMap.jsx';
 import AgentGrid from '../components/agents/AgentGrid.jsx';
 import AgentDetailPanel from '../components/agents/AgentDetailPanel.jsx';
-import PipelineFlow from '../components/agents/PipelineFlow.jsx';
+import AgentOverview from '../components/agents/AgentOverview.jsx';
 import SignalFeed from '../components/agents/SignalFeed.jsx';
-import SourcesTab from '../components/agents/SourcesTab.jsx';
 
 export default function AgentDashboard() {
   const [agents, setAgents] = useState([]);
@@ -17,9 +17,11 @@ export default function AgentDashboard() {
   const [events, setEvents] = useState([]);
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [stats, setStats] = useState({ agents: 0, events: 0, signals: 0, ops: 0 });
-  const [activeTab, setActiveTab] = useState('agents'); // 'agents' | 'signals' | 'pipeline' | 'sources'
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'agents' | 'signals'
+  const navigate = useNavigate();
   const [showMap, setShowMap] = useState(false);
   const [connected, setConnected] = useState(false);
+  const lastLoadRef = useRef(0);
 
   async function loadAll() {
     try {
@@ -54,7 +56,13 @@ export default function AgentDashboard() {
       } else if (message.type === 'signal') {
         setStats((prev) => ({ ...prev, signals: (prev.signals || 0) + 1 }));
       } else if (message.type === 'event' || message.type === 'event_updated' || message.type === 'ops') {
-        loadAll();
+        // Throttle: pipeline emits these constantly — refetch at most once
+        // per 4s, not per message, or the page re-renders nonstop.
+        const now = Date.now();
+        if (now - lastLoadRef.current > 4000) {
+          lastLoadRef.current = now;
+          loadAll();
+        }
       } else if (message.type === 'agent_status') {
         setAgents((prev) =>
           prev.map((a) =>
@@ -69,10 +77,9 @@ export default function AgentDashboard() {
   }, []);
 
   const tabs = [
+    { id: 'overview', label: 'Overview' },
     { id: 'agents', label: 'Agents' },
     { id: 'signals', label: 'Signals' },
-    { id: 'pipeline', label: 'Pipeline' },
-    { id: 'sources', label: 'Sources' },
   ];
 
   return (
@@ -85,7 +92,7 @@ export default function AgentDashboard() {
         <div>
           <div style={{ fontSize: 16, fontWeight: 700 }}>Agent Engine Dashboard</div>
           <div style={{ ...MONO, fontSize: 10, color: 'var(--mute)', letterSpacing: '0.05em' }}>
-            AGENT FLEET · SIGNAL PIPELINE · DATA SOURCES
+            AGENT FLEET · LIVE SIGNALS · REAL-TIME STATUS
           </div>
         </div>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -132,6 +139,10 @@ export default function AgentDashboard() {
 
       {/* Main content */}
       <div style={{ flex: 1, minHeight: 0, display: 'flex', overflow: 'hidden' }}>
+        {activeTab === 'overview' && (
+          <AgentOverview onNavigateTab={(t) => t === 'sources' ? navigate('/sources') : setActiveTab(t)} />
+        )}
+
         {activeTab === 'agents' && (
           <>
             {/* Left: Agent grid */}
@@ -175,7 +186,7 @@ export default function AgentDashboard() {
                   />
                 </div>
               )}
-              <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+              <div style={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
                 <AgentDetailPanel agentId={selectedAgent} onTrigger={loadAll} />
               </div>
             </div>
@@ -188,17 +199,6 @@ export default function AgentDashboard() {
           </div>
         )}
 
-        {activeTab === 'pipeline' && (
-          <div style={{ flex: 1, background: 'var(--panel)', display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
-            <PipelineFlow />
-          </div>
-        )}
-
-        {activeTab === 'sources' && (
-          <div style={{ flex: 1, background: 'var(--panel)', display: 'flex', flexDirection: 'column' }}>
-            <SourcesTab />
-          </div>
-        )}
       </div>
     </div>
   );

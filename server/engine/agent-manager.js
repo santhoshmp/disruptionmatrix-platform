@@ -7,6 +7,8 @@ import { IndustrialActionAgent } from '../agents/industrial.js';
 import { GeopoliticalAgent } from '../agents/geopolitical.js';
 import { InfrastructureAgent } from '../agents/infrastructure.js';
 import { RegulatoryAgent } from '../agents/regulatory.js';
+import { FlightAgent } from '../agents/flight.js';
+import { SocialAgent } from '../agents/social.js';
 
 const AGENT_CLASSES = {
   weather: WeatherAgent,
@@ -15,6 +17,8 @@ const AGENT_CLASSES = {
   geopolitical: GeopoliticalAgent,
   infrastructure: InfrastructureAgent,
   regulatory: RegulatoryAgent,
+  flight: FlightAgent,
+  social: SocialAgent,
 };
 
 class AgentManager {
@@ -119,10 +123,16 @@ class AgentManager {
         region: agent.region,
         subRegion: agent.subRegion,
         isRunning: agent.isRunning,
+        status: agent.status,
         pollCount: agent.pollCount,
         lastPollAt: agent.lastPollAt,
         lastError: agent.lastError,
         pollInterval: agent.pollInterval,
+        totalSignals: agent.totalSignals,
+        lastSignalsGenerated: agent.lastSignalsGenerated,
+        lastSignalAt: agent.lastSignalAt,
+        lastSignalName: agent.lastSignalName,
+        lastDurationMs: agent.lastDurationMs,
       });
     }
     return status;

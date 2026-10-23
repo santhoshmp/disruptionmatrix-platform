@@ -1,7 +1,8 @@
 // mock-weather.js — Synthetic weather signals for fallback when real API is unavailable.
 // Generates deterministic mock signals based on region + sub-region.
+import { getMockScenario } from '../data/reference-loader.js';
 
-const MOCK_SCENARIOS = {
+export const MOCK_SCENARIOS = {
   'R1:southIndia': [
     { name: 'Bay of Bengal Monsoon Depression', hazardType: 'monsoon', airports: ['BLR', 'MAA'], lat: 12, lon: 80, radiusKm: 400,
       summary: 'Deepening low-pressure system tracking toward the southeast coast. Heavy rain and low-level wind shear forecast.',
@@ -37,11 +38,71 @@ const MOCK_SCENARIOS = {
       summary: 'Blowing sand reducing visibility at DXB. Departure rate reduced during peak hours.',
       factorHints: { probability: 70, severity: 60, geographicReach: 40, expectedDuration: 55, timeToImpact: 75, escalationRate: 50, sourceCredibility: 80, predictionConfidence: 65 } },
   ],
+  'R2:southernEurope': [
+    { name: 'Rome Thunderstorm Outbreak', hazardType: 'thunderstorm', airports: ['FCO', 'MAD'], lat: 41.8, lon: 12.3, radiusKm: 250,
+      summary: 'Convective activity across southern Europe affecting FCO and MAD. Hail and wind shear on approach.',
+      factorHints: { probability: 78, severity: 70, geographicReach: 60, expectedDuration: 60, timeToImpact: 85, escalationRate: 55, sourceCredibility: 82, predictionConfidence: 70 } },
+  ],
+  'R4:mainlandSEA': [
+    { name: 'Singapore Sumatra Squall Line', hazardType: 'thunderstorm', airports: ['SIN', 'KUL'], lat: 1.4, lon: 104, radiusKm: 300,
+      summary: 'Sumatra squall line tracking across the Strait of Malacca. Gust fronts and heavy precipitation at SIN and KUL.',
+      factorHints: { probability: 82, severity: 75, geographicReach: 55, expectedDuration: 50, timeToImpact: 80, escalationRate: 65, sourceCredibility: 80, predictionConfidence: 72 } },
+    { name: 'Jakarta Monsoon Flood — Airport Access', hazardType: 'monsoon', airports: ['CGK'], lat: -6.1, lon: 106.7, radiusKm: 150,
+      summary: 'Seasonal monsoon flooding affecting road access to CGK. Reduced ground handling throughput.',
+      factorHints: { probability: 85, severity: 60, geographicReach: 40, expectedDuration: 70, timeToImpact: 75, escalationRate: 50, sourceCredibility: 78, predictionConfidence: 68 } },
+  ],
+  'R5:britishIsles': [
+    { name: 'London Heathrow Crosswind Event', hazardType: 'wind', airports: ['LHR', 'LGW'], lat: 51.5, lon: -0.5, radiusKm: 100,
+      summary: 'Strong southwesterly crosswind at LHR and LGW. Single-runway operations at LHR, go-arounds likely.',
+      factorHints: { probability: 80, severity: 62, geographicReach: 45, expectedDuration: 55, timeToImpact: 85, escalationRate: 60, sourceCredibility: 85, predictionConfidence: 75 } },
+  ],
+  'R5:northAmerica': [
+    { name: 'JFK Winter Nor\'easter', hazardType: 'snow_ice', airports: ['JFK', 'ORD'], lat: 40.6, lon: -73.8, radiusKm: 400,
+      summary: 'Coastal nor\'easter bringing heavy snow and low ceilings to JFK and ORD. De-icing delays expected.',
+      factorHints: { probability: 88, severity: 80, geographicReach: 70, expectedDuration: 75, timeToImpact: 90, escalationRate: 75, sourceCredibility: 88, predictionConfidence: 82 } },
+    { name: 'SFO Marine Layer Low Visibility', hazardType: 'low_visibility', airports: ['SFO'], lat: 37.6, lon: -122.4, radiusKm: 80,
+      summary: 'Persistent marine layer at SFO reducing vis below CAT I minima. Arrival rate reduced 40%.',
+      factorHints: { probability: 82, severity: 55, geographicReach: 30, expectedDuration: 65, timeToImpact: 70, escalationRate: 35, sourceCredibility: 85, predictionConfidence: 78 } },
+  ],
+  'R6:eastAsia': [
+    { name: 'Hong Kong Typhoon Approach', hazardType: 'thunderstorm', airports: ['HKG', 'NRT'], lat: 22.3, lon: 113.9, radiusKm: 500,
+      summary: 'Tropical system tracking toward the Pearl River Delta. HKG closure likely; NRT diversions from transpacific routes.',
+      factorHints: { probability: 90, severity: 85, geographicReach: 75, expectedDuration: 80, timeToImpact: 95, escalationRate: 85, sourceCredibility: 90, predictionConfidence: 85 } },
+    { name: 'Seoul Incheon Yellow Dust', hazardType: 'low_visibility', airports: ['ICN'], lat: 37.5, lon: 126.5, radiusKm: 200,
+      summary: 'Yellow dust (Hwangsa) from Mongolian deserts reducing visibility at ICN. Runway changes and arrival delays.',
+      factorHints: { probability: 75, severity: 50, geographicReach: 45, expectedDuration: 55, timeToImpact: 65, escalationRate: 40, sourceCredibility: 82, predictionConfidence: 70 } },
+  ],
+  'R7:eastAfrica': [
+    { name: 'Nairobi Convective Activity', hazardType: 'thunderstorm', airports: ['NBO'], lat: -1.3, lon: 36.9, radiusKm: 150,
+      summary: 'Convective cells over Nairobi FIR. NBO arrivals experiencing wind shear and holding delays.',
+      factorHints: { probability: 72, severity: 58, geographicReach: 40, expectedDuration: 50, timeToImpact: 75, escalationRate: 45, sourceCredibility: 78, predictionConfidence: 65 } },
+  ],
+  'R7:southernAfrica': [
+    { name: 'Johannesburg Highveld Thunderstorms', hazardType: 'thunderstorm', airports: ['JNB'], lat: -26.1, lon: 28.2, radiusKm: 200,
+      summary: 'Highveld thunderstorm activity affecting JNB. Hail risk and wind shear on approach.',
+      factorHints: { probability: 80, severity: 65, geographicReach: 45, expectedDuration: 55, timeToImpact: 80, escalationRate: 60, sourceCredibility: 80, predictionConfidence: 72 } },
+  ],
+  'R8:ausNZ': [
+    { name: 'Sydney Southerly Change — Wind Shear', hazardType: 'wind', airports: ['SYD', 'MEL'], lat: -33.9, lon: 151.2, radiusKm: 250,
+      summary: 'Strong southerly change tracking up the NSW coast. SYD and MEL crosswind conditions, go-arounds likely.',
+      factorHints: { probability: 82, severity: 62, geographicReach: 50, expectedDuration: 50, timeToImpact: 85, escalationRate: 55, sourceCredibility: 85, predictionConfidence: 75 } },
+    { name: 'Brisbane Convective Storm Outbreak', hazardType: 'thunderstorm', airports: ['BNE'], lat: -27.4, lon: 153.1, radiusKm: 200,
+      summary: 'Severe thunderstorms at BNE. Hail and wind shear on approach. Ground stops likely during peak.',
+      factorHints: { probability: 85, severity: 75, geographicReach: 45, expectedDuration: 55, timeToImpact: 90, escalationRate: 70, sourceCredibility: 82, predictionConfidence: 72 } },
+  ],
+  'R9:southAmerica': [
+    { name: 'Sao Paulo Severe Thunderstorms', hazardType: 'thunderstorm', airports: ['GRU', 'EZE'], lat: -23.4, lon: -46.5, radiusKm: 300,
+      summary: 'Convective activity across southeast Brazil and Argentina. GRU and EZE experiencing wind shear and delays.',
+      factorHints: { probability: 80, severity: 70, geographicReach: 55, expectedDuration: 60, timeToImpact: 85, escalationRate: 60, sourceCredibility: 82, predictionConfidence: 70 } },
+    { name: 'Santiago Andean Wind Shear', hazardType: 'wind', airports: ['SCL'], lat: -33.4, lon: -70.8, radiusKm: 150,
+      summary: 'Strong Andean downdrafts at SCL. Crosswind conditions on approach, runway changes likely.',
+      factorHints: { probability: 78, severity: 58, geographicReach: 35, expectedDuration: 50, timeToImpact: 80, escalationRate: 50, sourceCredibility: 80, predictionConfidence: 68 } },
+  ],
 };
 
 export function generateMockWeather(region, subRegion, airports) {
-  const key = `${region}:${subRegion}`;
-  const scenarios = MOCK_SCENARIOS[key] || [];
+  const scenarios = getMockScenario(region, subRegion, 'weather')
+    || MOCK_SCENARIOS[`${region}:${subRegion}`] || [];
 
   // Only emit a mock signal ~30% of the time (so the feed isn't flooded)
   if (scenarios.length === 0 || Math.random() > 0.3) return [];
@@ -71,5 +132,6 @@ export function generateMockWeather(region, subRegion, airports) {
       excerpt: scenario.summary,
     }],
     rawRefs: [`mock-wx-${Date.now()}`],
+    dataSourceMode: 'mock',
   }];
 }
