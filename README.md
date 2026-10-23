@@ -1,247 +1,121 @@
 # DisruptionMatrix
 
-### Threat Intelligence Platform for Airline Operations
+### Real-Time Aviation Threat Intelligence Platform
 
-DisruptionMatrix is a proof-of-concept platform that fuses external threat intelligence with airline-specific exposure models, giving operations teams a single pane of glass to anticipate, assess, and respond to disruptions before they cascade.
+DisruptionMatrix is an agent-driven platform that continuously monitors global aviation disruption sources — weather, airspace closures, strikes, geopolitical events, earthquakes, live flight data — and turns raw signals into scored, explainable, operationally-actionable threat events.
 
-> **Advises, does not decide.** All data is synthetic. All airline names, codes, routes, and figures are fictional.
-
----
-
-## What It Does
-
-DisruptionMatrix monitors global disruption sources — weather, ATC/airspace, industrial action, geopolitical incidents, infrastructure failures, and regulatory changes — and correlates them with each airline's network, fleet, crew, and schedule. The result is a ranked, scored view of threats tailored to each carrier's exposure profile.
-
-### Core Capabilities
-
-- **Global Threat Board** — A ranked list of active threats scored by the External Disruption Potential Score (EDPS), with trajectory tracking (Escalating / Stable / Improving), time-to-impact, and escalation level indicators. Filter by category, sort by score or urgency, and switch between ranked list and escalation lane layouts.
-- **Event Deep-Dive** — Each threat opens to a full assessment page with:
-  - **8-factor scoring model** — Probability, severity, geographic reach, expected duration, time to impact, escalation rate, source credibility, and prediction confidence, each weighted and explained.
-  - **Domain impact map** — Visual indicators showing which operational domains are affected (airport ops, flight schedule, aircraft rotations, crew, passengers, cargo, catering, maintenance, regulatory).
-  - **Causal chain** — First, second, and third-order effects with likelihood and lead time.
-  - **Evidence trail** — Source-corroborated intelligence with tier ratings and roles.
-  - **Published operational exposure** — Affected airports and impacted airlines with exposure levels.
-  - **SOP linkage** — Standard operating procedure references keyed by threat category.
-  - **Retrospective notes** — Historical context and lessons learned.
-- **World Threat Map** — Interactive Leaflet map showing all active threats geolocated with affected airports, radius of influence, and category filtering.
-- **Airline-Specific Threat Radar** — A five-tier exposure model that maps each global threat to the airline's own operations, showing exposure scores, impacted flights, fleet availability, crew duty implications, and bank structure disruptions.
-- **Airline Network Map** — Interactive map of the airline's route network with flagged rotations, hub connectivity, and threat-overlay visualization.
-- **Data Explorer with Recovery Solver** — A schedule-intervention workbench featuring:
-  - Flight tables with threat-linked exposure indicators.
-  - Schedule Gantt chart showing proposed changes.
-  - **Deterministic recovery solver** — Rule-based engine that proposes delay, cancel, reroute, or swap actions for impacted flights.
-  - Passenger impact calculator — Delayed passengers, misconnection risk, and total disruption cost estimates.
-  - Fleet and crew availability panels.
-
-### Multi-Airline Support
-
-The platform supports multiple airlines, each with their own threat exposure data, fleet, crew, pairings, and bank structures:
-
-| Airline | Code | Hub | Secondary Hub | Fleet | Focus |
-|---|---|---|---|---|---|
-| **Namma Air** | N7 | Bengaluru (BLR) | Delhi (DEL) | A320neo, A350 | Indian domestic + Gulf |
-| **EuroVista Airways** | EV | Vienna (VIE) | Munich (MUC) | E195, A320neo, A321neo | European regional + Middle East |
-| **IndiConnect Airways** | IC | Delhi (DEL) | Mumbai (BOM) | A320neo, A321neo, ATR 72 | Indian domestic + regional |
-
-Each airline has its own route prefix (`/radar`, `/eva/radar`, `/ica/radar`), accent color, and tailored threat exposure data. The global view shows the **union of all airline threats** — 17 events consolidated from the three carriers.
-
-### Authentication
-
-Basic session-based authentication with a split-screen login page. Credentials are configured via environment variables.
+Autonomous monitoring agents collect data around the clock; a processing pipeline correlates signals into events, scores them on a transparent weighted model (EDPS), and quantifies operational impact across nine domains — presented on a live threat board, world map, and deep-dive profiling views.
 
 ---
 
-## Views & Routes
-
-| Route | View | Lens |
-|---|---|---|
-| `/login` | Split-screen login (aircraft hero + credential form) | — |
-| `/` | Home — airline selector dashboard | — |
-| `/board` | Active threat board (ranked list + escalation lanes) | Global |
-| `/event/:id` | Event detail — assessment, process, SOP, retrospective | Global |
-| `/map` | World threat map (Leaflet) | Global |
-| `/radar` | Namma Air threat radar — five-tier exposure model | Airline |
-| `/airline-map` | Namma Air network map with flagged rotations | Airline |
-| `/explorer` | Data explorer — tables + schedule Gantt + recovery solver | Airline |
-| `/eva/radar` | EuroVista threat radar | Airline |
-| `/eva/airline-map` | EuroVista network map | Airline |
-| `/eva/explorer` | EuroVista data explorer | Airline |
-| `/ica/radar` | IndiConnect threat radar | Airline |
-| `/ica/airline-map` | IndiConnect network map | Airline |
-| `/ica/explorer` | IndiConnect data explorer | Airline |
-
----
-
-## Scoring Model
-
-### External Disruption Potential Score (EDPS)
-
-Each threat is scored 0–100 based on 8 weighted factors:
-
-| Factor | Weight | Description |
-|---|---|---|
-| Probability of occurrence | 18% | Likelihood the event materializes as forecast |
-| Severity if realised | 18% | Impact magnitude based on historical comparables |
-| Geographic reach | 12% | Number of airports / airspace zones affected |
-| Expected duration | 12% | Forecast window plus recovery time |
-| Time to impact | 14% | Urgency — when first operational effect is felt |
-| Escalation rate | 10% | Trajectory from recent score movement |
-| Source credibility | 10% | Tier 1–3 rating of intelligence sources |
-| Prediction confidence | 6% | Agreement across sources and forecast spread |
-
-Scores map to severity bands: **Critical** (80+), **High** (65–79), **Moderate** (45–64), **Low** (<45).
-
-### Airline-Specific Exposure Scores
-
-Each airline calculates its own exposure score per threat (e.g., `namma`, `eva`, `ica` fields), reflecting fleet capability, route overlap, bank sensitivity, and crew positioning.
-
----
-
-## Architecture
+## How It Works
 
 ```
-DisruptionMatrix/
-├── README.md                   # This file
-├── .gitignore                  # Git ignore rules
-├── vercel.json                 # Vercel deployment config
-├── index.html                  # Vite entry HTML
-├── vite.config.js              # Vite configuration
-├── package.json                # Dependencies & scripts
-├── package-lock.json           # Lockfile
-├── .env.example                # Environment variable template
-├── public/
-│   └── hero.png                # Login page hero image
-├── src/
-│   ├── data/
-│   │   ├── dm-data.json        # Global events, OPS, SOPs, escalation model
-│   │   ├── namma-data.json     # Namma Air threats, exposure, flights, fleet, crew
-│   │   ├── eurovista-data.json # EuroVista Airways data
-│   │   ├── indiconnect-data.json # IndiConnect Airways data
-│   │   └── geo.json            # Airport coordinates, stations, event geo data
-│   ├── pages/
-│   │   ├── Login.jsx           # Split-screen authentication
-│   │   ├── Home.jsx            # Airline selector dashboard
-│   │   ├── ThreatBoard.jsx     # Global ranked threat board
-│   │   ├── EventDetail.jsx     # Event deep-dive with tabs
-│   │   ├── WorldMap.jsx        # Leaflet world threat map
-│   │   ├── Radar.jsx           # Airline five-tier exposure radar
-│   │   ├── AirlineMap.jsx      # Airline network map
-│   │   └── DataExplorer.jsx    # Schedule Gantt + recovery solver
-│   ├── airlines.js             # Airline configuration registry
-│   ├── auth.js                 # Session-based authentication
-│   ├── theme.js                # Color system, score/severity helpers
-│   ├── styles.css              # CSS variables for dark/light themes
-│   ├── App.jsx                 # Routing, layouts, auth gating
-│   └── main.jsx                # Entry point
-├── data/                       # Legacy JS data files (pre-JSON)
-├── docs/                       # Design docs & airline profiles
-└── design/                     # Original HTML mockups
+External sources (NOAA · USGS · FAA · SafeAirspace · GDELT · adsb.lol · OpenSky · Reddit …)
+        │
+        ▼
+   156 polling agents (8 types × regions/sub-regions)
+        │  signals
+        ▼
+   Signal buffer → Pipeline (every ~10s)
+        │  correlate → score → impact → enrich
+        ▼
+   Event store (PostgreSQL)
+        │
+        ▼
+   Threat Board · World Map · Profiling · OPS impact · AI Assistant
 ```
 
-### Technology Stack
+Master data (PostgreSQL `ref_*` tables) feeds both the agents and the scoring engine — airports, regions, hazard types, factor weights, band values. Admin settings tune the model at runtime; the archiver retires stale events on a schedule.
 
-- **Vite + React 18** — Fast dev server, modern build tooling
-- **react-router-dom 6** — Client-side routing with layout composition
-- **Leaflet 1.9** — Interactive maps for world threat map and airline network views
-- **CSS Variables** — Dark/light theme system with persistent preference
-- **Static JSON data** — All data is client-side; designed to be swapped for an API
+## Key Capabilities
 
-### Design Principles
+- **Global coverage** — 9 regions, 26 sub-regions, 117 airports, 72 airlines, 74 countries under continuous watch
+- **13 integrated sources** — official APIs (NOAA, USGS, FAA, NASA EONET, Open-Meteo), aviation providers (adsb.lol, OpenSky, AirLabs, AviationStack), news/advisories (GDELT, SafeAirspace), and social corroboration (Reddit)
+- **Explainable scoring** — every event's 0–100 EDPS score decomposes into 8 weighted factors with per-factor readouts and rationale; bands L1–L4
+- **Operational impact** — category-specific profiles across 9 domains (flights, crew, rotations, airport ops, passengers, cargo, catering, maintenance, regulatory) + airport/airline exposure
+- **Threat profiling** — LLM-assisted deep analysis per event, run as supervised jobs (queued → running → done, with progress, logs, cancellation)
+- **Live agent dashboard** — fleet status, per-poll outcomes (`N signals in Xms`), stalled-agent detection, dismissible action alerts, force-refresh
+- **Provenance & source health** — every data object traces to its source chain; per-source health checks and mode labels (real / mock / planned)
+- **Full administrative control** — factor weights and on/off toggles, score bands, event lifecycle thresholds, region enable/disable, LLM provider config
+- **Event lifecycle** — configurable stale/max-age archiving with auto-restore on fresh signals
 
-- **Threat-first navigation** — The sidebar in the global view lists active threats as the primary navigation element, not menus.
-- **Score-driven UI** — Color coding (red/amber/yellow/blue) follows severity bands consistently across all views.
-- **Monospace data layer** — Operational data uses IBM Plex Mono for scanability.
-- **Minimal chrome** — Dense information display with no wasted screen real estate.
+## The EDPS Score
+
+```
+score = Σ (factor value × factor weight) ÷ Σ active weights    →  0–100
+```
+
+| Factor | Weight | Captures |
+|---|---|---|
+| Probability of occurrence | 18% | Corroboration + forecast confidence |
+| Severity if realised | 18% | Hazard default adjusted by magnitude |
+| Time to impact | 14% | How soon operations are affected |
+| Geographic reach | 12% | Airports / area affected |
+| Expected duration | 12% | How long it lasts |
+| Escalation rate | 10% | Worsening vs improving |
+| Source credibility | 10% | Source tier trust |
+| Prediction confidence | 6% | Cross-source agreement |
+
+Bands: **L4 Critical 80+ · L3 High 65–79 · L2 Moderate 45–64 · L1 Low <45** — thresholds tunable in Admin.
+
+Weights, factor enable/disable, band ranges, and qualitative→numeric mappings all live in master data and take effect within ~60s — no redeploy.
+
+## Screens
+
+| Route | Purpose |
+|---|---|
+| `/overview` | Executive summary |
+| `/board` | Prioritised active threats |
+| `/profiling` | Profiling jobs — progress, logs, cancel |
+| `/map` | Global event distribution |
+| `/archive` | Archived events + restore |
+| `/agents` | Agent Engine — fleet, grid, live signal feed |
+| `/regions` | Regional profiles, airspace checks, enable/disable |
+| `/sources` | Provenance · source registry · live pipeline |
+| `/admin` | Parameters · Threat Profile (scoring) · LLM setup |
+| `/master-data` | Governed reference data CRUD |
+| `/guide` | Built-in "How It Works" user guide |
 
 ---
+
+## Tech Stack
+
+- **Frontend** — React 18, Vite, react-router, MapLibre/Mapbox GL + Leaflet
+- **Backend** — Node.js, Express, WebSocket live stream (`/api/stream`)
+- **Database** — PostgreSQL (local, Supabase, or any `DATABASE_URL`); migrations + auto-seed on startup
+- **Agents** — 8 agent types × per-sub-region instances, own poll intervals, rate limiting, mock fallbacks
+- **LLM** — provider-agnostic profiling + AI assistant (configured in Admin → LLM Setup)
 
 ## Getting Started
 
-### Prerequisites
-
-- Node.js 18+
-- npm or yarn
-
-### Installation
-
 ```bash
-npm install
+# 1. PostgreSQL — create the database
+createdb disruption_matrix        # or any local Postgres
+
+# 2. Environment
+cp .env.example .env              # set DATABASE_URL or DB_* creds, API keys, VITE_*
+
+# 3. Install + run
+npm install && npm --prefix server install
+node server/index.js              # API + agents + WS on :3001  (migrations run automatically)
+npm run dev                       # frontend dev server on :5173 (proxies /api → :3001)
 ```
 
-### Environment Variables
+Production mode: `npm run build` then `node server/index.js` serves the SPA on :3001 too.
 
-Copy the example file and set credentials:
+## Deployment
 
-```bash
-cp .env.example .env
-```
+See **[docs/DEPLOY_RAILWAY_SUPABASE.md](docs/DEPLOY_RAILWAY_SUPABASE.md)** — database on Supabase, app on Railway (single service: SPA + API + WebSocket).
 
-```
-VITE_AUTH_USER=opsadmin
-VITE_AUTH_PASS=disrupt2026
-```
+## Documentation
 
-### Run
+- [Product summary](docs/PRODUCT_SUMMARY.md) — problem, vision, solution for management decks
+- [Threat profiling design](docs/Threat_Profiling_Agent_Design.md)
+- In-app **How It Works** (`/guide`) — plain-language explanation of sources, scoring, impact, lifecycle
 
-```bash
-npm run dev
-```
+## Notes
 
-Open http://localhost:5173
-
-### Build
-
-```bash
-npm run build
-npm run preview
-```
-
----
-
-## Data Model
-
-### Global Data (`dm-data.json`)
-
-- **EVENTS** — 17 active threats with full assessment metadata (factors, domains, causal chain, evidence, SOP keys)
-- **OPS** — Per-threat operational exposure: affected airports and impacted airlines
-- **ESC** — Escalation level definitions (L1–L4)
-- **PHASES** — Response process phases
-- **SOPS** — Standard operating procedures by category
-- **RETRO** — Retrospective notes
-
-### Airline Data (`namma-data.json`, `eurovista-data.json`, `indiconnect-data.json`)
-
-- **THREATS** — Airline-specific threat entries with exposure scores (EDPS + ICA)
-- **EXPOSURE** — Five-tier exposure model per threat
-- **FLIGHTS** — Flight schedule with threat linkage, passenger counts, connection data
-- **FLEET** — Aircraft with status, capability flags (e.g., CAT IIIB)
-- **CREW** — Crew duty status and positioning
-- **PAIRINGS** — Crew-trip assignments
-- **BANKS** — Hub bank structure with sensitivity ratings
-- **SCHEDULE** — Full schedule reference
-- **SNAPSHOT** — Operational snapshot timestamp
-
----
-
-## Threat Categories
-
-| Category | Code | SOP Key | Examples |
-|---|---|---|---|
-| Weather | WX | storm | Fog, monsoon, thunderstorms, convective activity |
-| ATC / Airspace | ATC | atc | Sector capacity reduction, airspace congestion, flow control |
-| Industrial action | — | ground | Strikes, walkouts, work stoppages |
-| Geopolitical | — | airspace | Airspace closures, sanctions, conflict zones |
-| Infrastructure | — | runway | Runway closures, equipment faults, airport access issues |
-| Regulatory | — | regulatory | Slot restrictions, new mandates, compliance deadlines |
-
----
-
-## Disclaimer
-
-This is a **proof-of-concept prototype** using entirely synthetic data. All airline names, ICAO/IATA codes, flight numbers, routes, schedules, fleet compositions, and threat scenarios are fictional and for demonstration purposes only. The platform is designed to be swapped for real data sources and a live API backend.
-
----
-
-## License
-
-Proprietary — proof-of-concept build.
+- Airline demo views (Namma Air, EuroVista, IndiConnect) use synthetic airline data — names, routes, fleets are fictional.
+- Real threat data comes from live public APIs; sources marked `mock` or `planned` are labelled, never hidden.
+- `.env` is never committed — secrets go in environment variables / Railway Variables.
