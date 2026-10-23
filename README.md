@@ -111,6 +111,8 @@ See **[docs/DEPLOY_RAILWAY_SUPABASE.md](docs/DEPLOY_RAILWAY_SUPABASE.md)** — d
 ## Documentation
 
 - [Product summary](docs/PRODUCT_SUMMARY.md) — problem, vision, solution for management decks
+- [Road to production plan](docs/ROAD_TO_PRODUCTION.md) — security, scale, resilience, and phased rollout plan
+- [Deployment guide (Railway + Supabase)](docs/DEPLOY_RAILWAY_SUPABASE.md)
 - [Threat profiling design](docs/Threat_Profiling_Agent_Design.md)
 - In-app **How It Works** (`/guide`) — plain-language explanation of sources, scoring, impact, lifecycle
 
