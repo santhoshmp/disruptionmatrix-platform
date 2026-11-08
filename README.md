@@ -110,6 +110,7 @@ See **[docs/DEPLOY_RAILWAY_SUPABASE.md](docs/DEPLOY_RAILWAY_SUPABASE.md)** — d
 
 ## Documentation
 
+- [Complete build summary](docs/BUILD_SUMMARY.md) — full inventory of all screens, agents, sources, engines, and DB tables built to date
 - [Product summary](docs/PRODUCT_SUMMARY.md) — problem, vision, solution for management decks
 - [Road to production plan](docs/ROAD_TO_PRODUCTION.md) — security, scale, resilience, and phased rollout plan
 - [Deployment guide (Railway + Supabase)](docs/DEPLOY_RAILWAY_SUPABASE.md)
